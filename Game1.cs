@@ -31,6 +31,11 @@ public class Game1 : Microsoft.Xna.Framework.Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         ResourceManager.Instance.LoadAll(Content);
 
+        // สร้าง 1×1 pixel texture สำหรับ debug drawing (PickaxeRenderer, rope line)
+        var pixel = new Texture2D(GraphicsDevice, 1, 1);
+        pixel.SetData(new[] { Color.White });
+        ResourceManager.Instance.LoadTexture("pixel", pixel);
+
         SceneManager.Instance.LoadScene("main");
     }
 
