@@ -28,7 +28,7 @@ public class Text : Component
             Content,
             base.GameObject.Position,
             Color,
-            base.GameObject.Rotation,
+            base.GameObject.Rotation.Z,
             Origin,
             base.GameObject.Scale,
             SpriteEffects.None,

@@ -1,15 +1,16 @@
+using System.Collections.Generic;
+using System.Linq;
+using ComputerGameFinal.Engine.Components;
+using ComputerGameFinal.Engine.Components.Physics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
-using ComputerGameFinal.Engine.Components;
-using System.Linq;
 
 namespace ComputerGameFinal.Engine;
 
 public class GameObject
 {
     public Vector2 Position { get; set; } = Vector2.Zero;
-    public float Rotation { get; set; } = 0f;
+    public Vector3 Rotation { get; set; } = Vector3.Zero;
     public Vector2 Scale { get; set; } = Vector2.One;
 
     public bool Active { get; set; } = true;
@@ -19,6 +20,16 @@ public class GameObject
 
     public virtual void Initialize() { }
     public virtual void Update(GameTime gameTime) { }
+
+    // ---- Collision callbacks (Physics) ----
+    public virtual void OnCollisionEnter2D(Collider collider) { }
+    public virtual void OnCollisionStay2D(Collider collider) { }
+    public virtual void OnCollisionExit2D(Collider collider) { }
+
+    // ---- Trigger callbacks (IsTrigger = true) ----
+    public virtual void OnTriggerEnter2D(Collider other) { }
+    public virtual void OnTriggerStay2D(Collider other) { }
+    public virtual void OnTriggerExit2D(Collider other) { }
 
     public T AddComponent<T>() where T : Component, new()
     {
@@ -34,6 +45,16 @@ public class GameObject
     public T GetComponent<T>() where T : Component
     {
         return _components.OfType<T>().FirstOrDefault();
+    }
+
+    public IEnumerable<T> GetComponents<T>() where T : Component
+    {
+        return _components.OfType<T>();
+    }
+
+    public bool HasComponent<T>() where T : Component
+    {
+        return _components.OfType<T>().Any();
     }
 
     public void RemoveComponent<T>() where T : Component

@@ -10,4 +10,10 @@ public abstract class Collider : Component
     public abstract bool IsIntersect(Collider other);
     public abstract bool IsIntersect(CircleCollider other);
     public abstract bool IsIntersect(BoxCollider other);
-} 
+
+    ///  Minimum Translation Vector - the smallest vector to separate two colliders
+    
+    public abstract Vector2 GetMTV(Collider other);
+    public abstract Vector2 GetMTV(CircleCollider other);
+    public abstract Vector2 GetMTV(BoxCollider other);
+}
