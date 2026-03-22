@@ -26,7 +26,12 @@ class MainScene : Scene
         tilemap.Layer = 0.5f;
         tilemap.MapData = new int[,]
         {
+            { 1, 1, 1, 1, -1, -1 },
             { 5, 4, 3, 2, 1, 0 },
+            { 1, 1, 1, 1, 1, 1 },
+            { -1, -1, -1, -1, -1, -1 },
+            { 0, 0, 0, 0, 0, 0 },
+            { 1, 2, 3, 4, 5, 6 },
             { 0, 0 ,0 ,0 ,0 ,0 },
             { 0, 0 ,0 ,0 ,0 ,0 },
             { 0, 0 ,0 ,0 ,0 ,0 },
@@ -46,7 +51,7 @@ class MainScene : Scene
             ScreenManager.Instance.nativeHeight
         ));
         camera.Zoom = 1f;
-        camera.SmoothFollow = false;
+        // camera.SmoothFollow = true;
         // camera.FollowSpeed = 2f;
 
         base.Camera = camera;

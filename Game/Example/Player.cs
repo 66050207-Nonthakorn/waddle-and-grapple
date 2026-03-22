@@ -15,8 +15,12 @@ public class Player : GameObject
 
     private Animator _animator;
 
+    private Rigidbody2D _rigidbody;
+
     public override void Initialize()
     {
+        _spriteRenderer = AddComponent<SpriteRenderer>();
+
         AnimationFactory factory = new AnimationFactory(
             ResourceManager.Instance.GetTexture("elephant-animation"),
             rows: 8,
@@ -26,7 +30,7 @@ public class Player : GameObject
         Animation idle = factory.CreateFromRow(row: 0, totalFrames: 1, frameDuration: .05f);
         Animation walk = factory.CreateFromRow(row: 2, totalFrames: 8, frameDuration: .05f);
 
-        Scale = new Vector2(2f, 2f);
+        Scale = new Vector2(.4f, .4f);
         
         _animator = AddComponent<Animator>();
         _animator.AddAnimation("idle", idle);
@@ -73,7 +77,7 @@ public class Player : GameObject
         {
             _animator.Play("idle");
         }
-
-        Position += speed * dt;
+        
+        _rigidbody.Velocity = speed;
     }
 }
