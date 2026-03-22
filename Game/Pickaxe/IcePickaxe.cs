@@ -24,6 +24,7 @@ public class IcePickaxe
     private const float ClimbSpeed     = 150f;  // ความเร็วไต่เชือก (px/s)
     private const float MinRopeLength  = 20f;   // ความยาวเชือกขั้นต่ำ (px)
     private const float AutoRecallSec  = 3f;    // auto-recall หลังกี่วินาที
+    private const float LaunchSpeed    = 900f;  // ความเร็วพุ่งจาก rope
 
     // ── Owner ─────────────────────────────────────────────────────────────────
     private readonly Player _owner;
@@ -152,11 +153,11 @@ public class IcePickaxe
     /// </summary>
     public void Recall()
     {
-        _state       = PickaxeState.Idle;
-        IsDeployed   = false;
-        IsHooked     = false;
-        ChargeLevel  = 0f;
-        _flyVelocity = Vector2.Zero;
+        _state      = PickaxeState.Idle;
+        IsDeployed  = false;
+        IsHooked    = false;
+        ChargeLevel = 0f;
+        _flyVelocity      = Vector2.Zero;
         // TODO (Phase 9): เล่น recall animation / sound
     }
 
@@ -247,8 +248,7 @@ public class IcePickaxe
 
     private void HandleHookedInput(float dt)
     {
-        // W/↑ = ไต่ขึ้น (ลด rope length → constraint ดึง Player ขึ้น)
-        // S/↓ = ไต่ลง (เพิ่ม rope length)
+        // ── ไต่เชือก: W/↑ = ขึ้น, S/↓ = ลง ────────────────────────────────
         bool climbUp   = InputManager.Instance.IsKeyDown(Keys.W)
                       || InputManager.Instance.IsKeyDown(Keys.Up);
         bool climbDown = InputManager.Instance.IsKeyDown(Keys.S)
@@ -259,7 +259,34 @@ public class IcePickaxe
 
         _ropeLength = Math.Max(_ropeLength, MinRopeLength);
 
+        // ── พุ่งทันที: คลิกขวาครั้งเดียว = พุ่งไปทิศเม้าส์แล้ว recall ───────
+        if (InputManager.Instance.IsMouseButtonPressed(1))
+        {
+            LaunchFromRope();
+            return;
+        }
+
         // E = recall ด้วยมือ
         // Space = ปล่อยตัวด้วย momentum (จัดการใน Player.HandleJump)
+    }
+
+    /// <summary>
+    /// พุ่งตรงจาก rope ไปทิศ Player → Mouse ด้วยความเร็วคงที่ MaxLaunchSpeed
+    /// </summary>
+    private void LaunchFromRope()
+    {
+        var rawMouse = InputManager.Instance.GetMousePosition();
+        var mousePos = new Vector2(rawMouse.X, rawMouse.Y);
+        var dir      = mousePos - _owner.Position;
+
+        if (dir != Vector2.Zero)
+        {
+            dir.Normalize();
+            _owner.VelocityX = dir.X * LaunchSpeed;
+            _owner.VelocityY = dir.Y * LaunchSpeed;
+        }
+
+        Recall();
+        _owner.ChangeState(_owner.VelocityY <= 0f ? PlayerState.Jumping : PlayerState.Falling);
     }
 }

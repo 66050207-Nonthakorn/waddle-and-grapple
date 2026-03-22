@@ -43,7 +43,7 @@ public class PickaxeRenderer : Component
         switch (_pickaxe.CurrentState)
         {
             case IcePickaxe.PickaxeStateKind.Charging:
-                DrawChargeIndicator(spriteBatch);
+                DrawChargeBar(spriteBatch, Color.Orange);
                 break;
 
             case IcePickaxe.PickaxeStateKind.Flying:
@@ -59,28 +59,50 @@ public class PickaxeRenderer : Component
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
-    /// <summary>
-    /// กล่องสีเหลืองรอบ Player ขยายจาก 8px → 30px ตาม ChargeLevel
-    /// </summary>
-    private void DrawChargeIndicator(SpriteBatch sb)
-    {
-        float size      = 8f + _pickaxe.ChargeLevel * 22f;
-        var   center    = _player.Position;
-        var   color     = Color.Orange;
-        float thickness = 2f;
+    // ── Charge Bar Constants ──────────────────────────────────────────────────
+    private const float BarWidth     = 60f;
+    private const float BarHeight    = 8f;
+    private const float BarAboveHead = 80f;  // px เหนือ player center
 
-        // top
-        DrawLine(sb, new Vector2(center.X - size, center.Y - size),
-                     new Vector2(center.X + size, center.Y - size), color, thickness, LayerCharge);
-        // bottom
-        DrawLine(sb, new Vector2(center.X - size, center.Y + size),
-                     new Vector2(center.X + size, center.Y + size), color, thickness, LayerCharge);
-        // left
-        DrawLine(sb, new Vector2(center.X - size, center.Y - size),
-                     new Vector2(center.X - size, center.Y + size), color, thickness, LayerCharge);
-        // right
-        DrawLine(sb, new Vector2(center.X + size, center.Y - size),
-                     new Vector2(center.X + size, center.Y + size), color, thickness, LayerCharge);
+    /// <summary>
+    /// แถบชาร์จเหนือหัว Player — เต็มตาม ChargeLevel (0→1)
+    /// สีขึ้นอยู่กับโหมด: Orange = ขว้าง, Cyan = พุ่งจาก rope
+    /// </summary>
+    private void DrawChargeBar(SpriteBatch sb, Color fillColor)
+    {
+        Vector2 center = _player.Position;
+        float   barY   = center.Y - BarAboveHead;
+        float   barX   = center.X - BarWidth / 2f;
+
+        // background (เทา)
+        DrawRect(sb, new Vector2(barX, barY), BarWidth, BarHeight,
+                 new Color(40, 40, 40, 200), LayerCharge);
+
+        // fill
+        float fillW = BarWidth * _pickaxe.ChargeLevel;
+        if (fillW > 0f)
+            DrawRect(sb, new Vector2(barX, barY), fillW, BarHeight, fillColor, LayerCharge + 0.001f);
+
+        // border
+        float t = 1.5f;
+        DrawLine(sb, new Vector2(barX,           barY),
+                     new Vector2(barX + BarWidth, barY),            Color.White, t, LayerCharge + 0.002f);
+        DrawLine(sb, new Vector2(barX,           barY + BarHeight),
+                     new Vector2(barX + BarWidth, barY + BarHeight), Color.White, t, LayerCharge + 0.002f);
+        DrawLine(sb, new Vector2(barX,           barY),
+                     new Vector2(barX,           barY + BarHeight), Color.White, t, LayerCharge + 0.002f);
+        DrawLine(sb, new Vector2(barX + BarWidth, barY),
+                     new Vector2(barX + BarWidth, barY + BarHeight), Color.White, t, LayerCharge + 0.002f);
+    }
+
+    private void DrawRect(SpriteBatch sb, Vector2 topLeft, float w, float h,
+                          Color color, float layerDepth)
+    {
+        sb.Draw(_pixel, topLeft, null, color,
+                0f, Vector2.Zero,
+                new Vector2(w, h),
+                SpriteEffects.None,
+                layerDepth);
     }
 
     /// <summary>
