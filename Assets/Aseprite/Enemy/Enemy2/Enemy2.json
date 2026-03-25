@@ -1,0 +1,364 @@
+{ "frames": {
+   "Enemy2 #Standing.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Idle 0.aseprite": {
+    "frame": { "x": 0, "y": 112, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 83
+   },
+   "Enemy2 #Idle 1.aseprite": {
+    "frame": { "x": 96, "y": 112, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Idle 2.aseprite": {
+    "frame": { "x": 192, "y": 112, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 83
+   },
+   "Enemy2 #Idle 3.aseprite": {
+    "frame": { "x": 288, "y": 112, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 83
+   },
+   "Enemy2 #Idle 4.aseprite": {
+    "frame": { "x": 384, "y": 112, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 83
+   },
+   "Enemy2 #Idle 5.aseprite": {
+    "frame": { "x": 480, "y": 112, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Walk 0.aseprite": {
+    "frame": { "x": 0, "y": 224, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Walk 1.aseprite": {
+    "frame": { "x": 96, "y": 224, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Walk 2.aseprite": {
+    "frame": { "x": 192, "y": 224, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Walk 3.aseprite": {
+    "frame": { "x": 288, "y": 224, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Walk 4.aseprite": {
+    "frame": { "x": 384, "y": 224, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Walk 5.aseprite": {
+    "frame": { "x": 480, "y": 224, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Walk 6.aseprite": {
+    "frame": { "x": 576, "y": 224, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Walk 7.aseprite": {
+    "frame": { "x": 672, "y": 224, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Attack 0.aseprite": {
+    "frame": { "x": 0, "y": 336, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Attack 1.aseprite": {
+    "frame": { "x": 96, "y": 336, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Attack 2.aseprite": {
+    "frame": { "x": 192, "y": 336, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Attack 3.aseprite": {
+    "frame": { "x": 288, "y": 336, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Attack 4.aseprite": {
+    "frame": { "x": 384, "y": 336, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Attack 5.aseprite": {
+    "frame": { "x": 480, "y": 336, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Blocking.aseprite": {
+    "frame": { "x": 0, "y": 448, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Dying 0.aseprite": {
+    "frame": { "x": 0, "y": 560, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Dying 1.aseprite": {
+    "frame": { "x": 96, "y": 560, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Dying 2.aseprite": {
+    "frame": { "x": 192, "y": 560, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Dying 3.aseprite": {
+    "frame": { "x": 288, "y": 560, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Dying 4.aseprite": {
+    "frame": { "x": 384, "y": 560, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Dying 5.aseprite": {
+    "frame": { "x": 480, "y": 560, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Dying 6.aseprite": {
+    "frame": { "x": 576, "y": 560, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Falling Down 0.aseprite": {
+    "frame": { "x": 0, "y": 672, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Falling Down 1.aseprite": {
+    "frame": { "x": 96, "y": 672, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Falling Down 2.aseprite": {
+    "frame": { "x": 192, "y": 672, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Falling Down 3.aseprite": {
+    "frame": { "x": 288, "y": 672, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Stunned 0.aseprite": {
+    "frame": { "x": 0, "y": 784, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 83
+   },
+   "Enemy2 #Stunned 1.aseprite": {
+    "frame": { "x": 96, "y": 784, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 83
+   },
+   "Enemy2 #Stunned 2.aseprite": {
+    "frame": { "x": 192, "y": 784, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 83
+   },
+   "Enemy2 #Stunned 3.aseprite": {
+    "frame": { "x": 288, "y": 784, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 83
+   },
+   "Enemy2 #Stunned 4.aseprite": {
+    "frame": { "x": 384, "y": 784, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 83
+   },
+   "Enemy2 #Getting Up 0.aseprite": {
+    "frame": { "x": 0, "y": 896, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Getting Up 1.aseprite": {
+    "frame": { "x": 96, "y": 896, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Getting Up 2.aseprite": {
+    "frame": { "x": 192, "y": 896, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   },
+   "Enemy2 #Getting Up 3.aseprite": {
+    "frame": { "x": 288, "y": 896, "w": 96, "h": 112 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 112 },
+    "sourceSize": { "w": 96, "h": 112 },
+    "duration": 100
+   }
+ },
+ "meta": {
+  "app": "https://www.aseprite.org/",
+  "version": "1.3.17-x64",
+  "format": "RGBA8888",
+  "size": { "w": 768, "h": 1008 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "Standing", "from": 0, "to": 0, "direction": "forward", "color": "#000000ff" },
+   { "name": "Idle", "from": 1, "to": 6, "direction": "forward", "color": "#000000ff" },
+   { "name": "Walk", "from": 7, "to": 14, "direction": "forward", "color": "#000000ff" },
+   { "name": "Attack", "from": 15, "to": 20, "direction": "forward", "color": "#000000ff" },
+   { "name": "Blocking", "from": 21, "to": 21, "direction": "forward", "color": "#000000ff" },
+   { "name": "Dying", "from": 22, "to": 28, "direction": "forward", "color": "#000000ff" },
+   { "name": "Falling Down", "from": 29, "to": 32, "direction": "forward", "color": "#000000ff" },
+   { "name": "Stunned", "from": 33, "to": 37, "direction": "forward", "color": "#000000ff" },
+   { "name": "Getting Up", "from": 38, "to": 41, "direction": "forward", "color": "#000000ff" }
+  ],
+  "layers": [
+   { "name": "Color", "opacity": 255, "blendMode": "normal" },
+   { "name": "Effects", "opacity": 201, "blendMode": "normal" },
+   { "name": "Dying Particles", "opacity": 130, "blendMode": "lighten" }
+  ],
+  "slices": [
+  ]
+ }
+}

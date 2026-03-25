@@ -6,6 +6,10 @@ namespace ComputerGameFinal.Engine.Components;
 
 public class SpriteRenderer : Component
 {
+    // X rotation: tilts the sprite top/bottom (scales Y axis by cos(rotX), flips past 90°)
+    // Y rotation: tilts the sprite left/right  (scales X axis by cos(rotY), flips past 90°)
+    // Z rotation: standard 2D rotation angle
+
     public Texture2D Texture
     {
         get { return _texture; }
@@ -24,12 +28,24 @@ public class SpriteRenderer : Component
     public Vector2 Origin { get; set; } = Vector2.Zero;
     public float LayerDepth { get; set; } = 0;
 
+    public Rectangle? SourceRectangle { get; set; } = null;
+
     public override void Draw(SpriteBatch spriteBatch)
     {
-        if (Texture != null)
-        {
-            spriteBatch.Draw(Texture, base.GameObject.Position, null, Tint, 
-                base.GameObject.Rotation, Origin, base.GameObject.Scale, SpriteEffects.None, LayerDepth);
-        }
+        if (Texture == null) return;
+
+        Vector3 rotation = base.GameObject.Rotation;
+
+        float cosX = (float)Math.Cos(rotation.X);
+        float cosY = (float)Math.Cos(rotation.Y);
+
+        Vector2 scale = base.GameObject.Scale * new Vector2(Math.Abs(cosY), Math.Abs(cosX));
+
+        SpriteEffects effects = SpriteEffects.None;
+        if (cosY < 0) effects |= SpriteEffects.FlipHorizontally;
+        if (cosX < 0) effects |= SpriteEffects.FlipVertically;
+
+        spriteBatch.Draw(Texture, base.GameObject.Position, SourceRectangle, Tint,
+            rotation.Z, Origin, scale, effects, LayerDepth);
     }
 }
