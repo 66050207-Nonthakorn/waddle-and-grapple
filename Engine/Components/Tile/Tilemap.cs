@@ -1,5 +1,5 @@
 using System;
-using ComputerGameFinal.Engine.Managers;
+using WaddleAndGrapple.Engine.Managers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 

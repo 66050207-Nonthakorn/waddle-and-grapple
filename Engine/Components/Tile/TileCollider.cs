@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using ComputerGameFinal.Engine.Components.Physics;
+using WaddleAndGrapple.Engine.Components.Physics;
 using Microsoft.Xna.Framework;
 
-namespace ComputerGameFinal.Engine.Components.Tile;
+namespace WaddleAndGrapple.Engine.Components.Tile;
 
 public class TileCollider : Collider
 {

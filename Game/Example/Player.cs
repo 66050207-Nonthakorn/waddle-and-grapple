@@ -17,6 +17,8 @@ public class Player : GameObject
 
     private Rigidbody2D _rigidbody;
 
+    private SpriteRenderer _spriteRenderer;
+
     public override void Initialize()
     {
         _spriteRenderer = AddComponent<SpriteRenderer>();
@@ -30,7 +32,7 @@ public class Player : GameObject
         Animation idle = factory.CreateFromRow(row: 0, totalFrames: 1, frameDuration: .05f);
         Animation walk = factory.CreateFromRow(row: 2, totalFrames: 8, frameDuration: .05f);
 
-        Scale = new Vector2(.4f, .4f);
+        Scale = new Vector2(1.5f, 1.5f);
 
         _rigidbody = AddComponent<Rigidbody2D>();
         _rigidbody.GravityScale = 0f;
