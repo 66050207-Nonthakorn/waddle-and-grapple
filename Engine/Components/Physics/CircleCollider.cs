@@ -50,7 +50,7 @@ public class CircleCollider : Collider
         {
             CircleCollider circleCollider => GetMTV(circleCollider),
             BoxCollider boxCollider => GetMTV(boxCollider),
-            _ => Vector2.Zero,
+            _ => -other.GetMTV(this), // delegate to the other collider type
         };
     }
 

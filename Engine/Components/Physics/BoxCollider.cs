@@ -69,7 +69,7 @@ public class BoxCollider : Collider
         {
             BoxCollider boxCollider => GetMTV(boxCollider),
             CircleCollider circleCollider => GetMTV(circleCollider),
-            _ => Vector2.Zero,
+            _ => -other.GetMTV(this), // delegate to the other collider type
         };
     }
 

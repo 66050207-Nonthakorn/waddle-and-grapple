@@ -20,6 +20,11 @@ public abstract class Scene
     
     public Camera2D Camera { get; set; }
 
+    public IEnumerable<T> GetComponents<T>() where T : Component
+        => GameObjects.Values
+            .Where(go => go.Active)
+            .SelectMany(go => go.GetComponents<T>().Where(c => c.Enabled));
+
     // For add game objects
     public abstract void Setup();
     
