@@ -31,6 +31,13 @@ public class Player : GameObject
         Animation walk = factory.CreateFromRow(row: 2, totalFrames: 8, frameDuration: .05f);
 
         Scale = new Vector2(.4f, .4f);
+
+        _rigidbody = AddComponent<Rigidbody2D>();
+        _rigidbody.GravityScale = 0f;
+
+        var boxCollider = AddComponent<BoxCollider>();
+        // Frame size 190×270 at scale 0.4 → ~76×108px; center it around Position
+        boxCollider.Bounds = new Rectangle(-38, -54, 76, 108);
         
         _animator = AddComponent<Animator>();
         _animator.AddAnimation("idle", idle);

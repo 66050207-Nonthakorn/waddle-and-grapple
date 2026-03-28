@@ -32,6 +32,10 @@ class MainScene : Scene
             { -1, -1, -1, -1, -1, -1 },
             { 0, 0, 0, 0, 0, 0 },
             { 1, 2, 3, 4, 5, 6 },
+            { 1, 1, 1, 1, 1, 1 },
+            { -1, -1, -1, -1, -1, -1 },
+            { 0, 0, 0, 0, 0, 0 },
+            { 1, 2, 3, 4, 5, 6 },
             { 0, 0 ,0 ,0 ,0 ,0 },
             { 0, 0 ,0 ,0 ,0 ,0 },
             { 0, 0 ,0 ,0 ,0 ,0 },
@@ -40,6 +44,9 @@ class MainScene : Scene
         };
 
         tilemap.GameObject.Scale = new Vector2(1f, 1f);
+
+        var tileCollider = tilemapObject.AddComponent<TileCollider>();
+        tileCollider.SetSolid(0, 1, 2, 3, 4, 5);
 
         // Create camera
         cameraObject = base.AddGameObject<GameObject>("camera");
