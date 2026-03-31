@@ -47,7 +47,7 @@ public class Player : GameObject
     // ── Phase 7: Death ────────────────────────────────────────────────────────
     private const float FallDeathY      = 480f;   // ขอบล่างหน้าจอ → ตาย
     private const float ScreenLeft      = 0f;     // ขอบซ้าย
-    private const float ScreenRight     = 800f;   // ขอบขวา (MonoGame default)
+    private const float ScreenRight     = 2400f;  // ขอบขวาของ demo scene
     private const float RespawnDelaySec = 1.5f;   // วินาทีก่อน respawn
 
     // ── Velocity ──────────────────────────────────────────────────────────────
@@ -195,6 +195,7 @@ public class Player : GameObject
 
         // Phase 8 — Checkpoint detection
         CheckCheckpoint();
+        CheckpointManager.Instance.UpdateSection(Position.X);
         // Phase 9: SyncAnimation()
 
         UpdateActiveEffects(dt);
@@ -617,7 +618,7 @@ public class Player : GameObject
 
     private void Respawn()
     {
-        Position  = _spawnPosition;
+        Position  = CheckpointManager.Instance.GetRespawnPosition(_spawnPosition);
         VelocityX = 0f;
         VelocityY = 0f;
         SetCrouchHeight(false); // คืน collider ขนาดปกติ

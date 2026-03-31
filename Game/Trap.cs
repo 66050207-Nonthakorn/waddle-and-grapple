@@ -32,13 +32,11 @@ public abstract class Trap : GameObject
             OnPlayerEnter(Player);
     }
 
-    private bool IsPlayerInRange(Player player)
-    {
-        var trapBounds = new Microsoft.Xna.Framework.Rectangle(
-            (int)Position.X, (int)Position.Y,
-            (int)Scale.X,    (int)Scale.Y);
-        return trapBounds.Intersects(player.ColliderBounds);
-    }
+    protected virtual Rectangle GetCollisionBounds() =>
+        new Rectangle((int)Position.X, (int)Position.Y, (int)Scale.X, (int)Scale.Y);
+
+    private bool IsPlayerInRange(Player player) =>
+        GetCollisionBounds().Intersects(player.ColliderBounds);
 
     /// <summary>Called once when the trap is set up. Override to load sprites, set size, etc.</summary>
     protected virtual void OnInitialize() { }
