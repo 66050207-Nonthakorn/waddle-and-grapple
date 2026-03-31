@@ -8,12 +8,15 @@ namespace ComputerGameFinal.Engine.UI;
 
 public class Button : Component
 {
+    Texture2D _dummyTexture;
     public Vector2 Size { get; set; } = new Vector2(200, 50);
     public Action OnClick { get; set; }
 
+    public Color FillColor { get; set; } = Color.DarkGray;
     public Color OutlineColor { get; set; } = Color.Red;
     public int OutlineThickness { get; set; } = 1;
     public bool IsShowOutline { get; set; } = false;
+    public bool IsShowFill { get; set; } = true;
 
     public override void Update(GameTime gameTime)
     {
@@ -31,14 +34,26 @@ public class Button : Component
 
     public override void Draw(SpriteBatch spriteBatch)
     {
+        if (_dummyTexture == null)
+        {
+            _dummyTexture = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
+            _dummyTexture.SetData(new[] { Color.White });
+        }
+
+        if (IsShowFill)
+        {
+            spriteBatch.Draw(
+                _dummyTexture,
+                new Rectangle((int)GameObject.Position.X, (int)GameObject.Position.Y, (int)Size.X, (int)Size.Y),
+                FillColor
+            );
+        }
+
         if (!IsShowOutline) return;
 
-        Texture2D dummyTexture = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
-        dummyTexture.SetData([OutlineColor]);
-        
         // Top outline
         spriteBatch.Draw(
-            dummyTexture,
+            _dummyTexture,
             new Rectangle(
                 (int)GameObject.Position.X - OutlineThickness,
                 (int)GameObject.Position.Y - OutlineThickness,
@@ -50,7 +65,7 @@ public class Button : Component
 
         // Bottom outline
         spriteBatch.Draw(
-            dummyTexture,
+            _dummyTexture,
             new Rectangle(
                 (int)GameObject.Position.X - OutlineThickness,
                 (int)(GameObject.Position.Y + Size.Y),
@@ -62,7 +77,7 @@ public class Button : Component
 
         // Left outline
         spriteBatch.Draw(
-            dummyTexture,
+            _dummyTexture,
             new Rectangle(
                 (int)GameObject.Position.X - OutlineThickness,
                 (int)GameObject.Position.Y - OutlineThickness,
@@ -74,7 +89,7 @@ public class Button : Component
 
         // Right outline
         spriteBatch.Draw(
-            dummyTexture,
+            _dummyTexture,
             new Rectangle(
                 (int)(GameObject.Position.X + Size.X),
                 (int)GameObject.Position.Y - OutlineThickness,

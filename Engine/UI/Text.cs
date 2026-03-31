@@ -10,6 +10,7 @@ public class Text : Component
     public SpriteFont Font { get; set; }
     public string Content { get; set; } = string.Empty;
     public Color Color { get; set; } = Color.White;
+    public Vector2 Offset { get; set; } = Vector2.Zero;
     public Vector2 Origin { get; set; } = Vector2.Zero;
     public float LayerDepth { get; set; } = 1f;
 
@@ -26,7 +27,7 @@ public class Text : Component
         spriteBatch.DrawString(
             Font,
             Content,
-            base.GameObject.Position,
+            base.GameObject.Position + Offset,
             Color,
             base.GameObject.Rotation.Z,
             Origin,

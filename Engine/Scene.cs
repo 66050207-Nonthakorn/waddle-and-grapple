@@ -38,7 +38,7 @@ public abstract class Scene
         }
     }
 
-    public void Unload()
+    public virtual void Unload()
     {
         GameObjects.Clear();
     }
