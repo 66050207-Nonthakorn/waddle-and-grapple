@@ -1,9 +1,9 @@
-using ComputerGameFinal.Engine;
-using ComputerGameFinal.Engine.Components.Physics;
-using ComputerGameFinal.Game.Example;
+using WaddleAndGrapple.Engine;
+using WaddleAndGrapple.Engine.Components.Physics;
+using WaddleAndGrapple.Game.Example;
 using Microsoft.Xna.Framework;
 
-namespace ComputerGameFinal.Game;
+namespace WaddleAndGrapple.Game;
 
 /// <summary>
 /// Base class สำหรับของที่เก็บได้ทุกชนิด (Coin, PowerUp item ฯลฯ)

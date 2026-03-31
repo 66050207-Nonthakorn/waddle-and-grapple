@@ -1,6 +1,6 @@
-using ComputerGameFinal.Game.Example;
+using WaddleAndGrapple.Game.Example;
 
-namespace ComputerGameFinal.Game;
+namespace WaddleAndGrapple.Game;
 
 /// <summary>
 /// ชะลอ world objects เป็นเวลา 8 วินาที (timer เดินปกติ)

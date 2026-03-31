@@ -1,6 +1,6 @@
-using ComputerGameFinal.Game.Example;
+using WaddleAndGrapple.Game.Example;
 
-namespace ComputerGameFinal.Game;
+namespace WaddleAndGrapple.Game;
 
 /// <summary>
 /// เพิ่ม MoveSpeed ×1.5 เป็นเวลา 10 วินาที

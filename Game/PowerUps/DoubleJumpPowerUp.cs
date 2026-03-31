@@ -1,6 +1,6 @@
-using ComputerGameFinal.Game.Example;
+using WaddleAndGrapple.Game.Example;
 
-namespace ComputerGameFinal.Game;
+namespace WaddleAndGrapple.Game;
 
 /// <summary>
 /// ให้ Player กระโดดได้ 2 ครั้ง (one-time use)

@@ -1,11 +1,11 @@
 using System;
-using ComputerGameFinal.Engine.Managers;
-using ComputerGameFinal.Game.Example;
+using WaddleAndGrapple.Engine.Managers;
+using WaddleAndGrapple.Game.Example;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-namespace ComputerGameFinal.Game;
+namespace WaddleAndGrapple.Game;
 
 /// <summary>
 /// Ice Pickaxe — อาวุธและเครื่องมือเดินทางหลักของ Agen-T

@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
-using ComputerGameFinal.Engine;
-using ComputerGameFinal.Engine.Components;
-using ComputerGameFinal.Engine.Components.Physics;
-using ComputerGameFinal.Engine.Managers;
+using WaddleAndGrapple.Engine;
+using WaddleAndGrapple.Engine.Components;
+using WaddleAndGrapple.Engine.Components.Physics;
+using WaddleAndGrapple.Engine.Managers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
-namespace ComputerGameFinal.Game;
+namespace WaddleAndGrapple.Game;
 
 // ── Phase 1.1: State Machine ──────────────────────────────────────────────────
 public enum PlayerState

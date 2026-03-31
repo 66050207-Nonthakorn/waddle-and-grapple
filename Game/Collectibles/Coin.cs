@@ -1,9 +1,9 @@
-using ComputerGameFinal.Engine.Components;
-using ComputerGameFinal.Engine.Managers;
-using ComputerGameFinal.Game.Example;
+using WaddleAndGrapple.Engine.Components;
+using WaddleAndGrapple.Engine.Managers;
+using WaddleAndGrapple.Game.Example;
 using Microsoft.Xna.Framework;
 
-namespace ComputerGameFinal.Game;
+namespace WaddleAndGrapple.Game;
 
 /// <summary>
 /// เหรียญทอง — เก็บได้เพื่อเพิ่ม CoinCount ของ Player

@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGameGum;
 using System.Collections.Generic;
-using GamePlayer = ComputerGameFinal.Game.Player;
+using GamePlayer = WaddleAndGrapple.Game.Player;
 
 namespace WaddleAndGrapple.Game.Example;
 
