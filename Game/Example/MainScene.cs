@@ -6,6 +6,7 @@ using ComputerGameFinal.Game;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using GamePlayer = ComputerGameFinal.Game.Player;
+using MonoGameGum;
 
 namespace ComputerGameFinal.Game.Example;
 
@@ -19,7 +20,12 @@ class MainScene : Scene
         // Camera
         cameraObject = base.AddGameObject<GameObject>("camera");
         var camera = cameraObject.AddComponent<Camera2D>();
-        camera.SetViewport(new Viewport(0, 0, 800, 600));
+        camera.SetViewport(new Viewport(
+            0,
+            0,
+            ScreenManager.Instance.nativeWidth,
+            ScreenManager.Instance.nativeHeight
+        ));
         camera.Zoom = 1f;
         camera.SmoothFollow = false;
         base.Camera = camera;
