@@ -14,30 +14,9 @@ class MainScene : Scene
 {
     GamePlayer player;
     GameObject cameraObject;
-    GameObject tilemapObject;
 
     public override void Setup()
     {
-        // Create tilemap first
-        tilemapObject = base.AddGameObject<GameObject>("tilemap");
-        var tilemap = tilemapObject.AddComponent<Tilemap>();
-        tilemap.Tileset = ResourceManager.Instance.GetTexture("Tiles/tileset");
-        tilemap.SourceTileSize = 75;
-        tilemap.DestinationTileSize = 75;
-        tilemap.Layer = 0.5f;
-        tilemap.MapData = new int[,]
-        {
-            { 1, 1, 1, 1, -1, -1 },
-            { 5, 4, 3, 2, 1, 0 },
-            { 1, 1, 1, 1, 1, 1 },
-            { 1, 2, 3, 4, 5, 6 }
-        };
-
-        tilemap.GameObject.Scale = new Vector2(1f, 1f);
-
-        var tileCollider = tilemapObject.AddComponent<TileCollider>();
-        tileCollider.SetSolid(0, 1, 2, 3, 4, 5);
-
         // Create camera
         cameraObject = base.AddGameObject<GameObject>("camera");
         var camera = cameraObject.AddComponent<Camera2D>();

@@ -4,6 +4,7 @@ using WaddleAndGrapple.Engine;
 using WaddleAndGrapple.Engine.Components;
 using WaddleAndGrapple.Engine.Components.Physics;
 using WaddleAndGrapple.Engine.Managers;
+using WaddleAndGrapple.Engine.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
@@ -87,9 +88,12 @@ public class Player : GameObject
     // ── Active PowerUp Effects ────────────────────────────────────────────────
     private readonly List<PowerUp> _activeEffects = new();
 
+    // ── Sprite Scale ──────────────────────────────────────────────────────────
+    public const float DisplayScale = 2f;
+
     // ── Components ────────────────────────────────────────────────────────────
     private SpriteRenderer _spriteRenderer;
-    // TODO (Phase 9): private Animator _animator;
+    private Animator       _animator;
 
     // ── Collider & Solid Rectangles ───────────────────────────────────────────
     private PlayerBoxCollider _collider;
@@ -106,6 +110,12 @@ public class Player : GameObject
     // อ่านได้จาก Collectible เพื่อตรวจ overlap
     public Rectangle ColliderBounds => _collider?.Bounds ?? Rectangle.Empty;
 
+    // ── Animation Timers ──────────────────────────────────────────────────────
+    private float _idleTimer;
+    private const float IdleBreathDelay   = 3f;    // วินาทีก่อนเล่น Breathe
+    private float _jumpAnimTimer;                  // > 0 → เล่น jumpstart / walljumpstart
+    private float _slideAnimTimer;                 // > 0 → เล่น slidestart
+
     // ── Rope Dash ─────────────────────────────────────────────────────────────
     private bool _isRopeDashing = false;
 
@@ -116,13 +126,39 @@ public class Player : GameObject
 
     public override void Initialize()
     {
-        _spriteRenderer            = AddComponent<SpriteRenderer>();
-        _spriteRenderer.Texture    = ResourceManager.Instance.GetTexture("pixel");
-        _spriteRenderer.Tint       = Color.Cyan;
+        Scale    = new Vector2(DisplayScale, DisplayScale);
+        _animator = AddComponent<Animator>();
+
+        // Animator สร้าง SpriteRenderer ให้อัตโนมัติ — เซ็ต LayerDepth เพิ่ม
+        _spriteRenderer            = GetComponent<SpriteRenderer>();
         _spriteRenderer.LayerDepth = 0.5f;
-        _spriteRenderer.Origin     = new Vector2(0.5f, 0.5f); // center บน texture 1×1
-        Scale = new Vector2(PlayerWidth, PlayerHeight); // 40×60 px
-        // TODO (Phase 9): _animator = AddComponent<Animator>();
+
+        // SpriteSheet เดียว: 14 rows × 9 columns, frame 64×64
+        // row ตาม JSON: y/64
+        // row 0=Standing, 1=Breathe, 2=Walk, 3=Crouch, 4=CrouchWalk,
+        //     5=Running,  6=GroundJumpStartup, 7=Jumping, 8=Freefall,
+        //     9=LedgeGrab, 10=WallSlide, 11=WallJumpStartup,
+        //    12=SlideStartEnd, 13=SlideLoop
+        var f = new AnimationFactory(
+            ResourceManager.Instance.GetTexture("Player/Player-SpriteSheet"),
+            rows: 14, columns: 9
+        );
+
+        _animator.AddAnimation("standing",       f.CreateFromRow(row:  0, totalFrames: 1, frameDuration: 0.083f));
+        _animator.AddAnimation("breathe",        f.CreateFromRow(row:  1, totalFrames: 7, frameDuration: 0.10f));
+        _animator.AddAnimation("walk",           f.CreateFromRow(row:  2, totalFrames: 9, frameDuration: 0.083f));
+        _animator.AddAnimation("crouch",         f.CreateFromRow(row:  3, totalFrames: 4, frameDuration: 0.083f, isLooping: false));
+        _animator.AddAnimation("crouchwalk",     f.CreateFromRow(row:  4, totalFrames: 6, frameDuration: 0.10f));
+        _animator.AddAnimation("run",            f.CreateFromRow(row:  5, totalFrames: 8, frameDuration: 0.083f));
+        _animator.AddAnimation("jumpstart",      f.CreateFromRow(row:  6, totalFrames: 1, frameDuration: 0.083f, isLooping: false));
+        _animator.AddAnimation("jump",           f.CreateFromRow(row:  7, totalFrames: 4, frameDuration: 0.083f, isLooping: false));
+        _animator.AddAnimation("freefall",       f.CreateFromRow(row:  8, totalFrames: 1, frameDuration: 0.083f));
+        _animator.AddAnimation("ledgegrab",      f.CreateFromRow(row:  9, totalFrames: 1, frameDuration: 0.083f));
+        _animator.AddAnimation("wallslide",      f.CreateFromRow(row: 10, totalFrames: 4, frameDuration: 0.083f));
+        _animator.AddAnimation("walljumpstart",  f.CreateFromRow(row: 11, totalFrames: 3, frameDuration: 0.083f, isLooping: false));
+        _animator.AddAnimation("slidestart",     f.CreateFromRow(row: 12, totalFrames: 4, frameDuration: 0.083f, isLooping: false));
+        _animator.AddAnimation("slide",          f.CreateFromRow(row: 13, totalFrames: 4, frameDuration: 0.083f));
+        _animator.Play("standing");
 
         _collider = AddComponent<PlayerBoxCollider>();
         UpdateColliderBounds();
@@ -196,9 +232,97 @@ public class Player : GameObject
         // Phase 8 — Checkpoint detection
         CheckCheckpoint();
         CheckpointManager.Instance.UpdateSection(Position.X);
-        // Phase 9: SyncAnimation()
+        // Sync animation to state
+        SyncAnimation(dt);
+
+        // Flip sprite ตาม FacingDirection ผ่าน Y rotation
+        Rotation = FacingDirection == -1
+            ? QuaternionUtils.Euler(0, 180, 0)
+            : Vector3.Zero;
 
         UpdateActiveEffects(dt);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // Animation Sync
+    // ══════════════════════════════════════════════════════════════════════════
+
+    private const float JumpStartDuration     = 0.083f; // ความยาว 1 frame
+    private const float WallJumpStartDuration = 0.083f * 3f;
+    private const float SlideStartDuration    = 0.083f * 4f;
+
+    private void SyncAnimation(float dt)
+    {
+        // ── countdown timers ──────────────────────────────────────────────────
+        if (_jumpAnimTimer  > 0f) _jumpAnimTimer  -= dt;
+        if (_slideAnimTimer > 0f) _slideAnimTimer -= dt;
+
+        switch (State)
+        {
+            // ── Idle: Standing ก่อน พอ 3 วิ เล่น Breathe ────────────────────
+            case PlayerState.Idle:
+                _idleTimer += dt;
+                if (_idleTimer >= IdleBreathDelay)
+                    _animator.Play("breathe");
+                else
+                    _animator.Play("standing");
+                break;
+
+            // ── Walk / Crouch Walk ────────────────────────────────────────────
+            case PlayerState.Running:
+                _idleTimer = 0f;
+                _animator.Play("walk");
+                break;
+
+            case PlayerState.Sprinting:
+                _idleTimer = 0f;
+                _animator.Play("run");
+                break;
+
+            // ── Jump: jumpstart 1 frame → jump ────────────────────────────────
+            case PlayerState.Jumping:
+                _idleTimer = 0f;
+                if (_jumpAnimTimer > 0f)
+                    _animator.Play(_jumpAnimTimer > WallJumpStartDuration - JumpStartDuration
+                        ? "walljumpstart" : "jumpstart");
+                else
+                    _animator.Play("jump");
+                break;
+
+            case PlayerState.Falling:
+                _idleTimer = 0f;
+                _animator.Play("freefall");
+                break;
+
+            case PlayerState.WallClinging:
+                _idleTimer = 0f;
+                _animator.Play("wallslide");
+                break;
+
+            case PlayerState.LedgeGrabbing:
+                _idleTimer = 0f;
+                _animator.Play("ledgegrab");
+                break;
+
+            case PlayerState.Crouching:
+                _idleTimer = 0f;
+                _animator.Play("crouch");
+                break;
+
+            // ── Slide: slidestart → slide ──────────────────────────────────────
+            case PlayerState.Sliding:
+                _idleTimer = 0f;
+                if (_slideAnimTimer > 0f)
+                    _animator.Play("slidestart");
+                else
+                    _animator.Play("slide");
+                break;
+
+            default:
+                _idleTimer = 0f;
+                _animator.Play("standing");
+                break;
+        }
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -475,7 +599,6 @@ public class Player : GameObject
         float bottomY  = Position.Y + _currentHeight / 2f; // เก็บขอบล่างไว้ก่อน
         _currentHeight = crouching ? PlayerHeight / 2 : PlayerHeight;
         Position       = new Vector2(Position.X, bottomY - _currentHeight / 2f);
-        Scale          = new Vector2(PlayerWidth, _currentHeight); // sync sprite
         UpdateColliderBounds();
     }
 
@@ -535,14 +658,19 @@ public class Player : GameObject
 
         foreach (var solid in _solidRects)
         {
-            if (!_collider.Bounds.Intersects(solid)) continue;
+            // ใช้ >= สำหรับขอบล่าง เพื่อจับกรณี collider.Bottom == solid.Top พอดี
+            bool hit = _collider.Bounds.Left  < solid.Right
+                    && _collider.Bounds.Right  > solid.Left
+                    && _collider.Bounds.Top    < solid.Bottom
+                    && _collider.Bounds.Bottom >= solid.Top;
+            if (!hit) continue;
 
-            if (VelocityY > 0f)      // ตกลง → ชน ground
+            if (VelocityY > 0f)      // ตกลง → ลงจอดบน solid
             {
                 Position   = new Vector2(Position.X, solid.Top - _currentHeight / 2f);
                 IsGrounded = true;
             }
-            else if (VelocityY < 0f) // กระโดดขึ้น → ชน ceiling
+            else if (VelocityY < 0f) // กระโดดขึ้น → หัวชนใต้ solid → ดีดกลับลง
             {
                 Position = new Vector2(Position.X, solid.Bottom + _currentHeight / 2f);
             }
@@ -581,6 +709,7 @@ public class Player : GameObject
 
     // ── API สำหรับ Level (Member 4) ───────────────────────────────────────────
     public void SetSolids(List<Rectangle> solids) => _solidRects = solids;
+    public IReadOnlyList<Rectangle> Solids => _solidRects;
 
     // ══════════════════════════════════════════════════════════════════════════
     // Phase 1: API (PowerUp / Coin / Death / State)
@@ -673,8 +802,25 @@ public class Player : GameObject
     public void ChangeState(PlayerState newState)
     {
         if (State == newState) return;
+
+        // Set animation startup timers เมื่อเข้า state ใหม่
+        switch (newState)
+        {
+            case PlayerState.Jumping when State == PlayerState.WallClinging:
+                _jumpAnimTimer = WallJumpStartDuration; // walljumpstart 3 frames
+                break;
+            case PlayerState.Jumping:
+                _jumpAnimTimer = JumpStartDuration;     // jumpstart 1 frame
+                break;
+            case PlayerState.Sliding:
+                _slideAnimTimer = SlideStartDuration;   // slidestart 4 frames
+                break;
+            case PlayerState.Idle:
+                _idleTimer = 0f;                        // reset breathe timer
+                break;
+        }
+
         State = newState;
-        // TODO (Phase 9): _animator.Play(newState.ToString().ToLower())
     }
 }
 

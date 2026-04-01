@@ -21,6 +21,8 @@ public class PickaxeRenderer : Component
     private Player     _player;
     private IcePickaxe _pickaxe;
     private Texture2D  _pixel;
+    private Texture2D  _pickaxeTex;
+    private Texture2D  _ropeTex;
 
     private const float LayerRope    = 0.80f;
     private const float LayerHook    = 0.81f;
@@ -34,7 +36,9 @@ public class PickaxeRenderer : Component
 
     public override void Initialize()
     {
-        _pixel = ResourceManager.Instance.GetTexture("pixel");
+        _pixel      = ResourceManager.Instance.GetTexture("pixel");
+        _pickaxeTex = ResourceManager.Instance.GetTexture("Player/Pickaxe");
+        _ropeTex    = ResourceManager.Instance.GetTexture("Player/Rope");
     }
 
     public override void Draw(SpriteBatch spriteBatch)
@@ -48,12 +52,12 @@ public class PickaxeRenderer : Component
                 break;
 
             case IcePickaxe.PickaxeStateKind.Flying:
-                DrawDot(spriteBatch, _pickaxe.PickaxePosition, Color.Blue, 8f, LayerHook);
+                DrawPickaxeSprite(spriteBatch, _pickaxe.PickaxePosition, _pickaxe.FlyAngle);
                 break;
 
             case IcePickaxe.PickaxeStateKind.Hooked:
-                DrawLine(spriteBatch, _player.Position, _pickaxe.HookPosition, Color.Black, 2f, LayerRope);
-                DrawDot(spriteBatch, _pickaxe.HookPosition, Color.Red, 10f, LayerHook);
+                DrawRope(spriteBatch, _player.Position, _pickaxe.HookPosition);
+                DrawPickaxeSprite(spriteBatch, _pickaxe.HookPosition, _pickaxe.FlyAngle);
                 break;
         }
     }
@@ -94,6 +98,42 @@ public class PickaxeRenderer : Component
                      new Vector2(barX,           barY + BarHeight), Color.White, t, LayerCharge + 0.002f);
         DrawLine(sb, new Vector2(barX + BarWidth, barY),
                      new Vector2(barX + BarWidth, barY + BarHeight), Color.White, t, LayerCharge + 0.002f);
+    }
+
+    private void DrawRope(SpriteBatch sb, Vector2 from, Vector2 to)
+    {
+        var tex = _ropeTex ?? _pixel;
+        Vector2 edge  = to - from;
+        float   len   = edge.Length();
+        float   angle = (float)Math.Atan2(edge.Y, edge.X);
+
+        // tile rope texture ตามความยาวเชือก
+        float tileW    = tex.Width;
+        float scaleY   = tex.Height > 0 ? 1f : 1f; // ความสูง 1:1
+        int   tileCount = (int)Math.Ceiling(len / tileW);
+
+        for (int i = 0; i < tileCount; i++)
+        {
+            float offset    = i * tileW;
+            float remaining = Math.Min(tileW, len - offset);
+            Vector2 pos     = from + Vector2.Normalize(edge) * offset;
+
+            var srcRect = new Rectangle(0, 0, (int)remaining, tex.Height);
+            sb.Draw(tex, pos, srcRect, Color.White,
+                    angle,
+                    new Vector2(0f, tex.Height / 2f),
+                    Vector2.One,
+                    SpriteEffects.None,
+                    LayerRope);
+        }
+    }
+
+    private void DrawPickaxeSprite(SpriteBatch sb, Vector2 position, float angle)
+    {
+        var tex = _pickaxeTex ?? _pixel;
+        var origin = new Vector2(tex.Width / 2f, tex.Height / 2f);
+        sb.Draw(tex, position, null, Color.White, angle, origin,
+                2f, SpriteEffects.None, LayerHook);
     }
 
     private void DrawRect(SpriteBatch sb, Vector2 topLeft, float w, float h,

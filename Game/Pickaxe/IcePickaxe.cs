@@ -38,6 +38,7 @@ public class IcePickaxe
     // ── Public Position (อ่านได้จาก PickaxeRenderer) ─────────────────────────
     public Vector2 PickaxePosition => _position;
     public Vector2 HookPosition    => _hookPosition;
+    public float   FlyAngle        => (float)Math.Atan2(_flyVelocity.Y, _flyVelocity.X);
     public PickaxeStateKind CurrentState => _state switch
     {
         PickaxeState.Charging => PickaxeStateKind.Charging,
@@ -202,10 +203,9 @@ public class IcePickaxe
         // ถ้ามี pickaxe อยู่แล้ว → recall ก่อน (1 pickaxe เท่านั้น)
         if (IsDeployed) { Recall(); return; }
 
-        // คำนวณทิศทาง Player → Mouse
-        // GetMousePosition() คืน System.Numerics.Vector2 → แปลงเป็น XNA Vector2
+        // แปลง mouse screen position → world position ผ่าน camera
         var rawMouse = InputManager.Instance.GetMousePosition();
-        var mousePos = new Vector2(rawMouse.X, rawMouse.Y);
+        var mousePos = ScreenToWorldMouse(new Vector2(rawMouse.X, rawMouse.Y));
         var dir      = mousePos - _owner.Position;
 
         if (dir == Vector2.Zero)
@@ -232,19 +232,29 @@ public class IcePickaxe
         _position     += step;
         _flownDistance += step.Length();
 
-        // TODO (Phase 4 + Member 4): ตรวจ collision กับ GameObject ที่มี tag "HookPoint"
-        //   foreach hookPoint in level.HookPoints:
-        //       if Vector2.Distance(_position, hookPoint.Position) < 8f:
-        //           HookToPoint(hookPoint.Position); return;
+        // ตรวจชน solid → hook ณ จุดที่ชน
+        const float PickaxeRadius = 6f;
+        foreach (var solid in _owner.Solids)
+        {
+            if (_position.X + PickaxeRadius > solid.Left
+             && _position.X - PickaxeRadius < solid.Right
+             && _position.Y + PickaxeRadius > solid.Top
+             && _position.Y - PickaxeRadius < solid.Bottom)
+            {
+                HookToPoint(_position);
+                return;
+            }
+        }
 
-        // TODO (Phase 4 + Member 3): ตรวจ collision กับ Enemy
-        //   ถ้าชน stunned enemy → enemy.TakeDamage(); Recall(); return;
-        //   ถ้าชน normal enemy  → Recall(); return;
-
-        // หมดระยะ → hook ณ ตำแหน่งปัจจุบัน
-        // TODO (Member 4): เปลี่ยนเป็น collision กับ HookPoint จริง แล้วค่อย Recall() ถ้าไม่โดน
+        // หมดระยะ → recall (ไม่โดน solid)
         if (_flownDistance >= _maxFlyDistance)
-            HookToPoint(_position);
+            Recall();
+    }
+
+    private Vector2 ScreenToWorldMouse(Vector2 screenPos)
+    {
+        var camera = SceneManager.Instance.CurrentScene?.Camera;
+        return camera != null ? camera.ScreenToWorld(screenPos) : screenPos;
     }
 
     private void HandleHookedInput(float dt)
@@ -277,7 +287,7 @@ public class IcePickaxe
     private void LaunchFromRope()
     {
         var rawMouse = InputManager.Instance.GetMousePosition();
-        var mousePos = new Vector2(rawMouse.X, rawMouse.Y);
+        var mousePos = ScreenToWorldMouse(new Vector2(rawMouse.X, rawMouse.Y));
         var dir      = mousePos - _owner.Position;
 
         if (dir != Vector2.Zero)
