@@ -45,7 +45,7 @@ public class SpikeTrap : Trap
 
     protected override void OnUpdate(GameTime gameTime)
     {
-        float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        float dt = WorldTime.Dt((float)gameTime.ElapsedGameTime.TotalSeconds);
         _stateTimer += dt;
 
         switch (_spikeState)

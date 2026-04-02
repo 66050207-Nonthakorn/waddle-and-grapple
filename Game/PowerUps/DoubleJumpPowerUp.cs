@@ -1,3 +1,4 @@
+using Microsoft.Xna.Framework;
 using WaddleAndGrapple.Game.Example;
 
 namespace WaddleAndGrapple.Game;
@@ -9,9 +10,11 @@ namespace WaddleAndGrapple.Game;
 /// </summary>
 public class DoubleJumpPowerUp : PowerUp
 {
+    public override Color ItemColor => new Color(0, 220, 255); // ฟ้าสว่าง
+
     public DoubleJumpPowerUp()
     {
-        Duration = 0f; // one-time use ไม่มีเวลาหมด
+        Duration = 15f; // มีเวลา 15 วินาที — ใช้ double jump ได้หลายครั้งภายในช่วงนี้
     }
 
     protected override void OnActivate(Player player)

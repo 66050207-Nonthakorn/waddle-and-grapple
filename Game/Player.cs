@@ -87,6 +87,7 @@ public class Player : GameObject
 
     // ── Active PowerUp Effects ────────────────────────────────────────────────
     private readonly List<PowerUp> _activeEffects = new();
+    public IReadOnlyList<PowerUp> ActiveEffects => _activeEffects;
 
     // ── Sprite Scale ──────────────────────────────────────────────────────────
     public const float DisplayScale = 2f;
@@ -168,6 +169,9 @@ public class Player : GameObject
 
         var pickaxeRenderer = AddComponent<PickaxeRenderer>();
         pickaxeRenderer.Setup(this, Pickaxe);
+
+        AddComponent<PowerUpBarRenderer>();
+        AddComponent<CoinHUD>();
     }
 
     // ── Update Loop ───────────────────────────────────────────────────────────
@@ -179,6 +183,9 @@ public class Player : GameObject
     public override void Update(GameTime gameTime)
     {
         float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+        // หยุดทุกอย่างเมื่อเกมจบ (goal reached)
+        if (WorldTime.IsFrozen) return;
 
         // Phase 7 — Respawn timer (ทำงานแม้ตาย)
         if (State == PlayerState.Dead)

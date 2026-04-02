@@ -45,7 +45,7 @@ public class LaserTrap : Trap
     {
         if (AlwaysOn) return;
 
-        float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        float dt = WorldTime.Dt((float)gameTime.ElapsedGameTime.TotalSeconds);
         _timer += dt;
 
         if (_beamOn && _timer >= OnDuration)

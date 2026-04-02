@@ -1,3 +1,4 @@
+using Microsoft.Xna.Framework;
 using WaddleAndGrapple.Game.Example;
 
 namespace WaddleAndGrapple.Game;
@@ -8,18 +9,13 @@ namespace WaddleAndGrapple.Game;
 /// </summary>
 public class SlowTimePowerUp : PowerUp
 {
+    public override Color ItemColor => new Color(180, 0, 255); // ม่วงสดใส
+
     public SlowTimePowerUp()
     {
         Duration = 8f;
     }
 
-    protected override void OnActivate(Player player)
-    {
-        // TODO (Phase 6 + Member 5): TimerManager.Instance.ApplySlowTime(Duration)
-    }
-
-    protected override void OnDeactivate(Player player)
-    {
-        // TODO (Phase 6 + Member 5): TimerManager.Instance.ResetTime()
-    }
+    protected override void OnActivate(Player player)   => WorldTime.SetSlow();
+    protected override void OnDeactivate(Player player) => WorldTime.SetNormal();
 }

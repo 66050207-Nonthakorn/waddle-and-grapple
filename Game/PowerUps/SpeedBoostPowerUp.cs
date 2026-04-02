@@ -1,3 +1,4 @@
+using Microsoft.Xna.Framework;
 using WaddleAndGrapple.Game.Example;
 
 namespace WaddleAndGrapple.Game;
@@ -8,6 +9,8 @@ namespace WaddleAndGrapple.Game;
 /// </summary>
 public class SpeedBoostPowerUp : PowerUp
 {
+    public override Color ItemColor => new Color(255, 160, 0); // ส้มสดใส
+
     private const float Multiplier = 1.5f;
 
     public SpeedBoostPowerUp()

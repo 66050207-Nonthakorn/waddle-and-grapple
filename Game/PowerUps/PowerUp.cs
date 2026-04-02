@@ -20,10 +20,13 @@ public abstract class PowerUp : Collectible
 {
     public bool IsActive { get; private set; }
 
-    /// <summary>ระยะเวลา effect (วินาที); 0 = one-time</summary>
-    protected float Duration;
+    /// <summary>สีของ item บน map และ HUD bar</summary>
+    public virtual Color ItemColor => Color.Magenta;
 
-    private float _remainingTime;
+    /// <summary>ระยะเวลา effect รวม (วินาที)</summary>
+    protected float Duration;
+    public float TotalDuration  => Duration;
+    public float RemainingTime  { get; private set; }
 
     // ── Collectible pickup ────────────────────────────────────────────────────
 
@@ -36,7 +39,7 @@ public abstract class PowerUp : Collectible
         Scale      = new Vector2(32, 32);
         var sr     = AddComponent<SpriteRenderer>();
         sr.Texture    = ResourceManager.Instance.GetTexture("pixel");
-        sr.Tint       = Color.Magenta;
+        sr.Tint       = ItemColor;
         sr.LayerDepth = 0.5f;
     }
 
@@ -50,18 +53,18 @@ public abstract class PowerUp : Collectible
 
     public void Activate(Player player)
     {
-        IsActive       = true;
-        _remainingTime = Duration;
+        IsActive      = true;
+        RemainingTime = Duration;
         OnActivate(player);
     }
 
     public void UpdateEffect(Player player, float dt)
     {
         if (!IsActive) return;
-        if (Duration <= 0f) return; // one-time use — deactivate จากภายนอก
+        if (Duration <= 0f) return;
 
-        _remainingTime -= dt;
-        if (_remainingTime <= 0f)
+        RemainingTime -= dt;
+        if (RemainingTime <= 0f)
             Deactivate(player);
     }
 
