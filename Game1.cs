@@ -1,4 +1,4 @@
-using WaddleAndGrapple.Engine.Managers;
+﻿using WaddleAndGrapple.Engine.Managers;
 using WaddleAndGrapple.Game.Example;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -147,6 +147,7 @@ public class Game1 : Microsoft.Xna.Framework.Game
 
     protected override void Draw(GameTime gameTime)
     {
+        GraphicsDevice.Clear(Color.Black);
         GraphicsDevice.Clear(Color.Black);
         
         var currentScene = SceneManager.Instance.CurrentScene;

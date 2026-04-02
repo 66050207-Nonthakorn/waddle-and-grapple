@@ -29,6 +29,7 @@ public class SpikeTrap : Trap
     private SpikeState _spikeState = SpikeState.Paused;
     private float      _stateTimer;
     private Vector2    _basePosition;
+    private bool       _usingPixelTexture = true;
 
     protected override void OnInitialize()
     {
@@ -36,9 +37,13 @@ public class SpikeTrap : Trap
         _basePosition = Position;
         _stateTimer   = PhaseOffset;
 
-        _spriteRenderer.Texture    = ResourceManager.Instance.GetTexture("pixel");
-        _spriteRenderer.Tint       = SpikeColor;
-        _spriteRenderer.LayerDepth = 0.6f;
+        SpriteTextureName = SpriteTextureName ?? "pixel";
+        var texture = ResourceManager.Instance.GetTexture(SpriteTextureName);
+        _usingPixelTexture = texture == ResourceManager.Instance.GetTexture("pixel");
+        if (_usingPixelTexture)
+            SpriteTint = SpikeColor;
+
+        ApplySpriteTexture();
 
         UpdateVisual(0f);
     }
@@ -77,25 +82,76 @@ public class SpikeTrap : Trap
     private void UpdateVisual(float progress)
     {
         float ext = SpikeThickness * progress; // ระยะที่โผล่ออกมาตาม progress
+        Vector2 drawPos;
+        Vector2 drawSize;
+
         switch (Origin)
         {
-            case SpikeOrigin.Floor:       // block แนวนอน โผล่ขึ้นจากพื้น
-                Position = new Vector2(_basePosition.X, _basePosition.Y - ext);
-                Scale    = new Vector2(SpikeLength, ext);
+            case SpikeOrigin.Floor:
+                drawPos = new Vector2(_basePosition.X, _basePosition.Y - ext);
+                drawSize = new Vector2(SpikeLength, ext);
                 break;
-            case SpikeOrigin.Ceiling:     // block แนวนอน หย่อนลงจากเพดาน
-                Position = new Vector2(_basePosition.X, _basePosition.Y);
-                Scale    = new Vector2(SpikeLength, ext);
+            case SpikeOrigin.Ceiling:
+                drawPos = new Vector2(_basePosition.X, _basePosition.Y);
+                drawSize = new Vector2(SpikeLength, ext);
                 break;
-            case SpikeOrigin.LeftWall:    // block แนวตั้ง ยื่นออกจากกำแพงซ้าย
-                Position = new Vector2(_basePosition.X, _basePosition.Y);
-                Scale    = new Vector2(ext, SpikeLength);
+            case SpikeOrigin.LeftWall:
+                drawPos = new Vector2(_basePosition.X, _basePosition.Y);
+                drawSize = new Vector2(ext, SpikeLength);
                 break;
-            case SpikeOrigin.RightWall:   // block แนวตั้ง ยื่นออกจากกำแพงขวา
-                Position = new Vector2(_basePosition.X - ext, _basePosition.Y);
-                Scale    = new Vector2(ext, SpikeLength);
+            case SpikeOrigin.RightWall:
+                drawPos = new Vector2(_basePosition.X - ext, _basePosition.Y);
+                drawSize = new Vector2(ext, SpikeLength);
+                break;
+            default:
+                drawPos = _basePosition;
+                drawSize = Vector2.Zero;
                 break;
         }
+
+        if (_usingPixelTexture)
+        {
+            Rotation = Vector3.Zero;
+            Position = drawPos;
+            SetSpikeScale(drawSize);
+            return;
+        }
+
+        // Keep unrotated size as horizontal strip, then rotate for wall-mounted spikes.
+        SetSpikeScale(new Vector2(SpikeLength, ext));
+
+        // For sprite textures, draw from center and rotate so the same sprite works on all surfaces.
+        _spriteRenderer.Origin = new Vector2(_spriteRenderer.Texture.Bounds.Width * 0.5f,
+                                             _spriteRenderer.Texture.Bounds.Height * 0.5f);
+        Position = drawPos + (drawSize * 0.5f);
+
+        Rotation = Origin switch
+        {
+            SpikeOrigin.Floor     => new Vector3(0f, 0f, 0f),
+            SpikeOrigin.Ceiling   => new Vector3(0f, 0f, MathF.PI),
+            SpikeOrigin.LeftWall  => new Vector3(0f, 0f, MathF.PI / 2f),
+            SpikeOrigin.RightWall => new Vector3(0f, 0f, -MathF.PI / 2f),
+            _                     => Vector3.Zero
+        };
+    }
+
+    private void SetSpikeScale(Vector2 targetSize)
+    {
+        if (_spriteRenderer?.Texture == null)
+        {
+            Scale = targetSize;
+            return;
+        }
+
+        var pixelTexture = ResourceManager.Instance.GetTexture("pixel");
+        if (_spriteRenderer.Texture == pixelTexture)
+        {
+            Scale = targetSize;
+            return;
+        }
+
+        Scale = new Vector2(targetSize.X / _spriteRenderer.Texture.Bounds.Width,
+                            targetSize.Y / _spriteRenderer.Texture.Bounds.Height);
     }
 
     // Fixed hitbox matching the fully-extended block dimensions

@@ -3,6 +3,8 @@ using Microsoft.Xna.Framework;
 
 namespace WaddleAndGrapple.Game;
 
+public enum LaserStyle { WallMounted, Floating }
+
 /// <summary>
 /// A laser beam trap that damages the player when they cross the beam.
 /// The laser can be toggled on/off on a timer or by a trigger.
@@ -22,6 +24,13 @@ public class LaserTrap : Trap
     // If true, beam never toggles off (ignores OnDuration/OffDuration)
     public bool AlwaysOn { get; set; } = false;
 
+    // Which visual style the laser uses.
+    public LaserStyle Style { get; set; } = LaserStyle.WallMounted;
+
+    // Visual scale for head/tail caps.
+    public float EndpointScale { get; set; } = 1f;
+    public float BeamThicknessScale { get; set; } = 1f;
+
     // Read by LaserRenderer to decide which colour to draw
     public bool BeamOn => _beamOn;
 
@@ -32,11 +41,15 @@ public class LaserTrap : Trap
     {
         Damage = 1;
 
-        // Collision bounding box = full head-to-tail rectangle
-        float E = LaserRenderer.EndpointSize;
+        // Collision bounding box = full beam rectangle.
+        float endpointSize = LaserRenderer.EndpointSize * EndpointScale;
+        float T = Style == LaserStyle.Floating
+            ? LaserRenderer.BeamThickness
+            : endpointSize;
+
         Scale = IsHorizontal
-            ? new Vector2(BeamLength, E)
-            : new Vector2(E, BeamLength);
+            ? new Vector2(BeamLength, T)
+            : new Vector2(T, BeamLength);
 
         AddComponent<LaserRenderer>();
     }

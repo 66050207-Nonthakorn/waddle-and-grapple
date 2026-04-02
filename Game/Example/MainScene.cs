@@ -142,85 +142,105 @@ class MainScene : Scene
         // TRAPS
         // ══════════════════════════════════════════════════════════════════════
 
-        // ── Zone A: saw ช้า บนพื้น (สอน timing พื้นฐาน) ─────────────────────
+        // ── Zone A: saw ช้า บนพื้น ────────────────────────────────────────────
         var sawA = base.AddGameObject<SawTrap>("saw_a");
-        sawA.Position       = new Vector2(310, 420);
-        sawA.MoveRange      = 220f;      // x = 200–420
-        sawA.MoveSpeed      = 70f;
-        sawA.MoveHorizontal = true;
-        sawA.Player         = player;
+        sawA.Position          = new Vector2(310, 420);
+        sawA.MoveRange         = 220f;
+        sawA.MoveSpeed         = 70f;
+        sawA.MoveHorizontal    = true;
+        sawA.BladeSize         = 50f;
+        sawA.SpriteTextureName = "Traps/Saw/LargeSaw";
+        sawA.SpriteTint        = Color.White;
+        sawA.Placement         = SawPlacement.FloorMounted;
+        sawA.Player            = player;
 
-        // ── Zone B: timed laser ขวางทาง (ต้องรอจังหวะหรือกระโดดข้าม) ────────
+        // ── Zone B: timed laser ────────────────────────────────────────────────
         var laserB = base.AddGameObject<LaserTrap>("laser_b");
-        laserB.Position     = new Vector2(755, 426);
-        laserB.BeamLength   = 220f;
-        laserB.IsHorizontal = true;
-        laserB.AlwaysOn     = false;
-        laserB.OnDuration   = 1.5f;
-        laserB.OffDuration  = 2.0f;      // off นานกว่า on → ผ่านได้ถ้ารอ
-        laserB.Player       = player;
+        laserB.Position           = new Vector2(755, 426);
+        laserB.BeamLength         = 220f;
+        laserB.IsHorizontal       = true;
+        laserB.Style              = LaserStyle.WallMounted;
+        laserB.AlwaysOn           = false;
+        laserB.OnDuration         = 1.5f;
+        laserB.OffDuration        = 2.0f;
+        laserB.Player             = player;
 
-        // ── Zone B: floor spike สองอัน stagger (หลัง laser) ─────────────────
+        // ── Zone B: floor spike สองอัน stagger ────────────────────────────────
         foreach (var (nx, ph) in new[] { (895, 0f), (940, 0.7f) })
         {
             var s = base.AddGameObject<SpikeTrap>($"spk_b_{nx}");
-            s.Position    = new Vector2(nx, 450);
-            s.Origin      = SpikeOrigin.Floor;
-            s.SpikeLength = 45f;
-            s.PhaseOffset = ph;
-            s.Player      = player;
+            s.Position          = new Vector2(nx, 450);
+            s.Origin            = SpikeOrigin.Floor;
+            s.SpikeLength       = 45f;
+            s.PhaseOffset       = ph;
+            s.SpriteTextureName = "Traps/Spike/Spike";
+            s.SpriteTint        = Color.White;
+            s.Player            = player;
         }
 
-        // ── Zone C: pit spike ในช่องว่าง (ตกลงไปจะโดน) ──────────────────────
+        // ── Zone C: pit spike ในช่องว่าง ─────────────────────────────────────
         foreach (var (nx, ph) in new[] { (1330,0f),(1375,0.5f),(1420,1.0f),(1465,1.5f) })
         {
             var s = base.AddGameObject<SpikeTrap>($"spk_c_{nx}");
-            s.Position    = new Vector2(nx, 600);
-            s.Origin      = SpikeOrigin.Floor;
-            s.SpikeLength = 50f;
-            s.PhaseOffset = ph;
-            s.Player      = player;
+            s.Position          = new Vector2(nx, 600);
+            s.Origin            = SpikeOrigin.Floor;
+            s.SpikeLength       = 50f;
+            s.PhaseOffset       = ph;
+            s.SpriteTextureName = "Traps/Spike/Spike";
+            s.SpriteTint        = Color.White;
+            s.Player            = player;
         }
 
-        // ── Zone C: ceiling spike ใต้ plat_c2 (ระวังหัว) ─────────────────────
+        // ── Zone C: ceiling spike ใต้ plat_c2 ────────────────────────────────
         foreach (var (nx, ph) in new[] { (1840, 0f), (1885, 0.8f) })
         {
             var s = base.AddGameObject<SpikeTrap>($"spk_cc_{nx}");
-            s.Position    = new Vector2(nx, 280);
-            s.Origin      = SpikeOrigin.Ceiling;
-            s.SpikeLength = 45f;
-            s.PhaseOffset = ph;
-            s.Player      = player;
+            s.Position          = new Vector2(nx, 280);
+            s.Origin            = SpikeOrigin.Ceiling;
+            s.SpikeLength       = 45f;
+            s.PhaseOffset       = ph;
+            s.SpriteTextureName = "Traps/Spike/Spike";
+            s.SpriteTint        = Color.White;
+            s.Player            = player;
         }
 
-        // ── Zone D: wall spike pair (ซ้ายขวา stagger) ────────────────────────
+        // ── Zone D: wall spike pair ───────────────────────────────────────────
         var swL = base.AddGameObject<SpikeTrap>("spk_wL");
-        swL.Position    = new Vector2(1948, 428);
-        swL.Origin      = SpikeOrigin.LeftWall;
-        swL.SpikeLength = 55f;
-        swL.PhaseOffset = 0f;
-        swL.Player      = player;
+        swL.Position          = new Vector2(1948, 428);
+        swL.Origin            = SpikeOrigin.LeftWall;
+        swL.SpikeLength       = 55f;
+        swL.PhaseOffset       = 0f;
+        swL.SpriteTextureName = "Traps/Spike/Spike";
+        swL.SpriteTint        = Color.White;
+        swL.Player            = player;
 
         var swR = base.AddGameObject<SpikeTrap>("spk_wR");
-        swR.Position    = new Vector2(1995, 428);
-        swR.Origin      = SpikeOrigin.RightWall;
-        swR.SpikeLength = 55f;
-        swR.PhaseOffset = 0.9f;
-        swR.Player      = player;
+        swR.Position          = new Vector2(1995, 428);
+        swR.Origin            = SpikeOrigin.RightWall;
+        swR.SpikeLength       = 55f;
+        swR.PhaseOffset       = 0.9f;
+        swR.SpriteTextureName = "Traps/Spike/Spike";
+        swR.SpriteTint        = Color.White;
+        swR.Player            = player;
 
-        // ── Zone D: fast saw บนพื้น (หลัง wall spike) ────────────────────────
+        // ── Zone D: fast saw ──────────────────────────────────────────────────
         var sawD = base.AddGameObject<SawTrap>("saw_d");
-        sawD.Position       = new Vector2(2075, 420);
-        sawD.MoveRange      = 160f;      // x = 1995–2155
-        sawD.MoveSpeed      = 165f;
-        sawD.MoveHorizontal = true;
-        sawD.Player         = player;
+        sawD.Position          = new Vector2(2075, 420);
+        sawD.MoveRange         = 160f;
+        sawD.MoveSpeed         = 165f;
+        sawD.MoveHorizontal    = true;
+        sawD.BladeSize         = 50f;
+        sawD.SpriteTextureName = "Traps/Saw/LargeSaw";
+        sawD.SpriteTint        = Color.White;
+        sawD.Placement         = SawPlacement.FloorMounted;
+        sawD.Player            = player;
 
-        // ── Zone D: always-on laser (ต้องกระโดดข้ามเพื่อเข้า plat_d2) ────────
+        // ── Zone D: always-on laser ───────────────────────────────────────────
         var laserD = base.AddGameObject<LaserTrap>("laser_d");
         laserD.Position     = new Vector2(2165, 426);
         laserD.BeamLength   = 110f;
         laserD.IsHorizontal = true;
+        laserD.Style        = LaserStyle.WallMounted;
         laserD.AlwaysOn     = true;
         laserD.Player       = player;
 
@@ -228,11 +248,13 @@ class MainScene : Scene
         foreach (var (nx, ph) in new[] { (2275, 0f), (2315, 0.5f) })
         {
             var s = base.AddGameObject<SpikeTrap>($"spk_d_{nx}");
-            s.Position    = new Vector2(nx, 450);
-            s.Origin      = SpikeOrigin.Floor;
-            s.SpikeLength = 45f;
-            s.PhaseOffset = ph;
-            s.Player      = player;
+            s.Position          = new Vector2(nx, 450);
+            s.Origin            = SpikeOrigin.Floor;
+            s.SpikeLength       = 45f;
+            s.PhaseOffset       = ph;
+            s.SpriteTextureName = "Traps/Spike/Spike";
+            s.SpriteTint        = Color.White;
+            s.Player            = player;
         }
 
         // ══════════════════════════════════════════════════════════════════════

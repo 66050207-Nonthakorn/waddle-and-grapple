@@ -1,5 +1,6 @@
 using WaddleAndGrapple.Engine;
 using WaddleAndGrapple.Engine.Components;
+using WaddleAndGrapple.Engine.Managers;
 using Microsoft.Xna.Framework;
 
 namespace WaddleAndGrapple.Game;
@@ -15,12 +16,58 @@ public abstract class Trap : GameObject
     /// <summary>Reference to the player. Set this from the scene after creating the trap.</summary>
     public Player Player { get; set; }
 
+    /// <summary>Optional sprite texture name for the trap.</summary>
+    public string SpriteTextureName { get; set; } = "pixel";
+
+    /// <summary>Optional tint to apply when using a sprite texture.</summary>
+    public Color SpriteTint { get; set; } = Color.White;
+
     protected SpriteRenderer _spriteRenderer;
 
     public override void Initialize()
     {
         _spriteRenderer = AddComponent<SpriteRenderer>();
         OnInitialize();
+    }
+
+    protected void ApplySpriteTexture(Vector2? targetSize = null)
+    {
+        if (_spriteRenderer == null) return;
+
+        var texture = ResourceManager.Instance.GetTexture(SpriteTextureName)
+            ?? ResourceManager.Instance.GetTexture("pixel");
+        var pixelTexture = ResourceManager.Instance.GetTexture("pixel");
+
+        if (texture == null) return;
+
+        _spriteRenderer.Texture = texture;
+        _spriteRenderer.Tint    = SpriteTint;
+        _spriteRenderer.LayerDepth = 0.6f;
+
+        if (targetSize.HasValue && texture != pixelTexture)
+        {
+            _spriteRenderer.Origin = Vector2.Zero;
+            ApplySpriteScale(targetSize.Value);
+        }
+    }
+
+    protected void ApplySpriteScale(Vector2 targetSize)
+    {
+        if (_spriteRenderer == null || _spriteRenderer.Texture == null) return;
+
+        var texture = _spriteRenderer.Texture;
+        var pixelTexture = ResourceManager.Instance.GetTexture("pixel");
+
+        if (texture == pixelTexture)
+        {
+            Scale = targetSize;
+        }
+        else
+        {
+            _spriteRenderer.Origin = Vector2.Zero;
+            Scale = new Vector2(targetSize.X / texture.Bounds.Width,
+                                targetSize.Y / texture.Bounds.Height);
+        }
     }
 
     public override void Update(GameTime gameTime)

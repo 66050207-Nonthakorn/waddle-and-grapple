@@ -164,8 +164,7 @@
 /processorParam:TextureFormat=Color
 /build:Tiles/tileset.png
 
-
-#begin Player/Player-Breathe.png
+#begin ../Assets/Aseprite/Traps/Saw/Small Saw-SpriteSheet.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -175,9 +174,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Player/Player-Breathe.png
+/build:../Assets/Aseprite/Traps/Saw/Small Saw-SpriteSheet.png;Traps/Saw/SmallSaw.png
 
-#begin Player/Player-Walk.png
+#begin ../Assets/Aseprite/Traps/Saw/Medium Saw-SpriteSheet.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -187,9 +186,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Player/Player-Walk.png
+/build:../Assets/Aseprite/Traps/Saw/Medium Saw-SpriteSheet.png;Traps/Saw/MediumSaw.png
 
-#begin Player/Player-Jump.png
+#begin ../Assets/Aseprite/Traps/Saw/Large Saw-SpriteSheet.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -199,9 +198,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Player/Player-Jump.png
+/build:../Assets/Aseprite/Traps/Saw/Large Saw-SpriteSheet.png;Traps/Saw/LargeSaw.png
 
-#begin Player/Player-LedgeGrab.png
+#begin ../Assets/Aseprite/Traps/Spike/Spike.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -211,9 +210,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Player/Player-LedgeGrab.png
+/build:../Assets/Aseprite/Traps/Spike/Spike.png;Traps/Spike/Spike.png
 
-#begin Player/Player-Crouch.png
+#begin ../Assets/Aseprite/Traps/Laser/Laser-SpriteSheet.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -223,19 +222,21 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Player/Player-Crouch.png
+/build:../Assets/Aseprite/Traps/Laser/Laser-SpriteSheet.png;Traps/Laser/Laser.png
+
+#begin ../Assets/Aseprite/Traps/Floating Laser/Floating Laser-SpriteSheet.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../Assets/Aseprite/Traps/Floating Laser/Floating Laser-SpriteSheet.png;Traps/Laser/FloatingLaser.png
 
 #begin ../Assets/Aseprite/Player/Player-SpriteSheet.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:../Assets/Aseprite/Player/Player-SpriteSheet.png;Player/Player-SpriteSheet.png
 
 #begin ../Assets/Aseprite/Player/Pickaxe.png
 /importer:TextureImporter
