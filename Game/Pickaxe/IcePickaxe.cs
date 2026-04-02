@@ -120,7 +120,29 @@ public class IcePickaxe
 
         // Player อยู่เกินความยาวเชือก → ดึงกลับบนวงกลม
         toPlayer.Normalize();
-        _owner.Position = _hookPosition + toPlayer * _ropeLength;
+        Vector2 proposed = _hookPosition + toPlayer * _ropeLength;
+
+        // ตรวจว่าตำแหน่งใหม่จะชน solid ไหม — ถ้าใช่ให้หยุดเชือกไว้
+        var curBounds = _owner.ColliderBounds;
+        int halfW = curBounds.Width  / 2;
+        int halfH = curBounds.Height / 2;
+        var newBounds = new Microsoft.Xna.Framework.Rectangle(
+            (int)(proposed.X - halfW),
+            (int)(proposed.Y - halfH),
+            curBounds.Width,
+            curBounds.Height
+        );
+        foreach (var solid in _owner.Solids)
+        {
+            if (newBounds.Intersects(solid))
+            {
+                // ห้ามไต่เข้าไปใน solid — คงระยะเชือกไว้
+                _ropeLength = dist;
+                return;
+            }
+        }
+
+        _owner.Position = proposed;
 
         // ตัด radial velocity ออก (เก็บแต่ tangential ไว้เพื่อ momentum)
         float radialDot = _owner.VelocityX * toPlayer.X + _owner.VelocityY * toPlayer.Y;
