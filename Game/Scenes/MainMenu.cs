@@ -6,6 +6,7 @@ using MonoGameGum;
 using Gum.Forms.Controls;
 using MonoGameGum.GueDeriving;
 using WaddleAndGrapple.Engine.Components;
+using Gum.Managers;
 
 namespace WaddleAndGrapple.Game.Scenes;
 
@@ -72,14 +73,14 @@ public class MainMenu : Scene
         _buttonPanel.AddChild(quitButton);
     }
 
-    private void OnStartGameClick(object sender, EventArgs e)
+    public void OnStartGameClick(object sender, EventArgs e)
     {
         // Create a fresh GameScene instance each time
         GumService.Default.Root.Children.Clear(); // Clear Gum UI elements from the main menu
         SceneManager.Instance.LoadScene("GameScene");
     }
 
-    private void OnSettingsClick(object sender, EventArgs e)
+    public void OnSettingsClick(object sender, EventArgs e)
     {
         // // Open settings as an overlay
         // AudioManager.Instance.PlaySound("Button_Click");
@@ -87,7 +88,7 @@ public class MainMenu : Scene
         Console.WriteLine("Settings button clicked - functionality not implemented yet.");
     }
 
-    private void OnQuitGameClick(object sender, EventArgs e)
+    public void OnQuitGameClick(object sender, EventArgs e)
     {
         // // Exit the game
         // AudioManager.Instance.PlaySound("Button_Click");

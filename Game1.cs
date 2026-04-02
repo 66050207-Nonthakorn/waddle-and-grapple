@@ -29,6 +29,8 @@ public class Game1 : Microsoft.Xna.Framework.Game
     {
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
+        Window.AllowUserResizing = true;
+        Window.ClientSizeChanged += OnClientSizeChanged;
         IsMouseVisible = true;
     }
 
