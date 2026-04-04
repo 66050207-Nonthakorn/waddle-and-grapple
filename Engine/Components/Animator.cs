@@ -10,6 +10,7 @@ public class Animator : Component
     private string _currentName;
 
     public string CurrentAnimationName => _currentName;
+    public int CurrentLoopCount => _currentAnimation?.LoopCount ?? 0;
 
     public void AddAnimation(string name, Animation animation)
     {
@@ -25,6 +26,16 @@ public class Animator : Component
             _currentAnimation.Reset();
             _currentName = name;
         }
+    }
+
+    /// <summary>เปลี่ยนไป animation ที่ระบุแล้วข้ามไปที่ frame สุดท้ายทันที
+    /// ใช้เมื่อต้องการแสดง pose สุดท้ายโดยไม่เล่น transition ซ้ำ</summary>
+    public void PlayAtEnd(string name)
+    {
+        bool alreadyPlaying = _currentName == name;
+        Play(name); // Reset ถ้าเป็น animation ใหม่
+        if (!alreadyPlaying && _currentAnimation != null)
+            _currentAnimation.SkipToLastFrame();
     }
 
     public override void Initialize()

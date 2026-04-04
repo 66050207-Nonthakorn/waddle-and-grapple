@@ -23,6 +23,7 @@ public enum PlayerState
     Crouching,
     Sliding,
     Dead,
+    GoalReached,
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -85,6 +86,13 @@ public class Player : GameObject
     // ── Coin Count ────────────────────────────────────────────────────────────
     public int CoinCount { get; private set; }
 
+    // ── Goal Animation ────────────────────────────────────────────────────────
+    // ปรับ GoalAnimTotalFrames ให้ตรงกับจำนวน frame จริงในแถว 14 ของ spritesheet
+    private const int   GoalAnimTotalFrames = 6;
+    private const float GoalAnimFrameDuration = 0.1f;
+    private const int   GoalAnimLoopsRequired = 3;
+    public  bool IsGoalAnimationComplete { get; private set; }
+
     // ── Active PowerUp Effects ────────────────────────────────────────────────
     private readonly List<PowerUp> _activeEffects = new();
     public IReadOnlyList<PowerUp> ActiveEffects => _activeEffects;
@@ -142,7 +150,7 @@ public class Player : GameObject
         //    12=SlideStartEnd, 13=SlideLoop
         var f = new AnimationFactory(
             ResourceManager.Instance.GetTexture("Player/Player-SpriteSheet"),
-            rows: 14, columns: 9
+            rows: 15, columns: 9
         );
 
         _animator.AddAnimation("standing",       f.CreateFromRow(row:  0, totalFrames: 1, frameDuration: 0.083f));
@@ -159,6 +167,7 @@ public class Player : GameObject
         _animator.AddAnimation("walljumpstart",  f.CreateFromRow(row: 11, totalFrames: 3, frameDuration: 0.083f, isLooping: false));
         _animator.AddAnimation("slidestart",     f.CreateFromRow(row: 12, totalFrames: 4, frameDuration: 0.083f, isLooping: false));
         _animator.AddAnimation("slide",          f.CreateFromRow(row: 13, totalFrames: 4, frameDuration: 0.083f));
+        _animator.AddAnimation("goal",           f.CreateFromRow(row: 14, totalFrames: GoalAnimTotalFrames, frameDuration: GoalAnimFrameDuration));
         _animator.Play("standing");
 
         _collider = AddComponent<PlayerBoxCollider>();
@@ -186,6 +195,15 @@ public class Player : GameObject
 
         // หยุดทุกอย่างเมื่อเกมจบ (goal reached)
         if (WorldTime.IsFrozen) return;
+
+        // Goal animation — เล่นครบ 3 รอบแล้วส่งสัญญาณให้ GoalFlag ขึ้น overlay
+        if (State == PlayerState.GoalReached)
+        {
+            SyncAnimation(dt);
+            if (_animator.CurrentLoopCount >= GoalAnimLoopsRequired)
+                IsGoalAnimationComplete = true;
+            return;
+        }
 
         // Phase 7 — Respawn timer (ทำงานแม้ตาย)
         if (State == PlayerState.Dead)
@@ -258,11 +276,19 @@ public class Player : GameObject
     private const float WallJumpStartDuration = 0.083f * 3f;
     private const float SlideStartDuration    = 0.083f * 4f;
 
+    // ขยับ sprite ขึ้น (ไม่กระทบ collider) เพื่อชดเชย sprite art ที่วาดต่ำกว่า frame กลาง
+    private const float CrouchSpriteOffsetY = -15f;
+
     private void SyncAnimation(float dt)
     {
         // ── countdown timers ──────────────────────────────────────────────────
         if (_jumpAnimTimer  > 0f) _jumpAnimTimer  -= dt;
         if (_slideAnimTimer > 0f) _slideAnimTimer -= dt;
+
+        bool isCrouched = State == PlayerState.Crouching || State == PlayerState.Sliding;
+        _spriteRenderer.DrawOffset = isCrouched
+            ? new Vector2(0f, CrouchSpriteOffsetY)
+            : Vector2.Zero;
 
         switch (State)
         {
@@ -313,7 +339,12 @@ public class Player : GameObject
 
             case PlayerState.Crouching:
                 _idleTimer = 0f;
-                _animator.Play("crouch");
+                if (VelocityX != 0f)
+                    _animator.Play("crouchwalk");
+                else if (_animator.CurrentAnimationName == "crouchwalk")
+                    _animator.PlayAtEnd("crouch"); // หยุดเดิน → ข้ามไป pose นั่งยองเลย
+                else
+                    _animator.Play("crouch");
                 break;
 
             // ── Slide: slidestart → slide ──────────────────────────────────────
@@ -323,6 +354,11 @@ public class Player : GameObject
                     _animator.Play("slidestart");
                 else
                     _animator.Play("slide");
+                break;
+
+            case PlayerState.GoalReached:
+                _idleTimer = 0f;
+                _animator.Play("goal");
                 break;
 
             default:
@@ -522,6 +558,14 @@ public class Player : GameObject
             return;
         }
 
+        // ลงพื้นระหว่าง hold S และ collider ยัง crouch height → คืน state Crouching
+        if (crouchHeld && IsGrounded && _currentHeight != PlayerHeight
+            && State != PlayerState.Crouching && State != PlayerState.Sliding)
+        {
+            ChangeState(PlayerState.Crouching);
+            return;
+        }
+
         if (!IsGrounded || State == PlayerState.Sliding) return;
 
         if (crouchHeld && _currentHeight == PlayerHeight && State != PlayerState.Crouching)
@@ -603,7 +647,7 @@ public class Player : GameObject
     /// </summary>
     private void SetCrouchHeight(bool crouching)
     {
-        float bottomY  = Position.Y + _currentHeight / 2f; // เก็บขอบล่างไว้ก่อน
+        float bottomY  = Position.Y + _currentHeight / 2f; // คงขอบล่างไว้ → IsGrounded ไม่เปลี่ยน
         _currentHeight = crouching ? PlayerHeight / 2 : PlayerHeight;
         Position       = new Vector2(Position.X, bottomY - _currentHeight / 2f);
         UpdateColliderBounds();
@@ -739,6 +783,15 @@ public class Player : GameObject
     }
 
     public void AddCoin(int value) => CoinCount += value;
+
+    /// <summary>เรียกจาก GoalFlag เมื่อ player แตะธง — เล่น animation 3 รอบก่อนขึ้น overlay</summary>
+    public void TriggerGoalReached()
+    {
+        if (State == PlayerState.GoalReached) return;
+        VelocityX = 0f;
+        VelocityY = 0f;
+        ChangeState(PlayerState.GoalReached);
+    }
 
     public void Die()
     {

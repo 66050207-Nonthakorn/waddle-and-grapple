@@ -27,6 +27,8 @@ public class SpriteRenderer : Component
     public Color Tint { get; set; } = Color.White;
     public Vector2 Origin { get; set; } = Vector2.Zero;
     public float LayerDepth { get; set; } = 0;
+    /// <summary>เลื่อน sprite ในพิกเซลโดยไม่กระทบ Position/Collider (ใช้แก้ offset ของ sprite art)</summary>
+    public Vector2 DrawOffset { get; set; } = Vector2.Zero;
 
     public Rectangle? SourceRectangle { get; set; } = null;
 
@@ -45,7 +47,7 @@ public class SpriteRenderer : Component
         if (cosY < 0) effects |= SpriteEffects.FlipHorizontally;
         if (cosX < 0) effects |= SpriteEffects.FlipVertically;
 
-        spriteBatch.Draw(Texture, base.GameObject.Position, SourceRectangle, Tint,
+        spriteBatch.Draw(Texture, base.GameObject.Position + DrawOffset, SourceRectangle, Tint,
             rotation.Z, Origin, scale, effects, LayerDepth);
     }
 }

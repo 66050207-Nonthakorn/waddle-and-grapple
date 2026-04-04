@@ -68,7 +68,12 @@ public class GoalFlagRenderer : Component
     {
         if (_reached)
         {
-            _overlayAlpha = Math.Min(1f, _overlayAlpha + (float)gameTime.ElapsedGameTime.TotalSeconds * 2f);
+            // รอ player เล่น goal animation ครบ 3 รอบ แล้วค่อย freeze + fade in overlay
+            if (!WorldTime.IsFrozen && player != null && player.IsGoalAnimationComplete)
+                WorldTime.Freeze();
+
+            if (WorldTime.IsFrozen)
+                _overlayAlpha = Math.Min(1f, _overlayAlpha + (float)gameTime.ElapsedGameTime.TotalSeconds * 2f);
             return;
         }
 
@@ -82,10 +87,7 @@ public class GoalFlagRenderer : Component
         if (trigger.Intersects(player.ColliderBounds))
         {
             _reached = true;
-            WorldTime.Freeze();
-            // หยุด animation player
-            var anim = player.GetComponent<Animator>();
-            if (anim != null) anim.Enabled = false;
+            player.TriggerGoalReached();
         }
     }
 
