@@ -158,7 +158,7 @@ public class LevelComplete : Scene
         }
 
         GumService.Default.Root.Children.Clear();
-        SceneManager.Instance.LoadScene("Level" + levelIndex);
+        SceneManager.Instance.LoadScene($"Level{levelIndex}IntroCutscene");
     }
 
     private static string FormatTime(TimeSpan time)

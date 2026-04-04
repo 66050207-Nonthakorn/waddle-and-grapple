@@ -65,6 +65,12 @@ public abstract class BaseCutscene : Scene
 
     public override void Update(GameTime gameTime)
     {
+        if (InputManager.Instance.IsKeyPressed(Keys.Escape))
+        {
+            CompleteCutscene();
+            return;
+        }
+        
         bool nextPressed = InputManager.Instance.IsMouseButtonPressed(0)
             || InputManager.Instance.IsKeyPressed(Keys.Space)
             || InputManager.Instance.IsKeyPressed(Keys.Enter);

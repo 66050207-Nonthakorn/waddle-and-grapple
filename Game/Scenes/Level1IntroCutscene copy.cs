@@ -5,7 +5,7 @@ namespace ComputerGameFinal.Game.Scenes;
 
 public class Level1IntroCutscene : BaseCutscene
 {
-    public const string SceneName = "cutscene_level1_intro";
+    public const string SceneName = "Level1IntroCutscene";
     public const string CutsceneKey = "level1_intro";
 
     protected override IReadOnlyList<string> GetSections()

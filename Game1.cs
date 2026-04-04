@@ -63,6 +63,9 @@ public class Game1 : Microsoft.Xna.Framework.Game
         SceneManager.Instance.AddScene<Level2>("Level2");
         SceneManager.Instance.AddScene<Level3>("Level3");
         SceneManager.Instance.AddScene<Level1IntroCutscene>(Level1IntroCutscene.SceneName);
+        SceneManager.Instance.AddScene<Level2IntroCutscene>(Level2IntroCutscene.SceneName);
+        SceneManager.Instance.AddScene<Level3IntroCutscene>(Level3IntroCutscene.SceneName);
+        SceneManager.Instance.AddScene<Level3OutroCutscene>(Level3OutroCutscene.SceneName);
         SceneManager.Instance.AddScene<LevelComplete>("levelcomplete");
         
         base.Initialize();

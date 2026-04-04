@@ -9,16 +9,16 @@ using MonoGameGum;
 
 public abstract class BaseLevel : Scene
 {
-    private PausedPanel _pausedPanel;
-    private bool isPaused = false;
-    private TimerUI _timerUI;
-    private bool _isLevelCompleted;
-    private bool _skipAbandonSaveOnUnload;
-    private GameObject _trackedPlayer;
-    private Vector2 _latestCheckpoint;
-    private bool _hasLatestCheckpoint;
-    private int _collectedFishCount;
-    private int _totalFishInLevel;
+    protected PausedPanel _pausedPanel;
+    protected bool isPaused = false;
+    protected TimerUI _timerUI;
+    protected bool _isLevelCompleted;
+    protected bool _skipAbandonSaveOnUnload;
+    protected GameObject _trackedPlayer;
+    protected Vector2 _latestCheckpoint;
+    protected bool _hasLatestCheckpoint;
+    protected int _collectedFishCount;
+    protected int _totalFishInLevel;
     public int LevelIndex;
 
     // called base update later so that the UI are on top of the game objects
@@ -177,7 +177,7 @@ public abstract class BaseLevel : Scene
         Console.WriteLine($"Checkpoint saved at {checkpointPosition}.");
     }
 
-    private void SaveCheckpointAtPlayer()
+    protected void SaveCheckpointAtPlayer()
     {
         if (_trackedPlayer == null)
         {
@@ -187,7 +187,7 @@ public abstract class BaseLevel : Scene
         SaveCheckpoint(_trackedPlayer.Position);
     }
 
-    private void UpdateRuntimeProgress()
+    protected void UpdateRuntimeProgress()
     {
         if (LevelIndex <= 0)
         {
@@ -207,12 +207,12 @@ public abstract class BaseLevel : Scene
         }
     }
 
-    private Vector2? GetLatestCheckpoint()
+    protected Vector2? GetLatestCheckpoint()
     {
         return _hasLatestCheckpoint ? _latestCheckpoint : null;
     }
 
-    private void QuickRestartFromLatestCheckpoint()
+    protected void QuickRestartFromLatestCheckpoint()
     {
         if (_trackedPlayer == null || !_hasLatestCheckpoint)
         {
@@ -244,7 +244,7 @@ public abstract class BaseLevel : Scene
         SceneManager.Instance.LoadScene("Level" + LevelIndex);
     }
 
-    private void TogglePause()
+    protected void TogglePause()
     {
         isPaused = !isPaused;
         _pausedPanel.TogglePause(isPaused);

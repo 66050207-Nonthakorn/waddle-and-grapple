@@ -1,3 +1,4 @@
+using System;
 using ComputerGameFinal.Engine;
 using ComputerGameFinal.Engine.Components;
 using ComputerGameFinal.Engine.Components.Tile;
@@ -57,5 +58,22 @@ class Level3 : BaseLevel
 
         // call base setup last to ensure create UI objects are on top of everything else
         base.Setup();
+    }
+
+    protected override void CompleteLevel()
+    {
+        _isLevelCompleted = true;
+
+        if (LevelIndex > 0)
+        {
+            ProgressionManager.Instance.CompleteLevel(
+                LevelIndex,
+                TimeSpan.FromMilliseconds(_timerUI.GetElapsedTime()),
+                _collectedFishCount,
+                _totalFishInLevel,
+                GetLatestCheckpoint());
+        }
+        
+        SceneManager.Instance.LoadScene("Level3OutroCutscene");
     }
 }

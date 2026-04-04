@@ -216,9 +216,9 @@ public class LevelSelect : Scene
         string sceneName = "Level" + levelIndex;
 
         // Play the intro cutscene on every fresh Level 1 run.
-        if (levelIndex == 1 && isNewRun)
+        if (levelIndex < 3 && isNewRun)
         {
-            sceneName = Level1IntroCutscene.SceneName;
+            sceneName = "Level" + levelIndex + "IntroCutscene";
         }
 
         Console.WriteLine($"Loading scene: {sceneName}");
