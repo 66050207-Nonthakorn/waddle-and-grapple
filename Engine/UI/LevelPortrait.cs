@@ -1,7 +1,7 @@
 using System;
-using ComputerGameFinal.Engine;
-using ComputerGameFinal.Engine.Managers;
-using ComputerGameFinal.Engine.UI;
+using WaddleAndGrapple.Engine;
+using WaddleAndGrapple.Engine.Managers;
+using WaddleAndGrapple.Engine.UI;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 

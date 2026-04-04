@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 
-namespace ComputerGameFinal.Engine.Managers;
+namespace WaddleAndGrapple.Engine.Managers;
 
 public sealed class ProgressionManager
 {

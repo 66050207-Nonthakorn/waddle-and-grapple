@@ -1,15 +1,15 @@
 using System;
-using ComputerGameFinal.Engine;
-using ComputerGameFinal.Engine.Components;
-using ComputerGameFinal.Engine.Managers;
-using ComputerGameFinal.Engine.UI;
+using WaddleAndGrapple.Engine;
+using WaddleAndGrapple.Engine.Components;
+using WaddleAndGrapple.Engine.Managers;
+using WaddleAndGrapple.Engine.UI;
 using Gum.Forms.Controls;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGameGum;
 
-namespace ComputerGameFinal.Game.Scenes;
+namespace WaddleAndGrapple.Game.Scenes;
 
 public class LevelComplete : Scene
 {

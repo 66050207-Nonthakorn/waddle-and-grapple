@@ -1,5 +1,5 @@
 using System;
-using ComputerGameFinal.Engine.Managers;
+using WaddleAndGrapple.Engine.Managers;
 using Gum.Forms.Controls;
 using Microsoft.Xna.Framework;
 using MonoGameGum;
@@ -8,9 +8,12 @@ using MonoGameGum.GueDeriving;
 public class PausedPanel : Panel
 {
     private Panel optionPanel;
+    private readonly Action _onReturnToLevelSelect;
 
-    public PausedPanel(Action onResume, Action onRestartLevel)
+    public PausedPanel(Action onResume, Action onRestartLevel, Action onReturnToLevelSelect = null)
     {
+        _onReturnToLevelSelect = onReturnToLevelSelect;
+
         this.Dock(Gum.Wireframe.Dock.Fill);
         this.IsVisible = false; // Start hidden
 
@@ -98,6 +101,12 @@ public class PausedPanel : Panel
 
     private void HandleReturnToLevelSelectButtonClicked()
     {
+        if (_onReturnToLevelSelect != null)
+        {
+            _onReturnToLevelSelect.Invoke();
+            return;
+        }
+
         GumService.Default.Root.Children.Clear();
         SceneManager.Instance.LoadScene("LevelSelect");
     }

@@ -1,16 +1,16 @@
 using Microsoft.Xna.Framework;
-using ComputerGameFinal.Engine;
-using ComputerGameFinal.Engine.Managers;
+using WaddleAndGrapple.Engine;
+using WaddleAndGrapple.Engine.Managers;
 using System;
 using MonoGameGum;
 using Gum.Forms.Controls;
 using MonoGameGum.GueDeriving;
-using ComputerGameFinal.Engine.Components;
+using WaddleAndGrapple.Engine.Components;
 using Microsoft.Xna.Framework.Graphics;
-using ComputerGameFinal.Engine.UI;
+using WaddleAndGrapple.Engine.UI;
 using Microsoft.Xna.Framework.Input;
 
-namespace ComputerGameFinal.Game.Scenes;
+namespace WaddleAndGrapple.Game.Scenes;
 
 public class LevelSelect : Scene
 {

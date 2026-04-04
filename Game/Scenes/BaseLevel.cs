@@ -1,8 +1,8 @@
 using System;
-using ComputerGameFinal.Engine;
-using ComputerGameFinal.Engine.Components.Physics;
-using ComputerGameFinal.Engine.Managers;
-using ComputerGameFinal.Engine.UI;
+using WaddleAndGrapple.Engine;
+using WaddleAndGrapple.Engine.Components.Physics;
+using WaddleAndGrapple.Engine.Managers;
+using WaddleAndGrapple.Engine.UI;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using MonoGameGum;
@@ -26,7 +26,7 @@ public abstract class BaseLevel : Scene
     {
         GumService.Default.Root.Children.Clear(); // Clear any existing Gum UI elements
 
-        _pausedPanel = new PausedPanel(TogglePause, ResetLevel);
+        _pausedPanel = new PausedPanel(TogglePause, ResetLevel, ReturnToLevelSelect);
         _pausedPanel.AddToRoot();
 
         _timerUI = base.AddGameObject<TimerUI>("timerUI");
@@ -242,6 +242,15 @@ public abstract class BaseLevel : Scene
 
         GumService.Default.Root.Children.Clear();
         SceneManager.Instance.LoadScene("Level" + LevelIndex);
+    }
+
+    protected virtual void ReturnToLevelSelect()
+    {
+        isPaused = false;
+        SaveCheckpointAtPlayer();
+
+        GumService.Default.Root.Children.Clear();
+        SceneManager.Instance.LoadScene("LevelSelect");
     }
 
     protected void TogglePause()

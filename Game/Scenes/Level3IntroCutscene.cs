@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using ComputerGameFinal.Engine.Managers;
+using WaddleAndGrapple.Engine.Managers;
 
-namespace ComputerGameFinal.Game.Scenes;
+namespace WaddleAndGrapple.Game.Scenes;
 
 public class Level3IntroCutscene : BaseCutscene
 {
