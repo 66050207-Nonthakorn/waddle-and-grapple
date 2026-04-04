@@ -13,51 +13,41 @@ public class ScreenManager
     public int previousWidth = 0;
     public int previousHeight = 0;
 
-    private bool _isFullScreen = false;
-    private bool _isBorderless = false;
+    public bool isFullScreen { get; private set; } = false;
 
     public GraphicsDeviceManager _graphics { get; set; }
+    public Rectangle RenderDestination { get; private set; } = Rectangle.Empty;
 
     private ScreenManager() { }
 
+    public void SetRenderDestination(Rectangle renderDestination)
+    {
+        RenderDestination = renderDestination;
+    }
+
+    public Vector2 WindowToNativePoint(int windowX, int windowY)
+    {
+        if (RenderDestination.Width <= 0 || RenderDestination.Height <= 0 || nativeWidth <= 0 || nativeHeight <= 0)
+        {
+            return new Vector2(windowX, windowY);
+        }
+
+        float normalizedX = (windowX - RenderDestination.X) / (float)RenderDestination.Width;
+        float normalizedY = (windowY - RenderDestination.Y) / (float)RenderDestination.Height;
+
+        float nativeX = MathHelper.Clamp(normalizedX, 0f, 1f) * nativeWidth;
+        float nativeY = MathHelper.Clamp(normalizedY, 0f, 1f) * nativeHeight;
+
+        return new Vector2(nativeX, nativeY);
+    }
+
     public void ToggleFullscreen()
     {
-        bool prevFullscreen = _isFullScreen;
-
-        if (_isBorderless)
-        {
-            _isBorderless = false;
-        }
-        else
-        {
-            _isFullScreen = !_isFullScreen;
-        }
+        isFullScreen = !isFullScreen;
         
-        ApplyFullscreen(prevFullscreen);
-    }
-
-    public void ToggleBorderless()
-    {
-        bool prevFullscreen = _isFullScreen;
-
-        _isBorderless = !_isBorderless;
-        _isFullScreen = _isBorderless;
-
-        ApplyFullscreen(prevFullscreen);
-    }
-
-    private void ApplyFullscreen(bool prevFullscreen)
-    {
-        if (_isFullScreen)
+        if (isFullScreen)
         {
-            if (prevFullscreen)
-            {
-                ApplyHardwareMode();
-            }
-            else
-            {
-                SetFullsceen();
-            }
+            SetFullsceen();
         }
         else
         {
@@ -65,19 +55,13 @@ public class ScreenManager
         }
     }
 
-    private void ApplyHardwareMode()
-    {
-        _graphics.HardwareModeSwitch = !_isBorderless;
-        _graphics.ApplyChanges();
-    }
-
     private void SetFullsceen()
     {
         _graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
         _graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
-        _graphics.HardwareModeSwitch = !_isBorderless;
 
         _graphics.IsFullScreen = true;
+        _graphics.HardwareModeSwitch = false;
         _graphics.ApplyChanges();
     }
 
@@ -87,6 +71,7 @@ public class ScreenManager
         _graphics.PreferredBackBufferHeight = previousHeight;
 
         _graphics.IsFullScreen = false;
+        _graphics.HardwareModeSwitch = true;
         _graphics.ApplyChanges();
     }
 }

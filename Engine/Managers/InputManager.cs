@@ -1,5 +1,5 @@
 using System;
-using System.Numerics;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
 namespace ComputerGameFinal.Engine.Managers;
@@ -73,7 +73,7 @@ public class InputManager
 
     public Vector2 GetMousePosition()
     {
-        return new Vector2(_currentMouseState.X, _currentMouseState.Y);
+        return ScreenManager.Instance.WindowToNativePoint(_currentMouseState.X, _currentMouseState.Y);
     }
     
     public void Update()

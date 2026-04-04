@@ -10,14 +10,21 @@ public class TimerUI : GameObject
 {
     private Text _text;
     private float _elapsedTime;
+    public bool IsRunning { get; private set; } = false;
+
+    public TimerUI()
+    {
+        _elapsedTime = 0f;
+    }
 
     public override void Initialize()
     {
         base.Initialize();
         
         _text = AddComponent<Text>();
-        _text.Font = ResourceManager.Instance.GetFont("m6x11plus");
-        _text.Content = "00:00";
+        _text.Font = ResourceManager.Instance.GetFont("Fonts/36Font");
+        _text.Content = "00:00.00";
+        _text.Offset = new Vector2(ScreenManager.Instance.nativeWidth - 20, 20);
         _text.Color = Color.White;
     }
 
@@ -26,32 +33,45 @@ public class TimerUI : GameObject
         base.Update(gameTime);
         
         // Update elapsed time
-        _elapsedTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
+        if (IsRunning)
+        {
+            _elapsedTime += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+        }
         
         // Update text display
         if (_text != null)
         {
-            int minutes = (int)(_elapsedTime / 60);
-            int seconds = (int)(_elapsedTime % 60);
-            _text.Content = $"{minutes:D2}:{seconds:D2}";
-            
-            // Recenter the text
+            _text.Content = GetFormattedTime();
+
+            // draw the text from the right edge
             var textSize = _text.MeasureText();
-            _text.Origin = new Vector2(textSize.X / 2, 0);
+            _text.Origin = new Vector2(textSize.X,  0);
         }
     }
 
     public float GetElapsedTime() => _elapsedTime;
+
+    public void SetElapsedTime(float elapsedMilliseconds)
+    {
+        _elapsedTime = Math.Max(0f, elapsedMilliseconds);
+    }
     
     public string GetFormattedTime()
     {
-        int minutes = (int)(_elapsedTime / 60);
-        int seconds = (int)(_elapsedTime % 60);
-        return $"{minutes:D2}:{seconds:D2}";
+        int minutes = (int)(_elapsedTime / 60000);
+        int seconds = (int)(_elapsedTime % 60000) / 1000;
+        int milliseconds = (int)(_elapsedTime % 1000);
+        return $"{minutes:D2}:{seconds:D2}:{milliseconds:D3}";
     }
     
     public void ResetTimer()
     {
         _elapsedTime = 0f;
+        IsRunning = false;
+    }
+
+    public void StartTimer()
+    {
+        IsRunning = true;
     }
 }

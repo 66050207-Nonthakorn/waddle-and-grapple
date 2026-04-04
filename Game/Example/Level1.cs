@@ -8,7 +8,7 @@ using MonoGameGum;
 
 namespace ComputerGameFinal.Game.Example;
 
-class MainScene : Scene
+class Level1 : BaseLevel
 {
     Player player;
     GameObject cameraObject;
@@ -17,6 +17,10 @@ class MainScene : Scene
 
     public override void Setup()
     {
+        // set the value for progression
+        LevelIndex = 1;
+        SetTotalFish(10);
+
         // Create tilemap first
         tilemapObject = base.AddGameObject<GameObject>("tilemap");
         var tilemap = tilemapObject.AddComponent<Tilemap>();
@@ -26,7 +30,7 @@ class MainScene : Scene
         tilemap.GameObject.Scale = new Vector2(1f, 1f);
         tilemap.MapData = new int[,]
         {
-            { 5, 4, 3, 2, 1, 0 },
+            { 1, 1, 1, 1, 1, 1 },
         };
 
         // Create camera
@@ -47,7 +51,11 @@ class MainScene : Scene
         player = base.AddGameObject<Player>("player");
         player.Position = new Vector2(100, 100);
         player.Scale = new Vector2(0.75f, 0.75f);
+        RegisterPlayerForProgression(player);
 
         camera.FollowTarget = player;
+
+        // call base setup last to ensure create UI objects are on top of everything else
+        base.Setup();
     }
 }

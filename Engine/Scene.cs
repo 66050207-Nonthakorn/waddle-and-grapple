@@ -43,7 +43,7 @@ public abstract class Scene
         GameObjects.Clear();
     }
 
-    public void Update(GameTime gameTime)
+    public virtual void Update(GameTime gameTime)
     {
         foreach (var gameObject in GameObjects.Values)
         {
@@ -232,6 +232,12 @@ public abstract class Scene
         T gameObject = new T();
         GameObjects.Add(name, gameObject);
         
+        return gameObject;
+    }
+
+    public T AddGameObject<T>(string name, T gameObject) where T : GameObject
+    {
+        GameObjects.Add(name, gameObject);
         return gameObject;
     }
 
