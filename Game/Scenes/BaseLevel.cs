@@ -54,6 +54,11 @@ public abstract class BaseLevel : Scene
             TogglePause();
         }
 
+        if (InputManager.Instance.IsKeyPressed(Keys.F9))
+        {
+            SaveCheckpointAtPlayer();
+        }
+
         if (InputManager.Instance.IsKeyPressed(Keys.R))
         {
             QuickRestartFromLatestCheckpoint();
@@ -149,6 +154,37 @@ public abstract class BaseLevel : Scene
         {
             ProgressionManager.Instance.UpdateCheckpoint(LevelIndex, checkpointPosition);
         }
+    }
+
+    // Call this from checkpoint triggers later to persist a real checkpoint state.
+    protected virtual void SaveCheckpoint(Vector2 checkpointPosition)
+    {
+        if (LevelIndex <= 0)
+        {
+            return;
+        }
+
+        _latestCheckpoint = checkpointPosition;
+        _hasLatestCheckpoint = true;
+
+        ProgressionManager.Instance.SaveCheckpoint(
+            LevelIndex,
+            checkpointPosition,
+            TimeSpan.FromMilliseconds(_timerUI.GetElapsedTime()),
+            _collectedFishCount,
+            _totalFishInLevel);
+
+        Console.WriteLine($"Checkpoint saved at {checkpointPosition}.");
+    }
+
+    private void SaveCheckpointAtPlayer()
+    {
+        if (_trackedPlayer == null)
+        {
+            return;
+        }
+
+        SaveCheckpoint(_trackedPlayer.Position);
     }
 
     private void UpdateRuntimeProgress()

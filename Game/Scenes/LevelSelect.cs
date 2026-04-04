@@ -193,7 +193,7 @@ public class LevelSelect : Scene
 
         int levelIndex = _pendingLevelIndex;
         HideCheckpointPrompt();
-        LoadLevel(levelIndex);
+        LoadLevel(levelIndex, isNewRun: false);
     }
 
     private void StartNewRun()
@@ -208,14 +208,22 @@ public class LevelSelect : Scene
         ProgressionManager.Instance.ClearCheckpointProgress(levelIndex);
 
         HideCheckpointPrompt();
-        LoadLevel(levelIndex);
+        LoadLevel(levelIndex, isNewRun: true);
     }
 
-    private void LoadLevel(int levelIndex)
+    private void LoadLevel(int levelIndex, bool isNewRun = true)
     {
-        Console.WriteLine($"Loading Level {levelIndex}...");
+        string sceneName = "Level" + levelIndex;
+
+        // Play the intro cutscene on every fresh Level 1 run.
+        if (levelIndex == 1 && isNewRun)
+        {
+            sceneName = Level1IntroCutscene.SceneName;
+        }
+
+        Console.WriteLine($"Loading scene: {sceneName}");
         GumService.Default.Root.Children.Clear();
-        SceneManager.Instance.LoadScene("Level" + levelIndex);
+        SceneManager.Instance.LoadScene(sceneName);
     }
 
     private void OnLevelPortraitClick(int levelIndex, bool isLocked)
@@ -232,7 +240,7 @@ public class LevelSelect : Scene
             return;
         }
 
-        LoadLevel(levelIndex);
+        LoadLevel(levelIndex, isNewRun: true);
     }
 
     

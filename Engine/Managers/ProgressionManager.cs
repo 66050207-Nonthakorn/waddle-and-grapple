@@ -9,6 +9,7 @@ public sealed class ProgressionManager
     public static ProgressionManager Instance { get; } = new ProgressionManager();
 
     private readonly Dictionary<int, LevelProgression> _levels = [];
+    private readonly HashSet<string> _playedCutscenes = [];
 
     public int CurrentLevelIndex { get; private set; }
     public int LastCompletedLevelIndex { get; private set; }
@@ -31,6 +32,26 @@ public sealed class ProgressionManager
     {
         _levels.TryGetValue(levelIndex, out var progression);
         return progression;
+    }
+
+    public bool HasPlayedCutscene(string cutsceneKey)
+    {
+        if (string.IsNullOrWhiteSpace(cutsceneKey))
+        {
+            return false;
+        }
+
+        return _playedCutscenes.Contains(cutsceneKey);
+    }
+
+    public void MarkCutscenePlayed(string cutsceneKey)
+    {
+        if (string.IsNullOrWhiteSpace(cutsceneKey))
+        {
+            return;
+        }
+
+        _playedCutscenes.Add(cutsceneKey);
     }
 
     public LevelProgression GetOrCreateLevel(int levelIndex)
@@ -99,6 +120,29 @@ public sealed class ProgressionManager
     {
         var progression = GetOrCreateLevel(levelIndex);
         progression.CheckpointPosition = checkpointPosition;
+    }
+
+    public void SaveCheckpoint(
+        int levelIndex,
+        Vector2 checkpointPosition,
+        TimeSpan currentLevelTime,
+        int collectedFishCount,
+        int totalFishCount)
+    {
+        var progression = GetOrCreateLevel(levelIndex);
+        progression.CheckpointPosition = checkpointPosition;
+        progression.CurrentLevelTime = currentLevelTime;
+        progression.CurrentCollectedFishCount = Math.Max(0, collectedFishCount);
+
+        if (progression.CurrentCollectedFishCount > progression.BestCollectedFishCount)
+        {
+            progression.BestCollectedFishCount = progression.CurrentCollectedFishCount;
+        }
+
+        if (totalFishCount > 0)
+        {
+            progression.TotalFishCount = totalFishCount;
+        }
     }
 
     public void UpdateFishProgress(int levelIndex, int collectedFishCount, int totalFishCount)
