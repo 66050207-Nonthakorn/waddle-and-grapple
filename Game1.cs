@@ -60,6 +60,8 @@ public class Game1 : Microsoft.Xna.Framework.Game
         SceneManager.Instance.AddScene<Level3OutroCutscene>(Level3OutroCutscene.SceneName);
         SceneManager.Instance.AddScene<LevelComplete>("levelcomplete");
         
+        SceneManager.Instance.AddScene<TileLoaderDemoScene>("tileloaderdemo");
+
         base.Initialize();
     }
 
@@ -98,7 +100,8 @@ public class Game1 : Microsoft.Xna.Framework.Game
                 {
                     circleData[index] = Color.White;
                 }
-                else                {
+                else
+                {
                     circleData[index] = Color.Transparent;
                 }
             }
@@ -106,7 +109,7 @@ public class Game1 : Microsoft.Xna.Framework.Game
         circleTexture.SetData(circleData);
         ResourceManager.Instance.LoadTexture("circle", circleTexture);
 
-        SceneManager.Instance.LoadScene("main");
+        SceneManager.Instance.LoadScene("tileloaderdemo");
     }
 
     private void OnClientSizeChanged(object sender, EventArgs e)
