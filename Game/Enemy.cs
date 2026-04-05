@@ -16,6 +16,8 @@ public enum EnemyState
     Taunting,         // เล่น emote เมื่อเห็น player ก่อน chase
     Chasing,
     Attacking,
+    FallingDown,      // ตกขอบ — อยู่กลางอากาศ
+    GettingUp,        // แตะพื้นหลังตก — รอ animation จบก่อน resume
     ReturningToSpawn,
     Dead,
 }
@@ -50,7 +52,7 @@ public class Enemy : GameObject
     public float LeashRange     { get; set; } = 400f; // ระยะสูงสุดก่อน return to spawn
 
     // ── Combat ────────────────────────────────────────────────────────────────
-    public float AttackCooldown { get; set; } = 1.5f;
+    public float AttackCooldown { get; set; } = 2f;
     private float _attackTimer;
 
     // ── Attack Animation Duration ─────────────────────────────────────────────
@@ -87,9 +89,14 @@ public class Enemy : GameObject
     private float _patrolWaitTimer;
 
     // ── Taunt ─────────────────────────────────────────────────────────────────
-    // 7 frames × 0.10 s — ตรงกับ emote animation ที่ลงทะเบียนใน Initialize
-    private const float TauntAnimDuration = 7 * 0.10f;
+    // 7 frames × 0.083 s — ตรงกับ emote animation ที่ลงทะเบียนใน Initialize
+    private const float TauntAnimDuration = 7 * 0.083f + 0.10f;
     private float _tauntTimer;
+
+    // ── Getting Up ────────────────────────────────────────────────────────────
+    // 4 frames × 0.10 s — ตรงกับ gettingup animation ที่ลงทะเบียนใน Initialize
+    private const float GettingUpAnimDuration = 4 * 0.10f + 0.31f;
+    private float _gettingUpTimer;
 
     // ═════════════════════════════════════════════════════════════════════════
 
@@ -111,14 +118,14 @@ public class Enemy : GameObject
         );
 
         _animator.AddAnimation("standing",   f.CreateFromRow(row: 0, totalFrames: 1, frameDuration: 0.083f));
-        _animator.AddAnimation("emote",   f.CreateFromRow(row: 1, totalFrames: 7, frameDuration: 0.10f, isLooping: false));
-        _animator.AddAnimation("walk",   f.CreateFromRow(row: 2, totalFrames: 8, frameDuration: 0.089f));
-        _animator.AddAnimation("run",   f.CreateFromRow(row: 2, totalFrames: 8, frameDuration: 0.060f));
-        _animator.AddAnimation("attack", f.CreateFromRow(row: 3, totalFrames: 7, frameDuration: 0.083f, isLooping: false));
-        _animator.AddAnimation("dead",   f.CreateFromRow(row: 4, totalFrames: 7, frameDuration: 0.10f, isLooping: false));
-        _animator.AddAnimation("fallingdown", f.CreateFromRow(row: 5, totalFrames: 4, frameDuration: 0.083f));
-        _animator.AddAnimation("stunned", f.CreateFromRow(row: 6, totalFrames: 5, frameDuration: 0.10f));
-        _animator.AddAnimation("gettingup", f.CreateFromRow(row: 7, totalFrames: 4, frameDuration: 0.10f));
+        _animator.AddAnimation("emote",      f.CreateFromRow(row: 1, totalFrames: 7, frameDuration: 0.083f, isLooping: false));
+        _animator.AddAnimation("walk",       f.CreateFromRow(row: 2, totalFrames: 8, frameDuration: 0.089f));
+        _animator.AddAnimation("run",        f.CreateFromRow(row: 2, totalFrames: 8, frameDuration: 0.060f));
+        _animator.AddAnimation("attack",     f.CreateFromRow(row: 3, totalFrames: 7, frameDuration: 0.083f, isLooping: false));
+        _animator.AddAnimation("dead",       f.CreateFromRow(row: 4, totalFrames: 7, frameDuration: 0.13f, isLooping: false));
+        _animator.AddAnimation("freefall",   f.CreateFromRow(row: 5, totalFrames: 4, frameDuration: 0.083f));
+        _animator.AddAnimation("stunned",    f.CreateFromRow(row: 6, totalFrames: 5, frameDuration: 0.10f));
+        _animator.AddAnimation("gettingup",  f.CreateFromRow(row: 7, totalFrames: 4, frameDuration: 0.10f, isLooping: false));
 
         _animator.Play("standing");
 
@@ -139,6 +146,7 @@ public class Enemy : GameObject
         if (_attackAnimTimer  > 0f) _attackAnimTimer  -= dt;
         if (_patrolWaitTimer  > 0f) _patrolWaitTimer  -= dt;
         if (_tauntTimer       > 0f) _tauntTimer       -= dt;
+        if (_gettingUpTimer   > 0f) _gettingUpTimer   -= dt;
 
         // AI decision → ตั้ง VelocityX
         UpdateAI();
@@ -146,6 +154,7 @@ public class Enemy : GameObject
         // Physics
         ApplyGravity(dt);
         MoveAndCollide(dt);
+        HandleAirborneTransitions();
 
         // Animation + sprite flip
         SyncAnimation();
@@ -166,8 +175,11 @@ public class Enemy : GameObject
         float distToPlayer  = Vector2.Distance(Position, _player.Position);
         bool  playerInSight = CanSeePlayer(distToPlayer);
 
-        // Leash: ออกไกลเกิน LeashRange → กลับ spawn ก่อนทำอะไรทั้งนั้น
-        if (distToSpawn > LeashRange && State != EnemyState.ReturningToSpawn)
+        // Leash: ออกไกลเกิน LeashRange → กลับ spawn (ไม่ interrupt ขณะกลางอากาศหรือลุกขึ้น)
+        if (distToSpawn > LeashRange
+            && State != EnemyState.ReturningToSpawn
+            && State != EnemyState.FallingDown
+            && State != EnemyState.GettingUp)
         {
             ChangeState(EnemyState.ReturningToSpawn);
         }
@@ -220,6 +232,18 @@ public class Enemy : GameObject
                 VelocityX = 0f;
                 if (_attackAnimTimer <= 0f)
                     ChangeState(playerInSight ? EnemyState.Chasing : EnemyState.Patrolling);
+                break;
+
+            // ── Falling: physics จัดการ ไม่ควบคุม horizontal ──────────────────
+            case EnemyState.FallingDown:
+                VelocityX = 0f;
+                break;
+
+            // ── Getting Up: หยุดนิ่ง รอ animation จบ → กลับ patrol ───────────
+            case EnemyState.GettingUp:
+                VelocityX = 0f;
+                if (_gettingUpTimer <= 0f)
+                    ChangeState(EnemyState.Patrolling);
                 break;
 
             // ── Return to Spawn ───────────────────────────────────────────────
@@ -284,7 +308,7 @@ public class Enemy : GameObject
         // เผชิญหน้ากับ player ก่อน attack
         FacingDirection = _player.Position.X > Position.X ? 1 : -1;
 
-        _player.Die();
+        Die();
     }
 
     private void HandleReturnToSpawn()
@@ -376,11 +400,41 @@ public class Enemy : GameObject
             case EnemyState.Attacking:
                 _animator.Play("attack");
                 break;
+            case EnemyState.FallingDown:
+                _animator.Play("freefall");
+                break;
+            case EnemyState.GettingUp:
+                _animator.Play("gettingup");
+                break;
             case EnemyState.Dead:
                 _animator.Play("dead");
                 break;
             default:
                 _animator.Play("standing");
+                break;
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // Airborne Transitions (เรียกหลัง MoveAndCollide ทุก frame)
+    // ══════════════════════════════════════════════════════════════════════════
+
+    private void HandleAirborneTransitions()
+    {
+        switch (State)
+        {
+            // เดินตกขอบ → เข้า FallingDown
+            case EnemyState.Patrolling:
+            case EnemyState.Chasing:
+            case EnemyState.ReturningToSpawn:
+                if (!IsGrounded)
+                    ChangeState(EnemyState.FallingDown);
+                break;
+
+            // แตะพื้นหลังตก → เข้า GettingUp
+            case EnemyState.FallingDown:
+                if (IsGrounded)
+                    ChangeState(EnemyState.GettingUp);
                 break;
         }
     }
@@ -486,6 +540,9 @@ public class Enemy : GameObject
                 break;
             case EnemyState.Taunting:
                 _tauntTimer = TauntAnimDuration;
+                break;
+            case EnemyState.GettingUp:
+                _gettingUpTimer = GettingUpAnimDuration;
                 break;
         }
 
