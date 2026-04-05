@@ -375,7 +375,7 @@
 /processorParam:TextureFormat=Color
 /build:../Assets/background.png;background.png
 
-#begin ../Assets/SpriteSheet/Items/SpeedUp.png
+#begin ../Assets/Aseprite/Collectibles/Fish.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -385,9 +385,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:../Assets/SpriteSheet/Items/SpeedUp.png;Items/SpeedBoost
+/build:../Assets/Aseprite/Collectibles/Fish.png;Collectibles/Fish
 
-#begin ../Assets/SpriteSheet/Items/DoubleJump.png
+#begin ../Assets/Aseprite/Collectibles/SpeedUp.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -397,9 +397,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:../Assets/SpriteSheet/Items/DoubleJump.png;Items/DoubleJump
+/build:../Assets/Aseprite/Collectibles/SpeedUp.png;Collectibles/SpeedBoost
 
-#begin ../Assets/SpriteSheet/Items/SlowDown.png
+#begin ../Assets/Aseprite/Collectibles/DoubleJump.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -409,4 +409,16 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:../Assets/SpriteSheet/Items/SlowDown.png;Items/SlowTime
+/build:../Assets/Aseprite/Collectibles/DoubleJump.png;Collectibles/DoubleJump
+
+#begin ../Assets/Aseprite/Collectibles/SlowDown.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../Assets/Aseprite/Collectibles/SlowDown.png;Collectibles/SlowTime
