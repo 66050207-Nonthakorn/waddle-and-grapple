@@ -5,10 +5,14 @@
     "version": "0.2.0",
     "configurations": [
       {
-        "name": "C#: WaddleAndGrapple Debug",
-        "type": "dotnet",
+        "name": "WaddleAndGrapple",
+        "type": "coreclr",
         "request": "launch",
-        "projectPath": "${workspaceFolder}/WaddleAndGrapple.csproj"
+        "preLaunchTask": "build",
+        "program": "${workspaceFolder}/bin/Debug/net9.0/WaddleAndGrapple.dll",
+        "args": [],
+        "cwd": "${workspaceFolder}",
+        "stopAtEntry": false
       }
     ],
   }

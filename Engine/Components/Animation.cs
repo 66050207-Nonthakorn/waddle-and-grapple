@@ -16,6 +16,7 @@ public class Animation(
     public float FrameDuration { get; set; } = frameDuration;
     public bool IsLooping { get; set; } = isLooping;
     public bool IsFinished { get; private set; }
+    public int LoopCount { get; private set; }
 
     private readonly List<Rectangle> frames = frames;
     private float timer;
@@ -34,7 +35,10 @@ public class Animation(
             if (next >= frames.Count)
             {
                 if (IsLooping)
+                {
                     currentFrame = 0;
+                    LoopCount++;
+                }
                 else
                     IsFinished = true;
             }
@@ -50,5 +54,14 @@ public class Animation(
         currentFrame = 0;
         timer = 0f;
         IsFinished = false;
+        LoopCount = 0;
+    }
+
+    /// <summary>ข้ามไปที่ frame สุดท้ายทันที (ใช้เมื่อต้องการแสดง pose สุดท้ายโดยไม่เล่น transition)</summary>
+    public void SkipToLastFrame()
+    {
+        currentFrame = frames.Count - 1;
+        timer        = 0f;
+        IsFinished   = !IsLooping;
     }
 }

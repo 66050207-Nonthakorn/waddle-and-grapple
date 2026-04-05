@@ -1,4 +1,4 @@
-using WaddleAndGrapple.Engine.Managers;
+﻿using WaddleAndGrapple.Engine.Managers;
 using WaddleAndGrapple.Game.Example;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;

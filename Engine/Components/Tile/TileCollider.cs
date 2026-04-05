@@ -18,6 +18,20 @@ public class TileCollider : Collider
     public void RemoveSolid(int index) => _solidTiles.Remove(index);
     public bool IsSolid(int index) => _solidTiles.Contains(index);
 
+    public List<Rectangle> GetSolidRects()
+    {
+        var (tilemap, scaledW, scaledH) = GetSetup();
+        var result = new List<Rectangle>();
+        if (tilemap == null) return result;
+        int rows = tilemap.MapData.GetLength(0);
+        int cols = tilemap.MapData.GetLength(1);
+        for (int ty = 0; ty < rows; ty++)
+            for (int tx = 0; tx < cols; tx++)
+                if (_solidTiles.Contains(tilemap.MapData[ty, tx]))
+                    result.Add(GetTileRect(tx, ty, scaledW, scaledH));
+        return result;
+    }
+
     // ── Collider interface ───────────────────────────────────────────────────
 
     public override bool IsIntersect(Collider other) => other switch
