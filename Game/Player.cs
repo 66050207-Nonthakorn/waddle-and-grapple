@@ -24,6 +24,7 @@ public enum PlayerState
     Sliding,
     Dead,
     GoalReached,
+    Launching,  // ดึงตัวเองไปตามเชือก (right-click ขณะ Hooked)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -37,7 +38,8 @@ public class Player : GameObject
     public const float SprintMultiplier = 1.6f;
     public const float SlideSpeed       = 420f;   // px/s
     public const float SlideDuration    = 0.45f;  // วินาที
-    public const float WallSlideSpeed   = 60f;    // px/s
+    public const float WallSlideSpeed    = 60f;    // px/s
+    public const float RopeLaunchSpeed  = 900f;   // ความเร็วดึงตัวเองไปตามเชือก (px/s)
 
     // ── Collider Size (placeholder — ปรับเมื่อได้ sprite จริง) ────────────────
     private const int PlayerWidth  = 40;
@@ -224,6 +226,43 @@ public class Player : GameObject
         if (IsGrounded) _coyoteTimer = CoyoteTime;
         else if (_coyoteTimer > 0f) _coyoteTimer -= dt;
 
+        // ── Right-click ขณะ Hooked → เริ่มดึงตัวเองไปตามเชือก ─────────────────
+        if (Pickaxe.IsHooked && InputManager.Instance.IsMouseButtonPressed(1))
+        {
+            Pickaxe.SuppressCharge = true;
+            Pickaxe.StartLaunch();
+            ChangeState(PlayerState.Launching);
+        }
+
+        // ── Launching state: ดึงตัวเองตามเชือก — ข้าม input ปกติทั้งหมด ──────
+        if (State == PlayerState.Launching)
+        {
+            HandleRopePull();
+            Pickaxe.HandleInput(dt);   // ให้ pickaxe อัปเดต waypoints
+            // ไม่ ApplyGravity — velocity ควบคุมโดย HandleRopePull
+            MoveAndCollide(dt);
+            CheckLedge();
+
+            // ชนวัตถุขณะ launch → กระโดด 1 step แล้วเก็บเชือกกลับทันที
+            if (IsTouchingWallLeft || IsTouchingWallRight || IsGrounded)
+            {
+                VelocityY = JumpForce;
+                Pickaxe.Recall();
+                ChangeState(PlayerState.Jumping);
+            }
+
+            // ไม่ ApplyConstraint — เราเป็นคนดึงเอง
+            CheckHazardCollision();
+            CheckCheckpoint();
+            CheckpointManager.Instance.UpdateSection(Position.X);
+            SyncAnimation(dt);
+            Rotation = FacingDirection == -1
+                ? QuaternionUtils.Euler(0, 180, 0)
+                : Vector3.Zero;
+            UpdateActiveEffects(dt);
+            return;
+        }
+
         // Phase 3 — Input (ต้องก่อน physics เพื่อให้ intent ถูก)
         HandleSlide(dt);
         HandleCrouch();
@@ -361,6 +400,11 @@ public class Player : GameObject
                 _animator.Play("goal");
                 break;
 
+            case PlayerState.Launching:
+                _idleTimer = 0f;
+                _animator.Play("jump");
+                break;
+
             default:
                 _idleTimer = 0f;
                 _animator.Play("standing");
@@ -433,6 +477,39 @@ public class Player : GameObject
             VelocityX *= SprintMultiplier;
             if (IsGrounded) ChangeState(PlayerState.Sprinting);
         }
+    }
+
+    /// <summary>
+    /// ขณะ Launching: เคลื่อนตัวไปตาม waypoints ของเชือก (bend → hook)
+    /// Left-click / E ยกเลิก, พอถึง hook → Jumping/Falling
+    /// </summary>
+    private void HandleRopePull()
+    {
+        // ยกเลิก
+        if (InputManager.Instance.IsMouseButtonPressed(0) ||
+            InputManager.Instance.IsKeyPressed(Keys.E))
+        {
+            Pickaxe.Recall();
+            ChangeState(PlayerState.Falling);
+            return;
+        }
+
+        // จบ launch แล้ว (ถึง hook)
+        if (Pickaxe.IsLaunchComplete)
+        {
+            ChangeState(VelocityY <= 0f ? PlayerState.Jumping : PlayerState.Falling);
+            return;
+        }
+
+        Vector2 target = Pickaxe.LaunchTarget;
+        Vector2 dir    = target - Position;
+        float   dist   = dir.Length();
+        if (dist < 0.001f) return;
+
+        dir.Normalize();
+        VelocityX       = dir.X * RopeLaunchSpeed;
+        VelocityY       = dir.Y * RopeLaunchSpeed;
+        FacingDirection = dir.X >= 0f ? 1 : -1;
     }
 
     /// <summary>
