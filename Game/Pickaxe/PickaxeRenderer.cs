@@ -52,12 +52,19 @@ public class PickaxeRenderer : Component
                 break;
 
             case IcePickaxe.PickaxeStateKind.Flying:
+                DrawRopeSegments(spriteBatch, _pickaxe.PickaxePosition);
                 DrawPickaxeSprite(spriteBatch, _pickaxe.PickaxePosition, _pickaxe.FlyAngle);
                 break;
 
             case IcePickaxe.PickaxeStateKind.Hooked:
-                DrawRope(spriteBatch, _player.Position, _pickaxe.HookPosition);
+            case IcePickaxe.PickaxeStateKind.Launching:
+                DrawRopeSegments(spriteBatch, _pickaxe.HookPosition);
                 DrawPickaxeSprite(spriteBatch, _pickaxe.HookPosition, _pickaxe.FlyAngle);
+                break;
+
+            case IcePickaxe.PickaxeStateKind.Recalling:
+                DrawRopeSegments(spriteBatch, _pickaxe.PickaxePosition);
+                DrawPickaxeSprite(spriteBatch, _pickaxe.PickaxePosition, _pickaxe.FlyAngle);
                 break;
         }
     }
@@ -98,6 +105,19 @@ public class PickaxeRenderer : Component
                      new Vector2(barX,           barY + BarHeight), Color.White, t, LayerCharge + 0.002f);
         DrawLine(sb, new Vector2(barX + BarWidth, barY),
                      new Vector2(barX + BarWidth, barY + BarHeight), Color.White, t, LayerCharge + 0.002f);
+    }
+
+    /// <summary>วาดเชือกผ่านทุก bend point จาก player ไปถึงปลาย (pickaxe/hook)</summary>
+    private void DrawRopeSegments(SpriteBatch sb, Vector2 endPoint)
+    {
+        Vector2 from = _player.Position;
+        for (int i = 0; i < _pickaxe.BendCount; i++)
+        {
+            Vector2 bend = _pickaxe.GetBendPoint(i);
+            DrawRope(sb, from, bend);
+            from = bend;
+        }
+        DrawRope(sb, from, endPoint);
     }
 
     private void DrawRope(SpriteBatch sb, Vector2 from, Vector2 to)
