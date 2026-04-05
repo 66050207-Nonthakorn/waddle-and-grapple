@@ -15,6 +15,7 @@ public enum PlayerState
 {
     Idle,
     Running,
+    Sprinting,
     Jumping,
     Falling,
     WallClinging,
@@ -34,6 +35,7 @@ public class Player : GameObject
     public const float Gravity          = 1200f;  // px/s²
     public const float MaxFallSpeed     = 700f;   // px/s
     public const float JumpForce        = -550f;  // px/s (ลบ = ขึ้น)
+    public const float SprintMultiplier = 1.6f;
     public const float SlideSpeed       = 420f;   // px/s
     public const int   SlideLoopCount  = 2;       // ← เปลี่ยนตรงนี้เพื่อยืด/สั้นระยะสไลด์ (จำนวนรอบของ row 13)
     public const float SlideDuration   = 0.083f * 4f * (1 + SlideLoopCount); // slidestart 1× + row13 N×
@@ -131,6 +133,12 @@ public class Player : GameObject
     private float _jumpAnimTimer;                  // > 0 → เล่น jumpstart / walljumpstart
     private float _slideAnimTimer;                 // > 0 → เล่น slidestart
     private float _slideEndAnimTimer;              // > 0 → เล่น slideend (row 12 reversed)
+
+    // ── Sprint (Double-tap) ───────────────────────────────────────────────────
+    private const float DoubleTapWindow = 0.25f; // วินาทีที่รอ tap ที่สอง
+    private float _doubleTapTimerD = 0f;         // countdown หลัง tap D ครั้งแรก
+    private float _doubleTapTimerA = 0f;         // countdown หลัง tap A ครั้งแรก
+    private int   _sprintDir       = 0;          // 0=ไม่ sprint, 1=ขวา, -1=ซ้าย
 
     // ── Rope Dash ─────────────────────────────────────────────────────────────
     private bool _isRopeDashing = false;
@@ -271,11 +279,19 @@ public class Player : GameObject
             return;
         }
 
-        // Phase 7 — Screen boundary death (ชนขอบจอ → ตาย)
-        if (Position.Y > FallDeathY || Position.X < ScreenLeft || Position.X > ScreenRight)
+        // Phase 7 — Screen boundary
+        if (Position.Y > FallDeathY) { Die(); return; } // ตกหล่น → ตาย
+
+        // ชนขอบซ้าย/ขวา → หยุดแค่นั้น ไม่ตาย
+        if (Position.X < ScreenLeft)
         {
-            Die();
-            return;
+            Position  = new Vector2(ScreenLeft, Position.Y);
+            VelocityX = 0f;
+        }
+        else if (Position.X > ScreenRight)
+        {
+            Position  = new Vector2(ScreenRight, Position.Y);
+            VelocityX = 0f;
         }
 
         // Coyote time — reset เมื่ออยู่บนพื้น, นับถอยหลังเมื่ออยู่ในอากาศ
@@ -323,6 +339,7 @@ public class Player : GameObject
         HandleSlide(dt);
         HandleCrouch();
         HandleMove();
+        HandleSprint(dt);
         if (Pickaxe.IsHooked) HandleRopeLaunch();
         else                  _isRopeDashing = false;
         HandleWallCling();
@@ -373,7 +390,8 @@ public class Player : GameObject
     private const float SlideEndAnimDuration  = 0.083f * 4f; // row 12 reversed
 
     // ขยับ sprite ขึ้น (ไม่กระทบ collider) เพื่อชดเชย sprite art ที่วาดต่ำกว่า frame กลาง
-    private const float CrouchSpriteOffsetY = -15f;
+    private const float CrouchSpriteOffsetY   = -15f;
+    private const float DeadGoalSpriteOffsetY = -20f; // ← ปรับตรงนี้ถ้าต้องการขึ้น/ลงมากกว่านี้
 
     private void SyncAnimation(float dt)
     {
@@ -382,10 +400,11 @@ public class Player : GameObject
         if (_slideAnimTimer    > 0f) _slideAnimTimer    -= dt;
         if (_slideEndAnimTimer > 0f) _slideEndAnimTimer -= dt;
 
-        bool isCrouched = State == PlayerState.Crouching || State == PlayerState.Sliding;
-        _spriteRenderer.DrawOffset = isCrouched
-            ? new Vector2(0f, CrouchSpriteOffsetY)
-            : Vector2.Zero;
+        bool isCrouched  = State == PlayerState.Crouching || State == PlayerState.Sliding;
+        bool isDeadGoal  = State == PlayerState.Dead       || State == PlayerState.GoalReached;
+        _spriteRenderer.DrawOffset = isCrouched ? new Vector2(0f, CrouchSpriteOffsetY)
+                                   : isDeadGoal ? new Vector2(0f, DeadGoalSpriteOffsetY)
+                                   : Vector2.Zero;
 
         switch (State)
         {
@@ -402,6 +421,11 @@ public class Player : GameObject
             case PlayerState.Running:
                 _idleTimer = 0f;
                 _animator.Play("walk");
+                break;
+
+            case PlayerState.Sprinting:
+                _idleTimer = 0f;
+                _animator.Play("run");
                 break;
 
             // ── Jump: jumpstart 1 frame → jump ────────────────────────────────
@@ -516,6 +540,57 @@ public class Player : GameObject
               && State != PlayerState.Jumping
               && VelocityY > 0f)
             ChangeState(PlayerState.Falling);
+    }
+
+    /// <summary>
+    /// Double-tap A/D: sprint ไปทิศที่ double-tap
+    /// sprint ต่อเนื่องตราบที่ยัง hold ปุ่มนั้นอยู่, หยุดเมื่อปล่อย
+    /// </summary>
+    private void HandleSprint(float dt)
+    {
+        if (State == PlayerState.Sliding
+         || State == PlayerState.LedgeGrabbing
+         || State == PlayerState.Crouching)
+        {
+            _sprintDir = 0;
+            return;
+        }
+
+        // tick double-tap timers
+        if (_doubleTapTimerD > 0f) _doubleTapTimerD -= dt;
+        if (_doubleTapTimerA > 0f) _doubleTapTimerA -= dt;
+
+        bool dPressed = InputManager.Instance.IsKeyPressed(Keys.D) || InputManager.Instance.IsKeyPressed(Keys.Right);
+        bool aPressed = InputManager.Instance.IsKeyPressed(Keys.A) || InputManager.Instance.IsKeyPressed(Keys.Left);
+        bool dHeld    = InputManager.Instance.IsKeyDown(Keys.D)    || InputManager.Instance.IsKeyDown(Keys.Right);
+        bool aHeld    = InputManager.Instance.IsKeyDown(Keys.A)    || InputManager.Instance.IsKeyDown(Keys.Left);
+
+        // double-tap detection
+        if (dPressed)
+        {
+            if (_doubleTapTimerD > 0f) _sprintDir = 1;   // double-tap → sprint ขวา
+            else                       _doubleTapTimerD = DoubleTapWindow; // tap แรก
+        }
+        if (aPressed)
+        {
+            if (_doubleTapTimerA > 0f) _sprintDir = -1;  // double-tap → sprint ซ้าย
+            else                       _doubleTapTimerA = DoubleTapWindow;
+        }
+
+        // cancel sprint เมื่อปล่อยปุ่ม
+        if (_sprintDir == 1  && !dHeld) _sprintDir = 0;
+        if (_sprintDir == -1 && !aHeld) _sprintDir = 0;
+
+        // apply sprint
+        if (_sprintDir != 0 && VelocityX != 0f && IsGrounded)
+        {
+            VelocityX *= SprintMultiplier;
+            ChangeState(PlayerState.Sprinting);
+        }
+        else if (State == PlayerState.Sprinting)
+        {
+            ChangeState(VelocityX == 0f ? PlayerState.Idle : PlayerState.Running);
+        }
     }
 
     /// <summary>

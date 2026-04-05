@@ -21,7 +21,7 @@ public class FishHUD : Component
     private const float PadTop  = 14f;
 
     // icon: ใช้ frame แรกของ Fish spritesheet (32×32) scale ลงเป็น IconSize
-    private const int IconSize = 24;
+    private const int IconSize = 36;
     private static readonly Rectangle FishFrame = new(0, 0, 32, 32);
 
     private static readonly Color TextColor   = Color.White;
@@ -31,7 +31,7 @@ public class FishHUD : Component
     {
         _player    = (Player)GameObject;
         _fishSheet = ResourceManager.Instance.GetTexture("Collectibles/Fish");
-        _font      = ResourceManager.Instance.GetFont("Fonts/File");
+        _font      = ResourceManager.Instance.GetFont("Fonts/36Font");
     }
 
     public override void Draw(SpriteBatch spriteBatch)
