@@ -25,14 +25,14 @@ public class ThrowLephant : Enemy
     private const float MaxFallSpeed = 700f;   // px/s
 
     // ── Collider Size ─────────────────────────────────────────────────────────
-    private const int EnemyWidth  = 40; // เปลี่ยนเป็น 80 พอทำ Level จริงเสร็จ
-    private const int EnemyHeight = 60; // เปลี่ยนเป็น 120 พอทำ Level จริงเสร็จ
+    private const int EnemyWidth  = 32; // เปลี่ยนเป็น 80 พอทำ Level จริงเสร็จ
+    private const int EnemyHeight = 32; // เปลี่ยนเป็น 120 พอทำ Level จริงเสร็จ
 
     // ── Temporary Ground (ลบเมื่อ tiles พร้อม) ───────────────────────────────
-    private const float TempGroundY = 400f;
+    // private const float TempGroundY = 400f;
 
     // ── Sprite Scale ──────────────────────────────────────────────────────────
-    public const float DisplayScale = 2f; // เปลี่ยนเป็น 2f พอทำ Level จริงเสร็จ
+    public const float DisplayScale = 1f; // เปลี่ยนเป็น 2f พอทำ Level จริงเสร็จ
 
     // ── AI Ranges ─────────────────────────────────────────────────────────────
     public float DetectionRange { get; set; } = 400f; // ระยะมองเห็น player และระยะโยนค้อน
@@ -100,6 +100,8 @@ public class ThrowLephant : Enemy
         _animator.AddAnimation("attack",     f.CreateFromRow(row: 1, totalFrames: 4, frameDuration: 0.10f, isLooping: false));
         _animator.AddAnimation("dead",       f.CreateFromRow(row: 2, totalFrames: 6, frameDuration: 0.13f, isLooping: false));
 
+        _animator.UseBottomLeftAnchor = false;
+        _spriteRenderer.DrawOffset    = Vector2.Zero;
         _animator.Play("standing");
 
         _collider = AddComponent<ThrowLephantBoxCollider>();
@@ -336,16 +338,16 @@ public class ThrowLephant : Enemy
         }
 
         // ── Temp Ground ───────────────────────────────────────────────────────
-        if (_solidRects.Count == 0)
-        {
-            float groundTopY = TempGroundY - EnemyHeight / 2f;
-            if (Position.Y >= groundTopY)
-            {
-                Position   = new Vector2(Position.X, groundTopY);
-                VelocityY  = 0f;
-                IsGrounded = true;
-            }
-        }
+        // if (_solidRects.Count == 0)
+        // {
+        //     float groundTopY = TempGroundY - EnemyHeight / 2f;
+        //     if (Position.Y >= groundTopY)
+        //     {
+        //         Position   = new Vector2(Position.X, groundTopY);
+        //         VelocityY  = 0f;
+        //         IsGrounded = true;
+        //     }
+        // }
     }
 
     private void UpdateColliderBounds()

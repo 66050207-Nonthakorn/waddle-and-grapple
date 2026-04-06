@@ -174,6 +174,7 @@ public class GameMapLoader
             enemy.PatrolSpeed    = obj.FloatProp("PatrolSpeed",    enemy.PatrolSpeed);
             enemy.ChaseSpeed     = obj.FloatProp("ChaseSpeed",     enemy.ChaseSpeed);
             enemy.ReturnSpeed    = obj.FloatProp("ReturnSpeed",    enemy.ReturnSpeed);
+            enemy._patrolDirection = obj.IntProp("_patrolDirection", enemy._patrolDirection);
             enemy.SetPlayer(_player);
         });
     }
@@ -189,6 +190,7 @@ public class GameMapLoader
             enemy.PatrolSpeed    = obj.FloatProp("PatrolSpeed",    enemy.PatrolSpeed);
             enemy.ChaseSpeed     = obj.FloatProp("ChaseSpeed",     enemy.ChaseSpeed);
             enemy.ReturnSpeed    = obj.FloatProp("ReturnSpeed",    enemy.ReturnSpeed);
+            enemy._patrolDirection = obj.IntProp("_patrolDirection", enemy._patrolDirection);
             enemy.SetPlayer(_player);
         });
     }

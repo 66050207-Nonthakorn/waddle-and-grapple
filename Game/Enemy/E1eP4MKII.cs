@@ -29,7 +29,7 @@ public class E1eP4MKII : Enemy
     private const float TempGroundY = 400f;
 
     // ── Sprite Scale ──────────────────────────────────────────────────────────
-    public const float DisplayScale = 2f; // เปลี่ยนเป็น 2f พอทำ Level จริงเสร็จ
+    public const float DisplayScale = 1f; // เปลี่ยนเป็น 2f พอทำ Level จริงเสร็จ
 
     // ── AI Ranges ─────────────────────────────────────────────────────────────
     public float DetectionRange { get; set; } = 60f; // ระยะมองเห็น player และระยะโยนค้อน
@@ -97,6 +97,8 @@ public class E1eP4MKII : Enemy
 
         _animator.AddAnimation("explode2", f2.CreateFromRow(row: 0, totalFrames: 7, frameDuration: 0.083f, isLooping: false));
 
+        _animator.UseBottomLeftAnchor = false;
+        _spriteRenderer.DrawOffset    = Vector2.Zero;
         _animator.Play("idle");
 
         _collider = AddComponent<E1eP4MKIIBoxCollider>();

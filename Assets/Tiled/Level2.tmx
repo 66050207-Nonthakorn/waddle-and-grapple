@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="240" height="80" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="45">
+<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="240" height="80" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="64">
  <editorsettings>
   <export target="Level2.tmj" format="json"/>
  </editorsettings>
@@ -105,6 +105,86 @@
   <object id="42" x="240" y="496" width="976" height="16"/>
   <object id="43" x="1216" y="208" width="1440" height="16"/>
   <object id="44" x="2656" y="480" width="1152" height="16"/>
+ </objectgroup>
+ <objectgroup id="2" name="Room">
+  <object id="1" name="Room1" x="256" y="512" width="960" height="540"/>
+  <object id="5" name="Room2" x="1216" y="224" width="1440" height="832"/>
+  <object id="7" name="Room3" x="2656" y="512" width="1152" height="540"/>
+  <object id="8" x="560" y="640"/>
+ </objectgroup>
+ <objectgroup id="6" name="Enermy">
+  <object id="46" type="GruntLephant" x="384" y="992">
+   <properties>
+    <property name="PatrolRadius" type="float" value="63"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="47" type="GruntLephant" x="880" y="992">
+   <properties>
+    <property name="PatrolRadius" type="float" value="80"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="49" type="ThrowLephant" x="960" y="752">
+   <point/>
+  </object>
+  <object id="50" type="ThrowLephant" x="1456" y="640">
+   <point/>
+  </object>
+  <object id="51" type="ThrowLephant" x="1424" y="384">
+   <point/>
+  </object>
+  <object id="52" type="ThrowLephant" x="2112" y="784">
+   <point/>
+  </object>
+  <object id="53" type="ThrowLephant" x="2112" y="928">
+   <point/>
+  </object>
+  <object id="54" type="ThrowLephant" x="2256" y="704">
+   <point/>
+  </object>
+  <object id="55" type="ThrowLephant" x="2192" y="656">
+   <point/>
+  </object>
+  <object id="56" type="ThrowLephant" x="2928" y="640">
+   <point/>
+  </object>
+  <object id="57" type="ThrowLephant" x="3120" y="560">
+   <point/>
+  </object>
+  <object id="58" type="ThrowLephant" x="3392" y="672">
+   <point/>
+  </object>
+  <object id="59" type="GruntLephant" x="2192" y="496">
+   <properties>
+    <property name="PatrolRadius" type="float" value="98"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="60" type="GruntLephant" x="2592" y="560">
+   <properties>
+    <property name="PatrolRadius" type="float" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="61" type="GruntLephant" x="3104" y="784">
+   <properties>
+    <property name="PatrolRadius" type="float" value="110"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="62" type="BuffLephant" x="1440" y="496">
+   <properties>
+    <property name="PatrolRadius" type="float" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="63" type="BuffLephant" x="3072" y="976">
+   <properties>
+    <property name="PatrolRadius" type="float" value="80"/>
+   </properties>
+   <point/>
+  </object>
  </objectgroup>
  <objectgroup id="4" name="Trap">
   <object id="9" type="SpikeTrap" x="320" y="512">
@@ -280,11 +360,5 @@
   <object id="41" type="SpeedBoostPowerUp" x="1312" y="368">
    <point/>
   </object>
- </objectgroup>
- <objectgroup id="2" name="Room">
-  <object id="1" name="Room1" x="256" y="512" width="960" height="540"/>
-  <object id="5" name="Room2" x="1216" y="224" width="1440" height="832"/>
-  <object id="7" name="Room3" x="2656" y="512" width="1152" height="540"/>
-  <object id="8" x="560" y="640"/>
  </objectgroup>
 </map>

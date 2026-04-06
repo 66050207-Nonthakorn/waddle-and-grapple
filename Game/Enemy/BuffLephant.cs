@@ -26,18 +26,18 @@ public enum BuffLephantState
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-public class BuffLephant : GameObject
+public class BuffLephant : Enemy
 {
     // ── Physics Constants ─────────────────────────────────────────────────────
     private const float Gravity      = 1200f;  // px/s²
     private const float MaxFallSpeed = 700f;   // px/s
 
     // ── Collider Size ─────────────────────────────────────────────────────────
-    private const int EnemyWidth  = 40; // เปลี่ยนเป็น 80 พอทำ Level จริงเสร็จ
-    private const int EnemyHeight = 60; // เปลี่ยนเป็น 120 พอทำ Level จริงเสร็จ
+    private const int EnemyWidth  = 64; // เปลี่ยนเป็น 80 พอทำ Level จริงเสร็จ
+    private const int EnemyHeight = 80; // เปลี่ยนเป็น 120 พอทำ Level จริงเสร็จ
 
     // ── Temporary Ground (ลบเมื่อ tiles พร้อม) ───────────────────────────────
-    private const float TempGroundY = 400f;
+    // private const float TempGroundY = 400f;
 
     // ── Sprite Scale ──────────────────────────────────────────────────────────
     public const float DisplayScale = 1f; // เปลี่ยนเป็น 2f พอทำ Level จริงเสร็จ
@@ -75,7 +75,7 @@ public class BuffLephant : GameObject
 
     // ── Spawn / Patrol ────────────────────────────────────────────────────────
     private Vector2 _spawnPosition;
-    private int     _patrolDirection = 1;
+    public int     _patrolDirection = 1;
 
     // ── Player Reference ──────────────────────────────────────────────────────
     private Player _player;
@@ -143,6 +143,8 @@ public class BuffLephant : GameObject
         _animator.AddAnimation("stunned",    f.CreateFromRow(row: 7, totalFrames: 5, frameDuration: 0.10f));
         _animator.AddAnimation("gettingup",  f.CreateFromRow(row: 8, totalFrames: 4, frameDuration: 0.10f, isLooping: false));
 
+        _animator.UseBottomLeftAnchor = false;
+        _spriteRenderer.DrawOffset    = Vector2.Zero;
         _animator.Play("standing");
 
         _collider = AddComponent<BuffLephantBoxCollider>();
@@ -547,16 +549,16 @@ public class BuffLephant : GameObject
         }
 
         // ── Temp Ground ───────────────────────────────────────────────────────
-        if (_solidRects.Count == 0)
-        {
-            float groundTopY = TempGroundY - EnemyHeight / 2f;
-            if (Position.Y >= groundTopY)
-            {
-                Position   = new Vector2(Position.X, groundTopY);
-                VelocityY  = 0f;
-                IsGrounded = true;
-            }
-        }
+        // if (_solidRects.Count == 0)
+        // {
+        //     float groundTopY = TempGroundY - EnemyHeight / 2f;
+        //     if (Position.Y >= groundTopY)
+        //     {
+        //         Position   = new Vector2(Position.X, groundTopY);
+        //         VelocityY  = 0f;
+        //         IsGrounded = true;
+        //     }
+        // }
     }
 
     private void UpdateColliderBounds()
@@ -608,15 +610,15 @@ public class BuffLephant : GameObject
     // ══════════════════════════════════════════════════════════════════════════
 
     /// <summary>ส่ง Player reference จาก Level เพื่อให้ Enemy ติดตาม</summary>
-    public void SetPlayer(Player player) => _player = player;
+    public override void SetPlayer(Player player) => _player = player;
 
     /// <summary>ส่ง solid rectangles จาก Level (เหมือน Player.SetSolids)</summary>
-    public void SetSolids(List<Rectangle> solids) => _solidRects = solids;
+    public override void SetSolids(List<Rectangle> solids) => _solidRects = solids;
 
-    public Rectangle ColliderBounds => _collider?.Bounds ?? Rectangle.Empty;
+    public override Rectangle ColliderBounds => _collider?.Bounds ?? Rectangle.Empty;
 
     /// <summary>เรียกจาก hazard/trap หรือ Player เมื่อต้องการกำจัด enemy</summary>
-    public void Die()
+    public override void Die()
     {
         if (State == BuffLephantState.Dead) return;
         VelocityX = 0f;

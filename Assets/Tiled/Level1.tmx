@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="320" height="48" tilewidth="16" tileheight="16" infinite="0" nextlayerid="8" nextobjectid="38">
+<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="320" height="48" tilewidth="16" tileheight="16" infinite="0" nextlayerid="8" nextobjectid="41">
  <editorsettings>
   <export target="Level1.tmj" format="json"/>
  </editorsettings>
@@ -218,9 +218,21 @@
   <object id="7" name="Room4" x="4096" y="0" width="960" height="540"/>
  </objectgroup>
  <objectgroup id="7" name="Enermy">
-  <object id="37" type="GruntLephant" x="1072" y="160">
+  <object id="38" type="GruntLephant" x="2976" y="432">
    <properties>
-    <property name="PatrolRadius" type="float" value="120"/>
+    <property name="PatrolRadius" type="float" value="65"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="39" type="GruntLephant" x="3296" y="320">
+   <properties>
+    <property name="PatrolRadius" type="float" value="96"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="40" type="GruntLephant" x="4480" y="480">
+   <properties>
+    <property name="PatrolRadius" type="float" value="0"/>
    </properties>
    <point/>
   </object>

@@ -32,8 +32,8 @@ public class GruntLephant : Enemy
     private const float MaxFallSpeed = 700f;   // px/s
 
     // ── Collider Size ─────────────────────────────────────────────────────────
-    private const int EnemyWidth  = 40; // เปลี่ยนเป็น 80 พอทำ Level จริงเสร็จ
-    private const int EnemyHeight = 60; // เปลี่ยนเป็น 120 พอทำ Level จริงเสร็จ
+    private const int EnemyWidth  = 48; // เปลี่ยนเป็น 80 พอทำ Level จริงเสร็จ
+    private const int EnemyHeight = 64; // เปลี่ยนเป็น 120 พอทำ Level จริงเสร็จ
 
     // ── Temporary Ground (ลบเมื่อ tiles พร้อม) ───────────────────────────────
     // private const float TempGroundY = 400f;
@@ -74,7 +74,7 @@ public class GruntLephant : Enemy
 
     // ── Spawn / Patrol ────────────────────────────────────────────────────────
     private Vector2 _spawnPosition;
-    private int     _patrolDirection = 1;
+    public int     _patrolDirection = 1;
 
     // ── Player Reference ──────────────────────────────────────────────────────
     private Player _player;
@@ -113,7 +113,7 @@ public class GruntLephant : Enemy
     public override void Initialize()
     {
         _spawnPosition   = Position;
-        _patrolDirection = 1;
+        // _patrolDirection = 1;
 
         Scale       = new Vector2(DisplayScale, DisplayScale);
         _animator   = AddComponent<Animator>();
@@ -137,7 +137,8 @@ public class GruntLephant : Enemy
         _animator.AddAnimation("stunned",    f.CreateFromRow(row: 6, totalFrames: 5, frameDuration: 0.10f));
         _animator.AddAnimation("gettingup",  f.CreateFromRow(row: 7, totalFrames: 4, frameDuration: 0.10f, isLooping: false));
 
-        _animator.UseBottomLeftAnchor = true;
+        _animator.UseBottomLeftAnchor = false;
+        _spriteRenderer.DrawOffset    = Vector2.Zero;
         _animator.Play("standing");
 
         _collider = AddComponent<EnemyBoxCollider>();
@@ -494,13 +495,12 @@ public class GruntLephant : Enemy
 
             if (VelocityX > 0f)
             {
-                // Position.X = ขอบซ้าย → ดัน left ให้ชิด solid.Left
-                Position = new Vector2(solid.Left - EnemyWidth, Position.Y);
+                Position = new Vector2(solid.Left - EnemyWidth / 2f, Position.Y);
                 if (State == GruntLephantState.Patrolling) _patrolDirection = -1;
             }
             else if (VelocityX < 0f)
             {
-                Position = new Vector2(solid.Right, Position.Y);
+                Position = new Vector2(solid.Right + EnemyWidth / 2f, Position.Y);
                 if (State == GruntLephantState.Patrolling) _patrolDirection = 1;
             }
             VelocityX = 0f;
@@ -521,14 +521,12 @@ public class GruntLephant : Enemy
 
             if (VelocityY > 0f)
             {
-                // Position.Y = ขอบล่าง → ลงมาแตะ solid.Top
-                Position   = new Vector2(Position.X, solid.Top);
+                Position   = new Vector2(Position.X, solid.Top - EnemyHeight / 2f);
                 IsGrounded = true;
             }
             else if (VelocityY < 0f)
             {
-                // ชนเพดาน → ขอบบน (Position.Y - EnemyHeight) = solid.Bottom
-                Position = new Vector2(Position.X, solid.Bottom + EnemyHeight);
+                Position = new Vector2(Position.X, solid.Bottom + EnemyHeight / 2f);
             }
             VelocityY = 0f;
             UpdateColliderBounds();
@@ -550,10 +548,9 @@ public class GruntLephant : Enemy
     private void UpdateColliderBounds()
     {
         if (_collider == null) return;
-        // Position = มุมล่างซ้ายของ sprite/collider
         _collider.Bounds = new Rectangle(
-            (int)Position.X,
-            (int)(Position.Y - EnemyHeight),
+            (int)(Position.X - EnemyWidth  / 2f),
+            (int)(Position.Y - EnemyHeight / 2f),
             EnemyWidth,
             EnemyHeight
         );

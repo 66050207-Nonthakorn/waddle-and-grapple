@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using WaddleAndGrapple.Engine;
 using WaddleAndGrapple.Engine.Components;
 using WaddleAndGrapple.Engine.Managers;
@@ -15,6 +16,9 @@ public abstract class Trap : GameObject
 
     /// <summary>Reference to the player. Set this from the scene after creating the trap.</summary>
     public Player Player { get; set; }
+
+    /// <summary>Enemies that this trap can kill. Set from the level after spawning.</summary>
+    public List<Enemy> Enemies { get; set; } = new();
 
     /// <summary>Optional sprite texture name for the trap.</summary>
     public string SpriteTextureName { get; set; } = "pixel";
@@ -77,6 +81,12 @@ public abstract class Trap : GameObject
 
         if (Player != null && IsPlayerInRange(Player))
             OnPlayerEnter(Player);
+
+        foreach (var enemy in Enemies)
+        {
+            if (enemy.Active && GetCollisionBounds().Intersects(enemy.ColliderBounds))
+                OnEnemyEnter(enemy);
+        }
     }
 
     protected virtual Rectangle GetCollisionBounds() =>
@@ -93,6 +103,9 @@ public abstract class Trap : GameObject
 
     /// <summary>Called when a player enters the trap's trigger area.</summary>
     protected abstract void OnPlayerEnter(Player player);
+
+    /// <summary>Called when an enemy enters the trap's trigger area. Default: kills the enemy.</summary>
+    protected virtual void OnEnemyEnter(Enemy enemy) => enemy.Die();
 
     public virtual void Activate()
     {
