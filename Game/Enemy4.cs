@@ -32,16 +32,16 @@ public class Enemy4 : GameObject
     public const float DisplayScale = 2f; // เปลี่ยนเป็น 2f พอทำ Level จริงเสร็จ
 
     // ── AI Ranges ─────────────────────────────────────────────────────────────
-    public float DetectionRange { get; set; } = 30f; // ระยะมองเห็น player และระยะโยนค้อน
+    public float DetectionRange { get; set; } = 60f; // ระยะมองเห็น player และระยะโยนค้อน
 
-    // ── Combat ────────────────────────────────────────────────────────────────
-    public float AttackCooldown { get; set; } = 0.1f;
-    private float _attackTimer;
+    // ── Kill Zone ─────────────────────────────────────────────────────────────
+    public float KillZoneRange { get; set; } = 80f; // ระยะที่ระเบิดฆ่า player
 
-    // ── Attack Animation Duration ─────────────────────────────────────────────
-    // 6 frames × 0.083 s — ปรับตามจำนวน frame จริงใน spritesheet
-    private const float AttackAnimDuration = 4 * 0.10f + 1.0f;
-    private float _attackAnimTimer;
+    // ── Explode Animation Durations ───────────────────────────────────────────
+    private const float Explode1AnimDuration = 2 * 0.13f; // ตรงกับ explode1 (2 frames)
+    private const float Explode2AnimDuration = 7 * 0.083f; // ตรงกับ explode2 (7 frames)
+    private float _explode1Timer;
+    private float _explode2Timer;
 
     // ── Velocity ──────────────────────────────────────────────────────────────
     public float VelocityX;
@@ -91,10 +91,10 @@ public class Enemy4 : GameObject
 
         _animator.AddAnimation("idle",     f1.CreateFromRow(row: 0, totalFrames: 7, frameDuration: 0.083f));
         _animator.AddAnimation("dead",     f1.CreateFromRow(row: 1, totalFrames: 7, frameDuration: 0.13f, isLooping: false));
-        _animator.AddAnimation("explode1", f1.CreateFromRow(row: 2, totalFrames: 2, frameDuration: 0.083f, isLooping: false));
+        _animator.AddAnimation("explode1", f1.CreateFromRow(row: 2, totalFrames: 2, frameDuration: 0.13f, isLooping: false));
 
         var f2 = new AnimationFactory(
-            ResourceManager.Instance.GetTexture("Explosion"),
+            ResourceManager.Instance.GetTexture("Explosion-SpriteSheet"),
             rows: 1, columns: 7
         );
 
@@ -121,9 +121,12 @@ public class Enemy4 : GameObject
             return;
         }
 
-        // Cooldown / wait timers
-        if (_attackTimer      > 0f) _attackTimer      -= dt;
-        if (_attackAnimTimer  > 0f) _attackAnimTimer  -= dt;
+        // Explode timers
+        if (_explode1Timer > 0f) _explode1Timer -= dt;
+        if (_explode2Timer > 0f) _explode2Timer -= dt;
+
+        // Pickaxe hit check (ก่อน AI เพื่อ preempt state machine)
+        CheckPickaxeHit();
 
         // AI decision → ตั้ง VelocityX
         UpdateAI();
@@ -151,27 +154,52 @@ public class Enemy4 : GameObject
 
         switch (State)
         {
-            // ── Idle ─────────────────────────
+            // ── Idle: หยุดนิ่ง รอ player เข้าใกล้ ──────────────────────────────
             case Enemy4State.Idle:
                 if (playerInSight)
-                {
-                    ChangeState(Enemy4State.Attacking);
-                }
+                    ChangeState(Enemy4State.Igniting);
                 break;
 
-            // ── Attack ─────────────────────────────────────────
-            case Enemy4State.Attacking:
-                if (playerInSight && (distToPlayer <= DetectionRange))
-                {
-                    ThrowHammerAttack();
-                }
+            // ── Igniting: เล่น explode1 รอ animation จบ ────────────────────────
+            case Enemy4State.Igniting:
+                if (_explode1Timer <= 0f)
+                    ChangeState(Enemy4State.Explode); // ระเบิดเสมอ ฆ่า player ถ้าอยู่ใน killzone
+                break;
+
+            // ── Explode: เล่น explode2 รอ animation จบ แล้ว deactivate ทันที ────
+            case Enemy4State.Explode:
+                if (_explode2Timer <= 0f)
+                    base.Active = false;
                 break;
         }
     }
 
-    private void Ignite()
+    // ══════════════════════════════════════════════════════════════════════════
+    // Pickaxe Hit Detection
+    // ══════════════════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// ตรวจว่า pickaxe ที่กำลังบินอยู่ชนกับ collider ของ Enemy4 ไหม
+    /// ใช้ได้เฉพาะตอน Idle — ถ้าชนให้ตายเงียบๆ โดยไม่ระเบิด
+    /// </summary>
+    private void CheckPickaxeHit()
     {
-        // TODO
+        if (State != Enemy4State.Idle) return;
+        if (_player == null) return;
+        if (_player.Pickaxe.CurrentState != IcePickaxe.PickaxeStateKind.Flying) return;
+
+        const float PickaxeRadius = 6f;
+        var pos = _player.Pickaxe.PickaxePosition;
+        var expanded = new Rectangle(
+            _collider.Bounds.Left   - (int)PickaxeRadius,
+            _collider.Bounds.Top    - (int)PickaxeRadius,
+            _collider.Bounds.Width  + (int)PickaxeRadius * 2,
+            _collider.Bounds.Height + (int)PickaxeRadius * 2
+        );
+        if (!expanded.Contains((int)pos.X, (int)pos.Y)) return;
+
+        _player.Pickaxe.Recall();
+        Die();
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -238,8 +266,11 @@ public class Enemy4 : GameObject
     {
         switch (State)
         {
-            case Enemy4State.Attacking:
-                _animator.Play(_attackAnimTimer > 0f ? "attack" : "idle");
+            case Enemy4State.Igniting:
+                _animator.Play("explode1");
+                break;
+            case Enemy4State.Explode:
+                _animator.Play("explode2");
                 break;
             case Enemy4State.Dead:
                 _animator.Play("dead");
@@ -337,6 +368,14 @@ public class Enemy4 : GameObject
 
         switch (newState)
         {
+            case Enemy4State.Igniting:
+                _explode1Timer = Explode1AnimDuration;
+                break;
+            case Enemy4State.Explode:
+                _explode2Timer = Explode2AnimDuration;
+                if (_player != null && Vector2.Distance(Position, _player.Position) <= KillZoneRange)
+                    _player.Die();
+                break;
             case Enemy4State.Dead:
                 _deadTimer = DeadAnimDuration;
                 break;
@@ -348,9 +387,6 @@ public class Enemy4 : GameObject
     // ══════════════════════════════════════════════════════════════════════════
     // Public API
     // ══════════════════════════════════════════════════════════════════════════
-
-    /// <summary>ส่ง Scene reference เพื่อให้ Enemy spawn ThrowingHammer ได้</summary>
-    public void SetScene(Scene scene) => _scene = scene;
 
     /// <summary>ส่ง Player reference จาก Level เพื่อให้ Enemy ติดตาม</summary>
     public void SetPlayer(Player player) => _player = player;
