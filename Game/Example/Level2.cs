@@ -22,7 +22,24 @@ class Level2 : BaseLevel
         LevelIndex = 2;
         SetTotalFish(0);
 
-        // ── Camera ────────────────────────────────────────────────────────────
+        AudioManager.Instance.PlaySong("Song/Level2");
+
+        // // Create tilemap first
+        // tilemapObject = base.AddGameObject<GameObject>("tilemap");
+        // var tilemap = tilemapObject.AddComponent<Tilemap>();
+        // tilemap.Tileset = ResourceManager.Instance.GetTexture("Tiles/tileset");
+        // tilemap.SourceTileSize = 75;
+        // tilemap.DestinationTileSize = 150;
+        // tilemap.GameObject.Scale = new Vector2(1f, 1f);
+        // tilemap.MapData = new int[,]
+        // {
+        //     { 2, 2, 2, 2, 2, 2 },
+        // };
+
+        // var tileCollider = tilemapObject.AddComponent<TileCollider>();
+        // tileCollider.SetSolid(0, 1, 2, 3, 4, 5);
+
+        // Create camera
         cameraObject = base.AddGameObject<GameObject>("camera");
         var camera   = cameraObject.AddComponent<Camera2D>();
         camera.SetViewport(new Viewport(0, 0,

@@ -109,6 +109,18 @@
 /processorParam:TextureFormat=Color
 /build:../Assets/Aseprite/Player/Rope.png;Player/Rope.png
 
+#begin ../Assets/Aseprite/TileSet/LevelTileSet.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../Assets/Aseprite/TileSet/LevelTileSet.png;Tiles/LevelTileSet.png
+
 #begin ../Assets/Aseprite/Traps/Floating Laser/Floating Laser-SpriteSheet.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -265,6 +277,78 @@
 /processorParam:TextureFormat=Color
 /build:../Assets/Aseprite/UI/TabletScene.png;UI/TabletScene.png
 
+#begin ../Assets/Aseprite/Parallax/Level1/level1-sky-overflow.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../Assets/Aseprite/Parallax/Level1/level1-sky-overflow.png;Parallax/Level1/level1-sky-overflow.png
+
+#begin ../Assets/Aseprite/Parallax/Level1/level1-background.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../Assets/Aseprite/Parallax/Level1/level1-background.png;Parallax/Level1/level1-background.png
+
+#begin ../Assets/Aseprite/Parallax/Level1/level1-farground.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../Assets/Aseprite/Parallax/Level1/level1-farground.png;Parallax/Level1/level1-farground.png
+
+#begin ../Assets/Aseprite/Parallax/Level1/level1-midground.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../Assets/Aseprite/Parallax/Level1/level1-midground.png;Parallax/Level1/level1-midground.png
+
+#begin ../Assets/Aseprite/Parallax/Level1/level1-nearground.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../Assets/Aseprite/Parallax/Level1/level1-nearground.png;Parallax/Level1/level1-nearground.png
+
+#begin ../Assets/Aseprite/Parallax/Level1/level1-below-overflow.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../Assets/Aseprite/Parallax/Level1/level1-below-overflow.png;Parallax/Level1/level1-below-overflow.png
+
 #begin ../Assets/background.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -276,6 +360,30 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:../Assets/background.png;background.png
+
+#begin ../Assets/SpriteSheet/Player/SlowDownPlayer-SpriteSheet.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../Assets/SpriteSheet/Player/SlowDownPlayer-SpriteSheet.png;Player/SlowDownPlayer-SpriteSheet
+
+#begin ../Assets/SpriteSheet/Player/SpeedBoostPlayer-SpriteSheet.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../Assets/SpriteSheet/Player/SpeedBoostPlayer-SpriteSheet.png;Player/SpeedBoostPlayer-SpriteSheet
 
 #begin bird.png
 /importer:TextureImporter
@@ -399,6 +507,84 @@
 /processorParam:TextureFormat=Color
 /build:mario_walk.png
 
+#begin SFX/Jump.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:SFX/Jump.wav
+
+#begin SFX/Landing.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:SFX/Landing.wav
+
+#begin SFX/PickaxeHit.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:SFX/PickaxeHit.wav
+
+#begin SFX/PickaxeHolding.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:SFX/PickaxeHolding.wav;SFX/PickaxeCharge.wav
+
+#begin SFX/PickaxeThrow.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:SFX/PickaxeThrow.wav;SFX/PickaxeRope.wav
+
+#begin SFX/PlayerDead.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:SFX/PlayerDead.wav
+
+#begin SFX/RopePull.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:SFX/RopePull.wav;SFX/PickaxeThrow.wav
+
+#begin SFX/UI/Click.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:SFX/UI/Click.wav
+
+#begin SFX/Walk.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:SFX/Walk.wav
+
+#begin Song/Level1.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Song/Level1.mp3
+
+#begin Song/Level2.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Song/Level2.mp3
+
+#begin Song/Level3.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Song/Level3.mp3
+
+#begin Song/MainMenu.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Song/MainMenu.mp3
+
 #begin Tiles/block.jpg
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -423,19 +609,6 @@
 /processorParam:TextureFormat=Color
 /build:Tiles/tileset.png
 
-#begin ../Assets/Aseprite/TileSet/LevelTileSet.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:../Assets/Aseprite/TileSet/LevelTileSet.png;Tiles/LevelTileSet.png
-
-#begin ../Assets/Aseprite/Traps/Saw/Small Saw-SpriteSheet.png
 #begin UI/LockLevel.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -448,196 +621,3 @@
 /processorParam:TextureFormat=Color
 /build:UI/LockLevel.png
 
-#begin ../Assets/Aseprite/Traps/Saw/Small Saw-SpriteSheet.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:../Assets/Aseprite/Traps/Saw/Small Saw-SpriteSheet.png;Traps/Saw/SmallSaw.png
-
-#begin ../Assets/Aseprite/Traps/Saw/Medium Saw-SpriteSheet.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:../Assets/Aseprite/Traps/Saw/Medium Saw-SpriteSheet.png;Traps/Saw/MediumSaw.png
-
-#begin ../Assets/Aseprite/Traps/Saw/Large Saw-SpriteSheet.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:../Assets/Aseprite/Traps/Saw/Large Saw-SpriteSheet.png;Traps/Saw/LargeSaw.png
-
-#begin ../Assets/Aseprite/Traps/Spike/Spike.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:../Assets/Aseprite/Traps/Spike/Spike.png;Traps/Spike/Spike.png
-
-#begin ../Assets/Aseprite/Traps/Laser/Laser-SpriteSheet.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:../Assets/Aseprite/Traps/Laser/Laser-SpriteSheet.png;Traps/Laser/Laser.png
-
-#begin ../Assets/Aseprite/Traps/Floating Laser/Floating Laser-SpriteSheet.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:../Assets/Aseprite/Traps/Floating Laser/Floating Laser-SpriteSheet.png;Traps/Laser/FloatingLaser.png
-
-#begin ../Assets/Aseprite/Player/Player-SpriteSheet.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:../Assets/Aseprite/Player/Player-SpriteSheet.png;Player/Player-SpriteSheet.png
-
-#begin ../Assets/SpriteSheet/Player/SpeedBoostPlayer-SpriteSheet.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:../Assets/SpriteSheet/Player/SpeedBoostPlayer-SpriteSheet.png;Player/SpeedBoostPlayer-SpriteSheet
-
-#begin ../Assets/SpriteSheet/Player/SlowDownPlayer-SpriteSheet.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:../Assets/SpriteSheet/Player/SlowDownPlayer-SpriteSheet.png;Player/SlowDownPlayer-SpriteSheet
-
-#begin ../Assets/Aseprite/Player/Pickaxe.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:../Assets/Aseprite/Player/Pickaxe.png;Player/Pickaxe.png
-
-#begin ../Assets/Aseprite/Player/Rope.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:../Assets/Aseprite/Player/Rope.png;Player/Rope.png
-
-#begin ../Assets/background.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:../Assets/background.png;background.png
-/build:UI/LockLevel.png
-
-
-#begin ../Assets/Aseprite/Collectibles/Fish.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:../Assets/Aseprite/Collectibles/Fish.png;Collectibles/Fish
-
-#begin ../Assets/Aseprite/Collectibles/SpeedUp.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:../Assets/Aseprite/Collectibles/SpeedUp.png;Collectibles/SpeedBoost
-
-#begin ../Assets/Aseprite/Collectibles/DoubleJump.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:../Assets/Aseprite/Collectibles/DoubleJump.png;Collectibles/DoubleJump
-
-#begin ../Assets/Aseprite/Collectibles/SlowDown.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:../Assets/Aseprite/Collectibles/SlowDown.png;Collectibles/SlowTime

@@ -89,7 +89,7 @@ public class OptionPanel : Panel
 
         var fullscreenCheckbox = new CheckBox();
         fullscreenCheckbox.Text = "Fullscreen";
-        fullscreenCheckbox.IsChecked = ScreenManager.Instance.isFullScreen;
+        fullscreenCheckbox.IsChecked = ScreenManager.Instance.IsFullScreen;
         fullscreenCheckbox.Checked += (_, _) => ScreenManager.Instance.ToggleFullscreen();
         fullscreenCheckbox.Unchecked += (_, _) => ScreenManager.Instance.ToggleFullscreen();
         settingStackPannel.AddChild(fullscreenCheckbox);

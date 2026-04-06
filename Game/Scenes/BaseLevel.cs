@@ -11,6 +11,9 @@ using MonoGameGum;
 
 public abstract class BaseLevel : Scene
 {
+    public override bool IsPlayScene => true;
+    public bool IsPaused => isPaused;
+
     protected PausedPanel _pausedPanel;
     protected bool isPaused = false;
     protected TimerUI _timerUI;

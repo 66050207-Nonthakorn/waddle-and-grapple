@@ -15,7 +15,7 @@ public class Level3OutroCutscene : BaseCutscene
             "DAMN THOSE MAMMALS! \n WE'VE BEEN PLAYED LIKE A GODDAMN SARDINE!",
             "They have already taken Dr.Lunix and escaped!",
             "We must have been too late.",
-            "Get out, AgenT. Comeback and plan our next move.",
+            "Get out, Agen-T. Comeback and plan our next move.",
             "Next time, we'll get them for sure!"
         ];
     }

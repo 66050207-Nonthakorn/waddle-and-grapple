@@ -156,6 +156,10 @@ public class Player : GameObject
     private const float JumpBufferWindow = 0.2f; // window ที่ buffer jump input (วินาที)
     private bool  _wasGroundedPrev = false;      // debug: ป้องกัน [LAND] spam ทุก frame
 
+    // ── Footstep Sound ────────────────────────────────────────────────────────
+    private float _footstepTimer = 0f;
+    private const float FootstepInterval = 0.32f; // วินาทีระหว่างเสียงก้าว
+
     // ── Rope Dash ─────────────────────────────────────────────────────────────
     private bool _isRopeDashing = false;
 
@@ -459,11 +463,23 @@ public class Player : GameObject
             case PlayerState.Running:
                 _idleTimer = 0f;
                 _animator.Play("walk");
+                _footstepTimer -= dt;
+                if (_footstepTimer <= 0f)
+                {
+                    AudioManager.Instance.PlaySound("SFX/Walk");
+                    _footstepTimer = FootstepInterval;
+                }
                 break;
 
             case PlayerState.Sprinting:
                 _idleTimer = 0f;
                 _animator.Play("run");
+                _footstepTimer -= dt;
+                if (_footstepTimer <= 0f)
+                {
+                    AudioManager.Instance.PlaySound("SFX/Walk");
+                    _footstepTimer = FootstepInterval / SprintMultiplier;
+                }
                 break;
 
             // ── Jump: jumpstart 1 frame → jump ────────────────────────────────
@@ -574,9 +590,6 @@ public class Player : GameObject
             else
                 VelocityX = 0f;
         }
-
-        // TODO (Phase 9): flip sprite
-        // _spriteRenderer.Effects = FacingDirection == -1 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
 
         // อัปเดต state เมื่ออยู่บนพื้น
         if (IsGrounded && State != PlayerState.Crouching)
@@ -716,6 +729,7 @@ public class Player : GameObject
             VelocityY         = JumpForce;
             _coyoteTimer      = 0f;
             _jumpBufferTimer  = 0f;
+            AudioManager.Instance.PlaySound("SFX/Jump");
             ChangeState(PlayerState.Jumping);
         }
         else if (State == PlayerState.WallClinging)
@@ -728,6 +742,7 @@ public class Player : GameObject
             FacingDirection        = -wallSide;
             _jumpBufferTimer       = 0f;
             Console.WriteLine($"[JUMP] WallJump  side={wallSide}  kickVX={VelocityX:F0}  kickVY={VelocityY:F0}  (buffered={!jumpPressed})");
+            AudioManager.Instance.PlaySound("SFX/Jump");
             ChangeState(PlayerState.Jumping);
         }
         else if (State == PlayerState.LedgeGrabbing)
@@ -736,6 +751,7 @@ public class Player : GameObject
             _ledgeReleaseCooldown = 0.25f;
             VelocityY        = JumpForce;
             _jumpBufferTimer = 0f;
+            AudioManager.Instance.PlaySound("SFX/Jump");
             ChangeState(PlayerState.Jumping);
         }
         else if (Pickaxe.IsHooked)
@@ -744,6 +760,7 @@ public class Player : GameObject
             Pickaxe.Recall();
             VelocityY        = JumpForce;
             _jumpBufferTimer = 0f;
+            AudioManager.Instance.PlaySound("SFX/Jump");
             ChangeState(PlayerState.Jumping);
         }
         else if (HasDoubleJump && !HasUsedDoubleJump)
@@ -752,6 +769,7 @@ public class Player : GameObject
             VelocityY         = JumpForce;
             HasUsedDoubleJump = true;
             _jumpBufferTimer  = 0f;
+            AudioManager.Instance.PlaySound("SFX/Jump");
             ChangeState(PlayerState.Jumping);
         }
     }
@@ -1054,7 +1072,10 @@ public class Player : GameObject
             if (VelocityY > 0f)      // ตกลง → ลงจอดบน solid
             {
                 if (!_wasGroundedPrev)
+                {
                     Console.WriteLine($"[LAND]  pos={Position.X:F0},{Position.Y:F0}  impactVY={VelocityY:F0}  state={State}");
+                    AudioManager.Instance.PlaySound("SFX/Landing");
+                }
                 Position   = new Vector2(Position.X, solid.Top - _currentHeight / 2f);
                 IsGrounded = true;
             }
@@ -1221,6 +1242,7 @@ public class Player : GameObject
         VelocityY     = 0f;
         _respawnTimer = RespawnDelaySec;
         Pickaxe.Recall();
+        AudioManager.Instance.PlaySound("SFX/PlayerDead", 0.5f);
         ChangeState(PlayerState.Dead);
         // TODO (Phase 9): play death animation
         // TODO (Phase 8): CheckpointManager.Instance.RespawnPlayer(this)
@@ -1300,7 +1322,8 @@ public class Player : GameObject
                 _slideEndAnimTimer = 0f;                   // reset slideend
                 break;
             case PlayerState.Idle:
-                _idleTimer = 0f;                        // reset breathe timer
+                _idleTimer     = 0f;  // reset breathe timer
+                _footstepTimer = 0f;  // next walk starts a step immediately
                 break;
         }
 

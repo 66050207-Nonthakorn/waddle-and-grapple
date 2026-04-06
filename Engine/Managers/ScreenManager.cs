@@ -13,7 +13,7 @@ public class ScreenManager
     public int previousWidth = 0;
     public int previousHeight = 0;
 
-    public bool isFullScreen { get; private set; } = false;
+    public bool IsFullScreen { get; private set; } = true;
 
     public GraphicsDeviceManager _graphics { get; set; }
     public Rectangle RenderDestination { get; private set; } = Rectangle.Empty;
@@ -43,16 +43,16 @@ public class ScreenManager
 
     public void ToggleFullscreen()
     {
-        isFullScreen = !isFullScreen;
-        
-        if (isFullScreen)
-        {
+        IsFullScreen = !IsFullScreen;
+        ApplyCurrentMode();
+    }
+
+    public void ApplyCurrentMode()
+    {
+        if (IsFullScreen)
             SetFullsceen();
-        }
         else
-        {
             UnsetFullscreen();
-        }
     }
 
     private void SetFullsceen()

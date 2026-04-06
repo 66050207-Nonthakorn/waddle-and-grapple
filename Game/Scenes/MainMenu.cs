@@ -19,6 +19,11 @@ public class MainMenu : Scene
     {
         GumService.Default.Root.Children.Clear(); // Clear any existing Gum UI elements
 
+        if (AudioManager.Instance.CurrentSongName != "Song/MainMenu")
+        {
+            AudioManager.Instance.PlaySong("Song/MainMenu");
+        }
+
         float screenWidth = ScreenManager.Instance.nativeWidth;
         float screenHeight = ScreenManager.Instance.nativeHeight;
 
