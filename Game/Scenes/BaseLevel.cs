@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using WaddleAndGrapple.Engine;
 using WaddleAndGrapple.Game;
 using WaddleAndGrapple.Engine.Components.Physics;
@@ -256,11 +257,22 @@ public abstract class BaseLevel : Scene
         }
 
         isPaused = false;
-        ProgressionManager.Instance.ClearCheckpointProgress(LevelIndex);
-        _skipAbandonSaveOnUnload = true;
+        _pausedPanel.TogglePause(false);
 
-        GumService.Default.Root.Children.Clear();
-        SceneManager.Instance.LoadScene("Level" + LevelIndex);
+        // Reset player to last checkpoint
+        if (_trackedPlayer is Player player)
+        {
+            player.Position = _latestCheckpoint;
+            player.VelocityX = 0f;
+            player.VelocityY = 0f;
+
+            if (player.Pickaxe?.IsHooked == true)
+                player.Pickaxe.Recall();
+        }
+
+        // Reset all enemies to their spawn positions
+        foreach (var enemy in GameObjects.Values.OfType<Enemy>())
+            enemy.ResetToSpawn();
     }
 
     protected virtual void ReturnToLevelSelect()
