@@ -575,9 +575,6 @@ public class Player : GameObject
                 VelocityX = 0f;
         }
 
-        // TODO (Phase 9): flip sprite
-        // _spriteRenderer.Effects = FacingDirection == -1 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
-
         // อัปเดต state เมื่ออยู่บนพื้น
         if (IsGrounded && State != PlayerState.Crouching)
             ChangeState(VelocityX == 0f ? PlayerState.Idle : PlayerState.Running);

@@ -25,7 +25,8 @@ public class IcePickaxe
     private const float FlySpeed       = 900f;  // ความเร็ว projectile (px/s)
     private const float ClimbSpeed     = 150f;  // ความเร็วไต่เชือก (px/s)
     private const float MinRopeLength  = 20f;   // ความยาวเชือกขั้นต่ำ (px)
-    public  const float MaxRopeLength  = 700f;  // ความยาวเชือกสูงสุด (px) — เกินนี้ auto-recall
+    public  const float MaxRopeLength      = 700f;   // ระยะสูงสุดขณะบิน (px) — เกินนี้ hook ไม่ติด
+    private const float MaxSwingRopeLength = 700f * 1.5f; // ความยาวเชือกสูงสุดขณะแกว่ง (px) — เกินนี้ auto-recall
     private const float FlyGravity     = 1200f; // แรงโน้มถ่วงขณะ pickaxe บิน (px/s²)
     private const float RecallSpeed    = 900f;  // ความเร็วดึงเชือกกลับ (px/s)
 
@@ -56,6 +57,17 @@ public class IcePickaxe
     public bool IsLaunchComplete  { get; private set; }
     /// <summary>waypoint ปัจจุบันที่ player ควรเคลื่อนไปหาตอน Launching</summary>
     public Vector2 LaunchTarget   => _bendPoints.Count > 0 ? _bendPoints[0].Position : _hookPosition;
+
+    /// <summary>ความยาวเชือกทั้งหมด = segment ปัจจุบัน + ทุก bend segment</summary>
+    private float TotalRopeLength
+    {
+        get
+        {
+            float total = _ropeLength;
+            foreach (var bp in _bendPoints) total += bp.SegmentLength;
+            return total;
+        }
+    }
 
     public enum PickaxeStateKind { Idle, Charging, Flying, Hooked, Recalling, Launching }
 
@@ -172,7 +184,18 @@ public class IcePickaxe
         );
         foreach (var solid in _owner.Solids)
         {
-            if (newBounds.Intersects(solid)) { _ropeLength = dist; return; }
+            if (newBounds.Intersects(solid))
+            {
+                _ropeLength = dist;
+                float totalStretch = TotalRopeLength;
+                Console.WriteLine($"[ROPE] stretch  total={totalStretch:F0}  maxSwing={MaxSwingRopeLength:F0}");
+                if (totalStretch > MaxSwingRopeLength)
+                {
+                    Console.WriteLine($"[ROPE] swing-exceed total={totalStretch:F0} → recall");
+                    StartRecall();
+                }
+                return;
+            }
         }
 
         _owner.Position = proposed;
@@ -619,6 +642,17 @@ public class IcePickaxe
         if (climbDown) _ropeLength += ClimbSpeed * dt;
 
         _ropeLength = Math.Max(_ropeLength, MinRopeLength);
+
+        float totalHooked = TotalRopeLength;
+        Console.WriteLine($"[ROPE] hooked total={totalHooked:F0}  maxSwing={MaxSwingRopeLength:F0}");
+
+        // เชือกยืดเกิน MaxSwingRopeLength → auto-recall
+        if (totalHooked > MaxSwingRopeLength)
+        {
+            Console.WriteLine($"[ROPE] swing-exceed ropeLen={_ropeLength:F0} → recall");
+            StartRecall();
+            return;
+        }
 
         // ── คลิกซ้าย / E = ดึงเชือกกลับ ─────────────────────────────────────
         if (InputManager.Instance.IsMouseButtonPressed(1) ||

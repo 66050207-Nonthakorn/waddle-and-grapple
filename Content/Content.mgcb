@@ -253,6 +253,78 @@
 /processorParam:TextureFormat=Color
 /build:../Assets/Aseprite/UI/TabletScene.png;UI/TabletScene.png
 
+#begin ../Assets/Aseprite/Parallax/Level1/level1-sky-overflow.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../Assets/Aseprite/Parallax/Level1/level1-sky-overflow.png;Parallax/Level1/level1-sky-overflow.png
+
+#begin ../Assets/Aseprite/Parallax/Level1/level1-background.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../Assets/Aseprite/Parallax/Level1/level1-background.png;Parallax/Level1/level1-background.png
+
+#begin ../Assets/Aseprite/Parallax/Level1/level1-farground.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../Assets/Aseprite/Parallax/Level1/level1-farground.png;Parallax/Level1/level1-farground.png
+
+#begin ../Assets/Aseprite/Parallax/Level1/level1-midground.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../Assets/Aseprite/Parallax/Level1/level1-midground.png;Parallax/Level1/level1-midground.png
+
+#begin ../Assets/Aseprite/Parallax/Level1/level1-nearground.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../Assets/Aseprite/Parallax/Level1/level1-nearground.png;Parallax/Level1/level1-nearground.png
+
+#begin ../Assets/Aseprite/Parallax/Level1/level1-below-overflow.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../Assets/Aseprite/Parallax/Level1/level1-below-overflow.png;Parallax/Level1/level1-below-overflow.png
+
 #begin ../Assets/background.png
 /importer:TextureImporter
 /processor:TextureProcessor
