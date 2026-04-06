@@ -15,6 +15,8 @@ public abstract class Scene
 
     protected Dictionary<string, GameObject> GameObjects { get; } = [];
     private readonly List<string> _deadObjects = [];
+    private readonly List<(string name, GameObject go)> _pendingAdd = [];
+    private bool _isUpdating;
 
     // Tracks which collider pairs were touching in the previous frame.
     private HashSet<ColliderPair> _previousCollisions = [];
@@ -52,6 +54,8 @@ public abstract class Scene
 
     public virtual void Update(GameTime gameTime)
     {
+        _isUpdating = true;
+
         foreach (var gameObject in GameObjects.Values)
         {
             gameObject.UpdateComponents(gameTime);
@@ -64,14 +68,20 @@ public abstract class Scene
 
         ProcessCollisions();
 
+        _isUpdating = false;
+
         foreach (var name in _deadObjects)
         {
             GameObjects.Remove(name);
         }
-
-        // Physics and collision handling update
-
         _deadObjects.Clear();
+
+        // Flush objects spawned during this frame's update
+        foreach (var (name, go) in _pendingAdd)
+        {
+            GameObjects.Add(name, go);
+        }
+        _pendingAdd.Clear();
     }
 
     // -------------------------------------------------------------------------
@@ -234,11 +244,15 @@ public abstract class Scene
         return Camera?.TransformMatrix ?? Matrix.Identity;
     }
 
-    public T AddGameObject<T>(string name) where T : GameObject, new() 
+    public T AddGameObject<T>(string name) where T : GameObject, new()
     {
         T gameObject = new T();
-        GameObjects.Add(name, gameObject);
-        
+
+        if (_isUpdating)
+            _pendingAdd.Add((name, gameObject));
+        else
+            GameObjects.Add(name, gameObject);
+
         return gameObject;
     }
 

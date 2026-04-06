@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework;
 namespace WaddleAndGrapple.Game;
 
 // ── State Machine ─────────────────────────────────────────────────────────────
-public enum EnemyState
+public enum Enemy2State
 {
     Idle,
     Patrolling,
@@ -20,12 +20,13 @@ public enum EnemyState
     GettingUp,        // แตะพื้นหลังตก — รอ animation จบก่อน resume
     ReturningToSpawn,
     Stunned,
+    Blocking,
     Dead,
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-public class Enemy : GameObject
+public class Enemy2 : GameObject
 {
     // ── Physics Constants ─────────────────────────────────────────────────────
     private const float Gravity      = 1200f;  // px/s²
@@ -42,9 +43,9 @@ public class Enemy : GameObject
     public const float DisplayScale = 1f; // เปลี่ยนเป็น 2f พอทำ Level จริงเสร็จ
 
     // ── Movement Speeds ───────────────────────────────────────────────────────
-    public float PatrolSpeed { get; set; } = 100f;
-    public float ChaseSpeed  { get; set; } = 200f;
-    public float ReturnSpeed { get; set; } = 220f;
+    public float PatrolSpeed { get; set; } = 80f;
+    public float ChaseSpeed  { get; set; } = 175f;
+    public float ReturnSpeed { get; set; } = 200f;
 
     // ── AI Ranges ─────────────────────────────────────────────────────────────
     public float PatrolRadius   { get; set; } = 150f; // ระยะ patrol ซ้าย/ขวาจาก spawn
@@ -70,7 +71,7 @@ public class Enemy : GameObject
     public int  FacingDirection { get; set; } = 1; // +1 = ขวา, -1 = ซ้าย
 
     // ── State Machine ─────────────────────────────────────────────────────────
-    public EnemyState State { get; private set; } = EnemyState.Idle;
+    public Enemy2State State { get; private set; } = Enemy2State.Idle;
 
     // ── Spawn / Patrol ────────────────────────────────────────────────────────
     private Vector2 _spawnPosition;
@@ -82,7 +83,7 @@ public class Enemy : GameObject
     // ── Components ────────────────────────────────────────────────────────────
     private SpriteRenderer   _spriteRenderer;
     private Animator         _animator;
-    private EnemyBoxCollider _collider;
+    private Enemy2BoxCollider _collider;
     private List<Rectangle>  _solidRects = [];
 
     // ── Patrol Wait ───────────────────────────────────────────────────────────
@@ -108,6 +109,10 @@ public class Enemy : GameObject
     private const float StunnedAnimDuration = 5 * 0.10f * 10;
     private float _stunnedTimer;
 
+    // Blocking pickaxe
+    private const float BlockDamageAnimDuration = 1 * 1.0f;
+    private float _blockDamageTimer;
+
     // ═════════════════════════════════════════════════════════════════════════
 
     public override void Initialize()
@@ -123,23 +128,24 @@ public class Enemy : GameObject
         // TODO: แทนที่ "Enemy/Enemy-SpriteSheet" ด้วย path spritesheet จริง
         //       และปรับ rows/columns/totalFrames ให้ตรงกับไฟล์
         var f = new AnimationFactory(
-            ResourceManager.Instance.GetTexture("elephant-animation"),
-            rows: 8, columns: 8
+            ResourceManager.Instance.GetTexture("Enemy2-SpriteSheet"),
+            rows: 9, columns: 8
         );
 
         _animator.AddAnimation("standing",   f.CreateFromRow(row: 0, totalFrames: 1, frameDuration: 0.083f));
-        _animator.AddAnimation("emote",      f.CreateFromRow(row: 1, totalFrames: 7, frameDuration: 0.083f, isLooping: false));
+        _animator.AddAnimation("emote",      f.CreateFromRow(row: 1, totalFrames: 6, frameDuration: 0.083f, isLooping: false));
         _animator.AddAnimation("walk",       f.CreateFromRow(row: 2, totalFrames: 8, frameDuration: 0.089f));
         _animator.AddAnimation("run",        f.CreateFromRow(row: 2, totalFrames: 8, frameDuration: 0.060f));
-        _animator.AddAnimation("attack",     f.CreateFromRow(row: 3, totalFrames: 7, frameDuration: 0.083f, isLooping: false));
-        _animator.AddAnimation("dead",       f.CreateFromRow(row: 4, totalFrames: 7, frameDuration: 0.13f, isLooping: false));
-        _animator.AddAnimation("freefall",   f.CreateFromRow(row: 5, totalFrames: 4, frameDuration: 0.083f));
-        _animator.AddAnimation("stunned",    f.CreateFromRow(row: 6, totalFrames: 5, frameDuration: 0.10f));
-        _animator.AddAnimation("gettingup",  f.CreateFromRow(row: 7, totalFrames: 4, frameDuration: 0.10f, isLooping: false));
+        _animator.AddAnimation("attack",     f.CreateFromRow(row: 3, totalFrames: 6, frameDuration: 0.083f, isLooping: false));
+        _animator.AddAnimation("block",      f.CreateFromRow(row: 4, totalFrames: 1, frameDuration: 1.0f));
+        _animator.AddAnimation("dead",       f.CreateFromRow(row: 5, totalFrames: 7, frameDuration: 0.13f, isLooping: false));
+        _animator.AddAnimation("freefall",   f.CreateFromRow(row: 6, totalFrames: 4, frameDuration: 0.083f));
+        _animator.AddAnimation("stunned",    f.CreateFromRow(row: 7, totalFrames: 5, frameDuration: 0.10f));
+        _animator.AddAnimation("gettingup",  f.CreateFromRow(row: 8, totalFrames: 4, frameDuration: 0.10f, isLooping: false));
 
         _animator.Play("standing");
 
-        _collider = AddComponent<EnemyBoxCollider>();
+        _collider = AddComponent<Enemy2BoxCollider>();
         UpdateColliderBounds();
     }
 
@@ -149,11 +155,12 @@ public class Enemy : GameObject
         float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
         if (WorldTime.IsFrozen) return;
-        if (State == EnemyState.Dead)
+
+        // Dead: นับ timer รอ animation จบ แล้ว deactivate
+        if (State == Enemy2State.Dead)
         {
-            // dead animation จบแล้ว → ลบออกจาก scene
-            if (_animator.IsCurrentAnimationFinished && SceneKey != null)
-                SceneManager.Instance.CurrentScene.RemoveGameObject(SceneKey);
+            if (_deadTimer > 0f) _deadTimer -= dt;
+            else base.Active = false;
             return;
         }
 
@@ -164,6 +171,7 @@ public class Enemy : GameObject
         if (_tauntTimer       > 0f) _tauntTimer       -= dt;
         if (_gettingUpTimer   > 0f) _gettingUpTimer   -= dt;
         if (_stunnedTimer     > 0f) _stunnedTimer     -= dt;
+        if (_blockDamageTimer > 0f) _blockDamageTimer -= dt;
 
         // AI decision → ตั้ง VelocityX
         UpdateAI();
@@ -194,46 +202,46 @@ public class Enemy : GameObject
 
         // Leash: ออกไกลเกิน LeashRange → กลับ spawn (ไม่ interrupt ขณะกลางอากาศหรือลุกขึ้น)
         if (distToSpawn > LeashRange
-            && State != EnemyState.ReturningToSpawn
-            && State != EnemyState.FallingDown
-            && State != EnemyState.GettingUp)
+            && State != Enemy2State.ReturningToSpawn
+            && State != Enemy2State.FallingDown
+            && State != Enemy2State.GettingUp)
         {
-            ChangeState(EnemyState.ReturningToSpawn);
+            ChangeState(Enemy2State.ReturningToSpawn);
         }
 
         switch (State)
         {
             // ── Idle: เริ่ม patrol ทันที ──────────────────────────────────────
-            case EnemyState.Idle:
-                ChangeState(EnemyState.Patrolling);
+            case Enemy2State.Idle:
+                ChangeState(Enemy2State.Patrolling);
                 break;
 
             // ── Patrol: เดินไปมาในรัศมี PatrolRadius ─────────────────────────
-            case EnemyState.Patrolling:
+            case Enemy2State.Patrolling:
                 if (playerInSight)
                 {
-                    ChangeState(EnemyState.Taunting);
+                    ChangeState(Enemy2State.Taunting);
                     break;
                 }
                 HandlePatrol();
                 break;
 
             // ── Taunting: หยุด หันหา player เล่น emote แล้วค่อย chase ─────────
-            case EnemyState.Taunting:
+            case Enemy2State.Taunting:
                 VelocityX = 0f;
                 FacingDirection = _player.Position.X > Position.X ? 1 : -1;
                 if (_tauntTimer <= 0f)
-                    ChangeState(EnemyState.Chasing);
+                    ChangeState(Enemy2State.Chasing);
                 break;
 
             // ── Chase: วิ่งตาม player ─────────────────────────────────────────
-            case EnemyState.Chasing:
+            case Enemy2State.Chasing:
                 if (!playerInSight)
                 {
                     // ยังอยู่ในเขต patrol → กลับ patrol; ออกนอกเขต → คืน spawn
                     ChangeState(distToSpawn <= PatrolRadius
-                        ? EnemyState.Patrolling
-                        : EnemyState.ReturningToSpawn);
+                        ? Enemy2State.Patrolling
+                        : Enemy2State.ReturningToSpawn);
                     break;
                 }
                 if (distToPlayer <= AttackRange)
@@ -245,39 +253,46 @@ public class Enemy : GameObject
                 break;
 
             // ── Attacking: หยุดนิ่ง รอ animation จบ ─────────────────────────
-            case EnemyState.Attacking:
+            case Enemy2State.Attacking:
                 VelocityX = 0f;
                 if (_attackAnimTimer <= 0f)
-                    ChangeState(playerInSight ? EnemyState.Chasing : EnemyState.Patrolling);
+                    ChangeState(playerInSight ? Enemy2State.Chasing : Enemy2State.Patrolling);
                 break;
 
             // ── Falling: physics จัดการ ไม่ควบคุม horizontal ──────────────────
-            case EnemyState.FallingDown:
+            case Enemy2State.FallingDown:
                 VelocityX = 0f;
                 break;
 
             // ── Getting Up: หยุดนิ่ง รอ animation จบ → กลับ patrol ───────────
-            case EnemyState.GettingUp:
+            case Enemy2State.GettingUp:
                 VelocityX = 0f;
                 if (_gettingUpTimer <= 0f)
-                    ChangeState(EnemyState.Patrolling);
+                    ChangeState(Enemy2State.Patrolling);
                 break;
 
             // ── Return to Spawn ───────────────────────────────────────────────
-            case EnemyState.ReturningToSpawn:
+            case Enemy2State.ReturningToSpawn:
                 HandleReturnToSpawn();
                 if (distToSpawn < 10f)
                 {
                     VelocityX = 0f;
-                    ChangeState(EnemyState.Patrolling);
+                    ChangeState(Enemy2State.Patrolling);
                 }
                 break;
 
             // Stunned
-            case EnemyState.Stunned:
+            case Enemy2State.Stunned:
                 VelocityX = 0f;
                 if (_stunnedTimer <= 0f)
-                    ChangeState(EnemyState.Patrolling);
+                    ChangeState(Enemy2State.Patrolling);
+                break;
+
+            // Blocking damage
+            case Enemy2State.Blocking:
+                VelocityX = 0f;
+                if (_blockDamageTimer <= 0f)
+                    ChangeState(Enemy2State.Chasing);
                 break;
         }
     }
@@ -324,11 +339,10 @@ public class Enemy : GameObject
     private void TryMeleeAttack()
     {
         if (_attackTimer > 0f) return; // ยังอยู่ใน cooldown
-        if (_player.State == PlayerState.Sliding) return; // player กำลังสไลด์ → ไม่โจมตี
 
         _attackTimer     = AttackCooldown;
         _attackAnimTimer = AttackAnimDuration;
-        ChangeState(EnemyState.Attacking);
+        ChangeState(Enemy2State.Attacking);
 
         // เผชิญหน้ากับ player ก่อน attack
         FacingDirection = _player.Position.X > Position.X ? 1 : -1;
@@ -412,30 +426,33 @@ public class Enemy : GameObject
     {
         switch (State)
         {
-            case EnemyState.Patrolling:
+            case Enemy2State.Patrolling:
                 _animator.Play(_patrolWaitTimer > 0f ? "standing" : "walk");
                 break;
-            case EnemyState.Taunting:
+            case Enemy2State.Taunting:
                 _animator.Play("emote");
                 break;
-            case EnemyState.ReturningToSpawn:
-            case EnemyState.Chasing:
+            case Enemy2State.ReturningToSpawn:
+            case Enemy2State.Chasing:
                 _animator.Play("run");
                 break;
-            case EnemyState.Attacking:
+            case Enemy2State.Attacking:
                 _animator.Play("attack");
                 break;
-            case EnemyState.FallingDown:
+            case Enemy2State.FallingDown:
                 _animator.Play("freefall");
                 break;
-            case EnemyState.GettingUp:
+            case Enemy2State.GettingUp:
                 _animator.Play("gettingup");
                 break;
-            case EnemyState.Dead:
+            case Enemy2State.Dead:
                 _animator.Play("dead");
                 break;
-            case EnemyState.Stunned:
+            case Enemy2State.Stunned:
                 _animator.Play("stunned");
+                break;
+            case Enemy2State.Blocking:
+                _animator.Play("block");
                 break;
             default:
                 _animator.Play("standing");
@@ -452,17 +469,17 @@ public class Enemy : GameObject
         switch (State)
         {
             // เดินตกขอบ → เข้า FallingDown
-            case EnemyState.Patrolling:
-            case EnemyState.Chasing:
-            case EnemyState.ReturningToSpawn:
+            case Enemy2State.Patrolling:
+            case Enemy2State.Chasing:
+            case Enemy2State.ReturningToSpawn:
                 if (!IsGrounded)
-                    ChangeState(EnemyState.FallingDown);
+                    ChangeState(Enemy2State.FallingDown);
                 break;
 
             // แตะพื้นหลังตก → เข้า GettingUp
-            case EnemyState.FallingDown:
+            case Enemy2State.FallingDown:
                 if (IsGrounded)
-                    ChangeState(EnemyState.GettingUp);
+                    ChangeState(Enemy2State.GettingUp);
                 break;
         }
     }
@@ -493,12 +510,12 @@ public class Enemy : GameObject
             {
                 Position = new Vector2(solid.Left - EnemyWidth / 2f, Position.Y);
                 // ชนผนังขณะ patrol → สลับทิศ
-                if (State == EnemyState.Patrolling) _patrolDirection = -1;
+                if (State == Enemy2State.Patrolling) _patrolDirection = -1;
             }
             else if (VelocityX < 0f)
             {
                 Position = new Vector2(solid.Right + EnemyWidth / 2f, Position.Y);
-                if (State == EnemyState.Patrolling) _patrolDirection = 1;
+                if (State == Enemy2State.Patrolling) _patrolDirection = 1;
             }
             VelocityX = 0f;
             UpdateColliderBounds();
@@ -557,26 +574,29 @@ public class Enemy : GameObject
     // State Machine
     // ══════════════════════════════════════════════════════════════════════════
 
-    private void ChangeState(EnemyState newState)
+    private void ChangeState(Enemy2State newState)
     {
         if (State == newState) return;
 
         switch (newState)
         {
-            case EnemyState.Patrolling:
+            case Enemy2State.Patrolling:
                 _patrolWaitTimer = 0f;
                 break;
-            case EnemyState.Taunting:
+            case Enemy2State.Taunting:
                 _tauntTimer = TauntAnimDuration;
                 break;
-            case EnemyState.GettingUp:
+            case Enemy2State.GettingUp:
                 _gettingUpTimer = GettingUpAnimDuration;
                 break;
-            case EnemyState.Dead:
+            case Enemy2State.Dead:
                 _deadTimer = DeadAnimDuration;
                 break;
-            case EnemyState.Stunned:
+            case Enemy2State.Stunned:
                 _stunnedTimer = StunnedAnimDuration;
+                break;
+            case Enemy2State.Blocking:
+                _blockDamageTimer = BlockDamageAnimDuration;
                 break;
         }
 
@@ -593,40 +613,29 @@ public class Enemy : GameObject
     /// <summary>ส่ง solid rectangles จาก Level (เหมือน Player.SetSolids)</summary>
     public void SetSolids(List<Rectangle> solids) => _solidRects = solids;
 
-    /// <summary>key ที่ใช้ตอน AddGameObject — ตั้งจาก Level เพื่อให้ลบตัวเองออกจาก scene ได้</summary>
-    public string SceneKey { get; set; }
-
     public Rectangle ColliderBounds => _collider?.Bounds ?? Rectangle.Empty;
-
-    /// <summary>รีเซ็ต enemy กลับไปยังตำแหน่ง spawn และเริ่ม patrol ใหม่</summary>
-    public void ResetToSpawn()
-    {
-        Position     = _spawnPosition;
-        VelocityX    = 0f;
-        VelocityY    = 0f;
-        IsGrounded   = false;
-        _patrolDirection = 1;
-        State = EnemyState.Idle; // bypass ChangeState guard so Patrolling transition fires
-        ChangeState(EnemyState.Patrolling);
-        _animator.Play("walk");
-    }
 
     /// <summary>เรียกจาก hazard/trap หรือ Player เมื่อต้องการกำจัด enemy</summary>
     public void Die()
     {
-        if (State == EnemyState.Dead) return;
+        if (State == Enemy2State.Dead) return;
         VelocityX = 0f;
         VelocityY = 0f;
-        ChangeState(EnemyState.Dead);
-        _animator.Play("dead"); // force ทันที — Update() จะ return early ก่อนถึง SyncAnimation
+        ChangeState(Enemy2State.Dead);
     }
 
     public void Stun()
     {
-        if (State == EnemyState.Stunned) return;
-        ChangeState(EnemyState.Stunned);
+        if (State == Enemy2State.Stunned) return;
+        ChangeState(Enemy2State.Stunned);
+    }
+
+    public void BlockDamage()
+    {
+        if (State == Enemy2State.Blocking) return;
+        ChangeState(Enemy2State.Blocking);
     }
 }
 
 // ── Concrete BoxCollider สำหรับ Enemy ────────────────────────────────────────
-internal sealed class EnemyBoxCollider : BoxCollider { }
+internal sealed class Enemy2BoxCollider : BoxCollider { }
