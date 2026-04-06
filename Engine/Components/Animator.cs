@@ -8,6 +8,7 @@ public class Animator : Component
     private readonly Dictionary<string, Animation> _animations = [];
     private Animation _currentAnimation;
     private string _currentName;
+    public bool UseBottomLeftAnchor { get; set; } = false;
 
     public string CurrentAnimationName => _currentName;
     public int CurrentLoopCount => _currentAnimation?.LoopCount ?? 0;
@@ -60,9 +61,12 @@ public class Animator : Component
             renderer.Texture          = _currentAnimation.Sheet;
             renderer.SourceRectangle  = _currentAnimation.CurrentSourceRect;
 
-            // Re-centre the origin based on the frame size
+            // Default animations use centered origin. Some world objects (e.g. traps/collectibles)
+            // can opt into left-bottom anchor for placement consistency.
             var r = _currentAnimation.CurrentSourceRect;
-            renderer.Origin = new Vector2(r.Width / 2f, r.Height / 2f);
+            renderer.Origin = UseBottomLeftAnchor
+                ? new Vector2(0f, r.Height)
+                : new Vector2(r.Width / 2f, r.Height / 2f);
         }
     }
 }

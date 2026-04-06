@@ -109,6 +109,11 @@
                  "point":true,
                  "properties":[
                         {
+                         "name":"AlwaysExtended",
+                         "type":"bool",
+                         "value":true
+                        }, 
+                        {
                          "name":"SpikeTiles",
                          "type":"int",
                          "value":3
@@ -493,6 +498,147 @@
         }, 
         {
          "draworder":"topdown",
+         "id":6,
+         "name":"Collectable",
+         "objects":[
+                {
+                 "height":0,
+                 "id":27,
+                 "name":"",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"Fish",
+                 "visible":true,
+                 "width":0,
+                 "x":800,
+                 "y":224
+                }, 
+                {
+                 "height":0,
+                 "id":28,
+                 "name":"",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"Fish",
+                 "visible":true,
+                 "width":0,
+                 "x":1712,
+                 "y":448
+                }, 
+                {
+                 "height":0,
+                 "id":29,
+                 "name":"",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"Fish",
+                 "visible":true,
+                 "width":0,
+                 "x":1984,
+                 "y":112
+                }, 
+                {
+                 "height":0,
+                 "id":30,
+                 "name":"",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"Fish",
+                 "visible":true,
+                 "width":0,
+                 "x":2720,
+                 "y":480
+                }, 
+                {
+                 "height":0,
+                 "id":31,
+                 "name":"",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"Fish",
+                 "visible":true,
+                 "width":0,
+                 "x":3280,
+                 "y":464
+                }, 
+                {
+                 "height":0,
+                 "id":32,
+                 "name":"",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"Fish",
+                 "visible":true,
+                 "width":0,
+                 "x":3696,
+                 "y":240
+                }, 
+                {
+                 "height":0,
+                 "id":33,
+                 "name":"",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"DoubleJumpPowerUp",
+                 "visible":true,
+                 "width":0,
+                 "x":1872,
+                 "y":448
+                }, 
+                {
+                 "height":0,
+                 "id":34,
+                 "name":"",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"DoubleJumpPowerUp",
+                 "visible":true,
+                 "width":0,
+                 "x":2080,
+                 "y":288
+                }, 
+                {
+                 "height":0,
+                 "id":35,
+                 "name":"",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"SpeedBoostPowerUp",
+                 "visible":true,
+                 "width":0,
+                 "x":3280,
+                 "y":160
+                }, 
+                {
+                 "height":0,
+                 "id":36,
+                 "name":"",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"SpeedBoostPowerUp",
+                 "visible":true,
+                 "width":0,
+                 "x":2208,
+                 "y":272
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
          "id":2,
          "name":"Room",
          "objects":[
@@ -550,8 +696,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":6,
- "nextobjectid":27,
+ "nextlayerid":7,
+ "nextobjectid":37,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.1",

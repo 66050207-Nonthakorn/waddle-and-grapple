@@ -38,7 +38,7 @@ public abstract class PowerUp : Collectible
     {
         base.Initialize(); // ตั้ง collider
 
-        Scale = new Vector2(2f, 2f);
+        Scale = new Vector2(1f, 1f);
 
         var sheet  = ResourceManager.Instance.GetTexture(SpriteName);
         const int FrameSize = 16;
@@ -49,6 +49,7 @@ public abstract class PowerUp : Collectible
 
         var anim     = new Animation(sheet, frames, frameDuration: 0.1f, isLooping: true);
         var animator = AddComponent<Animator>();
+        animator.UseBottomLeftAnchor = true;
         animator.AddAnimation("idle", anim);
         animator.Play("idle");
 

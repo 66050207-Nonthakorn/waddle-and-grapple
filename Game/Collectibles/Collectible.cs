@@ -62,8 +62,8 @@ public abstract class Collectible : GameObject
     private void SyncColliderBounds()
     {
         _collider.Bounds = new Rectangle(
-            (int)(Position.X - ColliderWidth  / 2f),
-            (int)(Position.Y - ColliderHeight / 2f),
+            (int)Position.X,
+            (int)(Position.Y - ColliderHeight),
             ColliderWidth,
             ColliderHeight);
     }

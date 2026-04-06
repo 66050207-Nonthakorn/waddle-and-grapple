@@ -1,9 +1,41 @@
 {
-  "Levels": [],
-  "PlayedCutscenes": [],
-  "CurrentLevelIndex": 0,
-  "LastCompletedLevelIndex": 0,
-  "LastCompletionTime": "00:00:00",
-  "LastCompletionCollectedFishCount": 0,
+  "Levels": [
+    {
+      "LevelIndex": 1,
+      "IsCompleted": true,
+      "BestCompletionTime": "00:01:17.6168359",
+      "IsCurrentLevel": false,
+      "CurrentLevelTime": "00:01:17.6168359",
+      "CheckpointPosition": {
+        "X": 300,
+        "Y": 390
+      },
+      "CurrentCollectedFishCount": 0,
+      "BestCollectedFishCount": 3,
+      "TotalFishCount": 0
+    },
+    {
+      "LevelIndex": 2,
+      "IsCompleted": false,
+      "BestCompletionTime": null,
+      "IsCurrentLevel": true,
+      "CurrentLevelTime": "00:00:18.3000625",
+      "CheckpointPosition": {
+        "X": 399.9994,
+        "Y": 704
+      },
+      "CurrentCollectedFishCount": 0,
+      "BestCollectedFishCount": 0,
+      "TotalFishCount": 0
+    }
+  ],
+  "PlayedCutscenes": [
+    "level1_intro",
+    "level2_intro"
+  ],
+  "CurrentLevelIndex": 2,
+  "LastCompletedLevelIndex": 1,
+  "LastCompletionTime": "00:01:17.6168359",
+  "LastCompletionCollectedFishCount": 3,
   "LastCompletionTotalFishCount": 0
 }
