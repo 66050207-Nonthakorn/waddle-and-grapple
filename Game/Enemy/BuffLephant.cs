@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework;
 namespace WaddleAndGrapple.Game;
 
 // ── State Machine ─────────────────────────────────────────────────────────────
-public enum Enemy1State
+public enum BuffLephantState
 {
     Idle,
     Patrolling,
@@ -20,12 +20,13 @@ public enum Enemy1State
     GettingUp,        // แตะพื้นหลังตก — รอ animation จบก่อน resume
     ReturningToSpawn,
     Stunned,
+    Blocking,
     Dead,
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-public class Enemy1 : GameObject
+public class BuffLephant : GameObject
 {
     // ── Physics Constants ─────────────────────────────────────────────────────
     private const float Gravity      = 1200f;  // px/s²
@@ -42,9 +43,9 @@ public class Enemy1 : GameObject
     public const float DisplayScale = 1f; // เปลี่ยนเป็น 2f พอทำ Level จริงเสร็จ
 
     // ── Movement Speeds ───────────────────────────────────────────────────────
-    public float PatrolSpeed { get; set; } = 100f;
-    public float ChaseSpeed  { get; set; } = 200f;
-    public float ReturnSpeed { get; set; } = 220f;
+    public float PatrolSpeed { get; set; } = 80f;
+    public float ChaseSpeed  { get; set; } = 175f;
+    public float ReturnSpeed { get; set; } = 200f;
 
     // ── AI Ranges ─────────────────────────────────────────────────────────────
     public float PatrolRadius   { get; set; } = 150f; // ระยะ patrol ซ้าย/ขวาจาก spawn
@@ -70,7 +71,7 @@ public class Enemy1 : GameObject
     public int  FacingDirection { get; set; } = 1; // +1 = ขวา, -1 = ซ้าย
 
     // ── State Machine ─────────────────────────────────────────────────────────
-    public Enemy1State State { get; private set; } = Enemy1State.Idle;
+    public BuffLephantState State { get; private set; } = BuffLephantState.Idle;
 
     // ── Spawn / Patrol ────────────────────────────────────────────────────────
     private Vector2 _spawnPosition;
@@ -82,7 +83,7 @@ public class Enemy1 : GameObject
     // ── Components ────────────────────────────────────────────────────────────
     private SpriteRenderer   _spriteRenderer;
     private Animator         _animator;
-    private EnemyBoxCollider _collider;
+    private BuffLephantBoxCollider _collider;
     private List<Rectangle>  _solidRects = [];
 
     // ── Patrol Wait ───────────────────────────────────────────────────────────
@@ -108,6 +109,10 @@ public class Enemy1 : GameObject
     private const float StunnedAnimDuration = 5 * 0.10f * 10;
     private float _stunnedTimer;
 
+    // Blocking pickaxe
+    private const float BlockDamageAnimDuration = 1 * 1.0f;
+    private float _blockDamageTimer;
+
     // ═════════════════════════════════════════════════════════════════════════
 
     public override void Initialize()
@@ -123,23 +128,24 @@ public class Enemy1 : GameObject
         // TODO: แทนที่ "Enemy/Enemy-SpriteSheet" ด้วย path spritesheet จริง
         //       และปรับ rows/columns/totalFrames ให้ตรงกับไฟล์
         var f = new AnimationFactory(
-            ResourceManager.Instance.GetTexture("elephant-animation"),
-            rows: 8, columns: 8
+            ResourceManager.Instance.GetTexture("Enemy2-SpriteSheet"),
+            rows: 9, columns: 8
         );
 
         _animator.AddAnimation("standing",   f.CreateFromRow(row: 0, totalFrames: 1, frameDuration: 0.083f));
-        _animator.AddAnimation("emote",      f.CreateFromRow(row: 1, totalFrames: 7, frameDuration: 0.083f, isLooping: false));
+        _animator.AddAnimation("emote",      f.CreateFromRow(row: 1, totalFrames: 6, frameDuration: 0.083f, isLooping: false));
         _animator.AddAnimation("walk",       f.CreateFromRow(row: 2, totalFrames: 8, frameDuration: 0.089f));
         _animator.AddAnimation("run",        f.CreateFromRow(row: 2, totalFrames: 8, frameDuration: 0.060f));
-        _animator.AddAnimation("attack",     f.CreateFromRow(row: 3, totalFrames: 7, frameDuration: 0.083f, isLooping: false));
-        _animator.AddAnimation("dead",       f.CreateFromRow(row: 4, totalFrames: 7, frameDuration: 0.13f, isLooping: false));
-        _animator.AddAnimation("freefall",   f.CreateFromRow(row: 5, totalFrames: 4, frameDuration: 0.083f));
-        _animator.AddAnimation("stunned",    f.CreateFromRow(row: 6, totalFrames: 5, frameDuration: 0.10f));
-        _animator.AddAnimation("gettingup",  f.CreateFromRow(row: 7, totalFrames: 4, frameDuration: 0.10f, isLooping: false));
+        _animator.AddAnimation("attack",     f.CreateFromRow(row: 3, totalFrames: 6, frameDuration: 0.083f, isLooping: false));
+        _animator.AddAnimation("block",      f.CreateFromRow(row: 4, totalFrames: 1, frameDuration: 1.0f));
+        _animator.AddAnimation("dead",       f.CreateFromRow(row: 5, totalFrames: 7, frameDuration: 0.13f, isLooping: false));
+        _animator.AddAnimation("freefall",   f.CreateFromRow(row: 6, totalFrames: 4, frameDuration: 0.083f));
+        _animator.AddAnimation("stunned",    f.CreateFromRow(row: 7, totalFrames: 5, frameDuration: 0.10f));
+        _animator.AddAnimation("gettingup",  f.CreateFromRow(row: 8, totalFrames: 4, frameDuration: 0.10f, isLooping: false));
 
         _animator.Play("standing");
 
-        _collider = AddComponent<EnemyBoxCollider>();
+        _collider = AddComponent<BuffLephantBoxCollider>();
         UpdateColliderBounds();
     }
 
@@ -151,11 +157,10 @@ public class Enemy1 : GameObject
         if (WorldTime.IsFrozen) return;
 
         // Dead: นับ timer รอ animation จบ แล้ว deactivate
-        if (State == Enemy1State.Dead)
+        if (State == BuffLephantState.Dead)
         {
-            // dead animation จบแล้ว → ลบออกจาก scene
-            if (_animator.IsCurrentAnimationFinished && SceneKey != null)
-                SceneManager.Instance.CurrentScene.RemoveGameObject(SceneKey);
+            if (_deadTimer > 0f) _deadTimer -= dt;
+            else base.Active = false;
             return;
         }
 
@@ -166,6 +171,7 @@ public class Enemy1 : GameObject
         if (_tauntTimer       > 0f) _tauntTimer       -= dt;
         if (_gettingUpTimer   > 0f) _gettingUpTimer   -= dt;
         if (_stunnedTimer     > 0f) _stunnedTimer     -= dt;
+        if (_blockDamageTimer > 0f) _blockDamageTimer -= dt;
 
         // AI decision → ตั้ง VelocityX
         UpdateAI();
@@ -196,46 +202,46 @@ public class Enemy1 : GameObject
 
         // Leash: ออกไกลเกิน LeashRange → กลับ spawn (ไม่ interrupt ขณะกลางอากาศหรือลุกขึ้น)
         if (distToSpawn > LeashRange
-            && State != Enemy1State.ReturningToSpawn
-            && State != Enemy1State.FallingDown
-            && State != Enemy1State.GettingUp)
+            && State != BuffLephantState.ReturningToSpawn
+            && State != BuffLephantState.FallingDown
+            && State != BuffLephantState.GettingUp)
         {
-            ChangeState(Enemy1State.ReturningToSpawn);
+            ChangeState(BuffLephantState.ReturningToSpawn);
         }
 
         switch (State)
         {
             // ── Idle: เริ่ม patrol ทันที ──────────────────────────────────────
-            case Enemy1State.Idle:
-                ChangeState(Enemy1State.Patrolling);
+            case BuffLephantState.Idle:
+                ChangeState(BuffLephantState.Patrolling);
                 break;
 
             // ── Patrol: เดินไปมาในรัศมี PatrolRadius ─────────────────────────
-            case Enemy1State.Patrolling:
+            case BuffLephantState.Patrolling:
                 if (playerInSight)
                 {
-                    ChangeState(Enemy1State.Taunting);
+                    ChangeState(BuffLephantState.Taunting);
                     break;
                 }
                 HandlePatrol();
                 break;
 
             // ── Taunting: หยุด หันหา player เล่น emote แล้วค่อย chase ─────────
-            case Enemy1State.Taunting:
+            case BuffLephantState.Taunting:
                 VelocityX = 0f;
                 FacingDirection = _player.Position.X > Position.X ? 1 : -1;
                 if (_tauntTimer <= 0f)
-                    ChangeState(Enemy1State.Chasing);
+                    ChangeState(BuffLephantState.Chasing);
                 break;
 
             // ── Chase: วิ่งตาม player ─────────────────────────────────────────
-            case Enemy1State.Chasing:
+            case BuffLephantState.Chasing:
                 if (!playerInSight)
                 {
                     // ยังอยู่ในเขต patrol → กลับ patrol; ออกนอกเขต → คืน spawn
                     ChangeState(distToSpawn <= PatrolRadius
-                        ? Enemy1State.Patrolling
-                        : Enemy1State.ReturningToSpawn);
+                        ? BuffLephantState.Patrolling
+                        : BuffLephantState.ReturningToSpawn);
                     break;
                 }
                 if (distToPlayer <= AttackRange)
@@ -247,39 +253,46 @@ public class Enemy1 : GameObject
                 break;
 
             // ── Attacking: หยุดนิ่ง รอ animation จบ ─────────────────────────
-            case Enemy1State.Attacking:
+            case BuffLephantState.Attacking:
                 VelocityX = 0f;
                 if (_attackAnimTimer <= 0f)
-                    ChangeState(playerInSight ? Enemy1State.Chasing : Enemy1State.Patrolling);
+                    ChangeState(playerInSight ? BuffLephantState.Chasing : BuffLephantState.Patrolling);
                 break;
 
             // ── Falling: physics จัดการ ไม่ควบคุม horizontal ──────────────────
-            case Enemy1State.FallingDown:
+            case BuffLephantState.FallingDown:
                 VelocityX = 0f;
                 break;
 
             // ── Getting Up: หยุดนิ่ง รอ animation จบ → กลับ patrol ───────────
-            case Enemy1State.GettingUp:
+            case BuffLephantState.GettingUp:
                 VelocityX = 0f;
                 if (_gettingUpTimer <= 0f)
-                    ChangeState(Enemy1State.Patrolling);
+                    ChangeState(BuffLephantState.Patrolling);
                 break;
 
             // ── Return to Spawn ───────────────────────────────────────────────
-            case Enemy1State.ReturningToSpawn:
+            case BuffLephantState.ReturningToSpawn:
                 HandleReturnToSpawn();
                 if (distToSpawn < 10f)
                 {
                     VelocityX = 0f;
-                    ChangeState(Enemy1State.Patrolling);
+                    ChangeState(BuffLephantState.Patrolling);
                 }
                 break;
 
             // Stunned
-            case Enemy1State.Stunned:
+            case BuffLephantState.Stunned:
                 VelocityX = 0f;
                 if (_stunnedTimer <= 0f)
-                    ChangeState(Enemy1State.Patrolling);
+                    ChangeState(BuffLephantState.Patrolling);
+                break;
+
+            // Blocking damage
+            case BuffLephantState.Blocking:
+                VelocityX = 0f;
+                if (_blockDamageTimer <= 0f)
+                    ChangeState(BuffLephantState.Chasing);
                 break;
         }
     }
@@ -326,11 +339,10 @@ public class Enemy1 : GameObject
     private void TryMeleeAttack()
     {
         if (_attackTimer > 0f) return; // ยังอยู่ใน cooldown
-        if (_player.State == PlayerState.Sliding) return; // player กำลังสไลด์ → ไม่โจมตี
 
         _attackTimer     = AttackCooldown;
         _attackAnimTimer = AttackAnimDuration;
-        ChangeState(Enemy1State.Attacking);
+        ChangeState(BuffLephantState.Attacking);
 
         // เผชิญหน้ากับ player ก่อน attack
         FacingDirection = _player.Position.X > Position.X ? 1 : -1;
@@ -414,30 +426,33 @@ public class Enemy1 : GameObject
     {
         switch (State)
         {
-            case Enemy1State.Patrolling:
+            case BuffLephantState.Patrolling:
                 _animator.Play(_patrolWaitTimer > 0f ? "standing" : "walk");
                 break;
-            case Enemy1State.Taunting:
+            case BuffLephantState.Taunting:
                 _animator.Play("emote");
                 break;
-            case Enemy1State.ReturningToSpawn:
-            case Enemy1State.Chasing:
+            case BuffLephantState.ReturningToSpawn:
+            case BuffLephantState.Chasing:
                 _animator.Play("run");
                 break;
-            case Enemy1State.Attacking:
+            case BuffLephantState.Attacking:
                 _animator.Play("attack");
                 break;
-            case Enemy1State.FallingDown:
+            case BuffLephantState.FallingDown:
                 _animator.Play("freefall");
                 break;
-            case Enemy1State.GettingUp:
+            case BuffLephantState.GettingUp:
                 _animator.Play("gettingup");
                 break;
-            case Enemy1State.Dead:
+            case BuffLephantState.Dead:
                 _animator.Play("dead");
                 break;
-            case Enemy1State.Stunned:
+            case BuffLephantState.Stunned:
                 _animator.Play("stunned");
+                break;
+            case BuffLephantState.Blocking:
+                _animator.Play("block");
                 break;
             default:
                 _animator.Play("standing");
@@ -454,17 +469,17 @@ public class Enemy1 : GameObject
         switch (State)
         {
             // เดินตกขอบ → เข้า FallingDown
-            case Enemy1State.Patrolling:
-            case Enemy1State.Chasing:
-            case Enemy1State.ReturningToSpawn:
+            case BuffLephantState.Patrolling:
+            case BuffLephantState.Chasing:
+            case BuffLephantState.ReturningToSpawn:
                 if (!IsGrounded)
-                    ChangeState(Enemy1State.FallingDown);
+                    ChangeState(BuffLephantState.FallingDown);
                 break;
 
             // แตะพื้นหลังตก → เข้า GettingUp
-            case Enemy1State.FallingDown:
+            case BuffLephantState.FallingDown:
                 if (IsGrounded)
-                    ChangeState(Enemy1State.GettingUp);
+                    ChangeState(BuffLephantState.GettingUp);
                 break;
         }
     }
@@ -495,12 +510,12 @@ public class Enemy1 : GameObject
             {
                 Position = new Vector2(solid.Left - EnemyWidth / 2f, Position.Y);
                 // ชนผนังขณะ patrol → สลับทิศ
-                if (State == Enemy1State.Patrolling) _patrolDirection = -1;
+                if (State == BuffLephantState.Patrolling) _patrolDirection = -1;
             }
             else if (VelocityX < 0f)
             {
                 Position = new Vector2(solid.Right + EnemyWidth / 2f, Position.Y);
-                if (State == Enemy1State.Patrolling) _patrolDirection = 1;
+                if (State == BuffLephantState.Patrolling) _patrolDirection = 1;
             }
             VelocityX = 0f;
             UpdateColliderBounds();
@@ -559,26 +574,29 @@ public class Enemy1 : GameObject
     // State Machine
     // ══════════════════════════════════════════════════════════════════════════
 
-    private void ChangeState(Enemy1State newState)
+    private void ChangeState(BuffLephantState newState)
     {
         if (State == newState) return;
 
         switch (newState)
         {
-            case Enemy1State.Patrolling:
+            case BuffLephantState.Patrolling:
                 _patrolWaitTimer = 0f;
                 break;
-            case Enemy1State.Taunting:
+            case BuffLephantState.Taunting:
                 _tauntTimer = TauntAnimDuration;
                 break;
-            case Enemy1State.GettingUp:
+            case BuffLephantState.GettingUp:
                 _gettingUpTimer = GettingUpAnimDuration;
                 break;
-            case Enemy1State.Dead:
+            case BuffLephantState.Dead:
                 _deadTimer = DeadAnimDuration;
                 break;
-            case Enemy1State.Stunned:
+            case BuffLephantState.Stunned:
                 _stunnedTimer = StunnedAnimDuration;
+                break;
+            case BuffLephantState.Blocking:
+                _blockDamageTimer = BlockDamageAnimDuration;
                 break;
         }
 
@@ -595,39 +613,29 @@ public class Enemy1 : GameObject
     /// <summary>ส่ง solid rectangles จาก Level (เหมือน Player.SetSolids)</summary>
     public void SetSolids(List<Rectangle> solids) => _solidRects = solids;
 
-    /// <summary>key ที่ใช้ตอน AddGameObject — ตั้งจาก Level เพื่อให้ลบตัวเองออกจาก scene ได้</summary>
-    public string SceneKey { get; set; }
-
     public Rectangle ColliderBounds => _collider?.Bounds ?? Rectangle.Empty;
-
-    /// <summary>รีเซ็ต enemy กลับไปยังตำแหน่ง spawn และเริ่ม patrol ใหม่</summary>
-    public void ResetToSpawn()
-    {
-        Position     = _spawnPosition;
-        VelocityX    = 0f;
-        VelocityY    = 0f;
-        IsGrounded   = false;
-        _patrolDirection = 1;
-        State = EnemyState.Idle; // bypass ChangeState guard so Patrolling transition fires
-        ChangeState(EnemyState.Patrolling);
-        _animator.Play("walk");
-    }
 
     /// <summary>เรียกจาก hazard/trap หรือ Player เมื่อต้องการกำจัด enemy</summary>
     public void Die()
     {
-        if (State == Enemy1State.Dead) return;
+        if (State == BuffLephantState.Dead) return;
         VelocityX = 0f;
         VelocityY = 0f;
-        ChangeState(Enemy1State.Dead);
+        ChangeState(BuffLephantState.Dead);
     }
 
     public void Stun()
     {
-        if (State == Enemy1State.Stunned) return;
-        ChangeState(Enemy1State.Stunned);
+        if (State == BuffLephantState.Stunned) return;
+        ChangeState(BuffLephantState.Stunned);
+    }
+
+    public void BlockDamage()
+    {
+        if (State == BuffLephantState.Blocking) return;
+        ChangeState(BuffLephantState.Blocking);
     }
 }
 
 // ── Concrete BoxCollider สำหรับ Enemy ────────────────────────────────────────
-internal sealed class EnemyBoxCollider : BoxCollider { }
+internal sealed class BuffLephantBoxCollider : BoxCollider { }

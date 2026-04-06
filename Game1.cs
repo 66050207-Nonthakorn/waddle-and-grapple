@@ -48,6 +48,8 @@ public class Game1 : Microsoft.Xna.Framework.Game
 
         CalculateRenderTargetSize();
 
+        SceneManager.Instance.AddScene<MainScene>("mainScene");
+
         // Set up scenes
         SceneManager.Instance.AddScene<MainMenu>("main");
         SceneManager.Instance.AddScene<LevelSelect>("levelSelect");
@@ -60,8 +62,6 @@ public class Game1 : Microsoft.Xna.Framework.Game
         SceneManager.Instance.AddScene<Level3OutroCutscene>(Level3OutroCutscene.SceneName);
         SceneManager.Instance.AddScene<LevelComplete>("levelcomplete");
         
-        // SceneManager.Instance.AddScene<GameMapLoaderDemo>("tileloaderdemo");
-
         ScreenManager.Instance.ApplyCurrentMode();
 
         base.Initialize();
@@ -113,7 +113,7 @@ public class Game1 : Microsoft.Xna.Framework.Game
 
         ProgressionManager.Instance.LoadFromFile(ProgressionManager.Instance.SaveFilePath);
 
-        SceneManager.Instance.LoadScene("main");
+        SceneManager.Instance.LoadScene("mainScene");
     }
 
     private void OnClientSizeChanged(object sender, EventArgs e)

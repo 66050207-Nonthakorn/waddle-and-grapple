@@ -68,7 +68,7 @@ namespace WaddleAndGrapple.Game;
 public class GameMapLoader
 {
     private readonly MapLoader _loader;
-    private Player _player;
+    private readonly Player _player;
 
     public GameMapLoader(Scene scene, string mapPath, Player player)
     {
@@ -90,15 +90,25 @@ public class GameMapLoader
 
     private void RegisterAll()
     {
+        // Traps
         RegisterSawTrap();
         RegisterLaserTrap();
         RegisterSpikeTrap();
-        RegisterEnemy();
+        
+        // Coin
         RegisterFish();
         RegisterGoalFlag();
+        
+        // Power-ups
         RegisterDoubleJumpPowerUp();
         RegisterSpeedBoostPowerUp();
         RegisterSlowTimePowerUp();
+
+        // Enemies
+        RegisterGruntLephant();
+        RegisterBuffLephant();
+        RegisterThrowLephant();
+        RegisterE1eP4MKII();
     }
 
     private void RegisterSawTrap()
@@ -148,9 +158,9 @@ public class GameMapLoader
         });
     }
 
-    private void RegisterEnemy()
+    private void RegisterGruntLephant()
     {
-        _loader.Register<Enemy>("Enemy", (enemy, obj) =>
+        _loader.Register<GruntLephant>("GruntLephant", (enemy, obj) =>
         {
             enemy.PatrolRadius   = obj.FloatProp("PatrolRadius",   enemy.PatrolRadius);
             enemy.DetectionRange = obj.FloatProp("DetectionRange", enemy.DetectionRange);
@@ -159,6 +169,41 @@ public class GameMapLoader
             enemy.PatrolSpeed    = obj.FloatProp("PatrolSpeed",    enemy.PatrolSpeed);
             enemy.ChaseSpeed     = obj.FloatProp("ChaseSpeed",     enemy.ChaseSpeed);
             enemy.ReturnSpeed    = obj.FloatProp("ReturnSpeed",    enemy.ReturnSpeed);
+            enemy.SetPlayer(_player);
+        });
+    }
+
+    private void RegisterBuffLephant()
+    {
+        _loader.Register<BuffLephant>("BuffLephant", (enemy, obj) =>
+        {
+            enemy.PatrolRadius   = obj.FloatProp("PatrolRadius",   enemy.PatrolRadius);
+            enemy.DetectionRange = obj.FloatProp("DetectionRange", enemy.DetectionRange);
+            enemy.AttackRange    = obj.FloatProp("AttackRange",    enemy.AttackRange);
+            enemy.LeashRange     = obj.FloatProp("LeashRange",     enemy.LeashRange);
+            enemy.PatrolSpeed    = obj.FloatProp("PatrolSpeed",    enemy.PatrolSpeed);
+            enemy.ChaseSpeed     = obj.FloatProp("ChaseSpeed",     enemy.ChaseSpeed);
+            enemy.ReturnSpeed    = obj.FloatProp("ReturnSpeed",    enemy.ReturnSpeed);
+            enemy.SetPlayer(_player);
+        });
+    }
+
+    private void RegisterThrowLephant()
+    {
+        _loader.Register<ThrowLephant>("ThrowLephant", (enemy, obj) =>
+        {
+            enemy.DetectionRange = obj.FloatProp("DetectionRange", enemy.DetectionRange);
+            enemy.AttackCooldown = obj.FloatProp("AttackCooldown", enemy.AttackCooldown);
+            enemy.SetPlayer(_player);
+        });
+    }
+
+    private void RegisterE1eP4MKII()
+    {
+        _loader.Register<E1eP4MKII>("E1eP4MKII", (enemy, obj) =>
+        {
+            enemy.DetectionRange = obj.FloatProp("DetectionRange", enemy.DetectionRange);
+            enemy.KillZoneRange  = obj.FloatProp("KillZoneRange",  enemy.KillZoneRange);
             enemy.SetPlayer(_player);
         });
     }

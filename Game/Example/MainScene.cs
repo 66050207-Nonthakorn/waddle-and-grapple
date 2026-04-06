@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using GamePlayer = WaddleAndGrapple.Game.Player;
-using GameEnemy = WaddleAndGrapple.Game.Enemy4;
+using GameEnemy = WaddleAndGrapple.Game.E1eP4MKII;
 
 namespace WaddleAndGrapple.Game.Example;
 
