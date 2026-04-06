@@ -12,12 +12,12 @@ public class Level2IntroCutscene : BaseCutscene
     {
         return
         [
-            "Good job on infiltrating the site, AgenT. \n But this is just the beginning.",
+            "Good job on infiltrating the site, Agen-T. \n But this is just the beginning.",
             "Dr.Lunix is being held in a heavily fortified area within the construction site. \n Expect heavy resistance from the P'an P'an Syndicate's forces.",
             "Looks for any suspicious buildings where they might be keeping him.",
             "If you find any enemy soldiers to tough to take down, \n try getting them of their feet by sliding into them.",
-            "Use your agility to your advantage, AgenT. \n Keep moving and use the environment to outmaneuver your foes.",
-            "Stay vigilant, AgenT.",
+            "Use your agility to your advantage, Agen-T. \n Keep moving and use the environment to outmaneuver your foes.",
+            "Stay vigilant, Agen-T.",
         ];
     }
 

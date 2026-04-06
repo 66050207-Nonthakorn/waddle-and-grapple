@@ -9,23 +9,16 @@ using Microsoft.Xna.Framework;
 namespace WaddleAndGrapple.Game;
 
 // ── State Machine ─────────────────────────────────────────────────────────────
-public enum EnemyState
+public enum ThrowLephantState
 {
     Idle,
-    Patrolling,
-    Taunting,         // เล่น emote เมื่อเห็น player ก่อน chase
-    Chasing,
     Attacking,
-    FallingDown,      // ตกขอบ — อยู่กลางอากาศ
-    GettingUp,        // แตะพื้นหลังตก — รอ animation จบก่อน resume
-    ReturningToSpawn,
-    Stunned,
     Dead,
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-public class Enemy : GameObject
+public class ThrowLephant : Enemy
 {
     // ── Physics Constants ─────────────────────────────────────────────────────
     private const float Gravity      = 1200f;  // px/s²
@@ -39,26 +32,18 @@ public class Enemy : GameObject
     private const float TempGroundY = 400f;
 
     // ── Sprite Scale ──────────────────────────────────────────────────────────
-    public const float DisplayScale = 1f; // เปลี่ยนเป็น 2f พอทำ Level จริงเสร็จ
-
-    // ── Movement Speeds ───────────────────────────────────────────────────────
-    public float PatrolSpeed { get; set; } = 100f;
-    public float ChaseSpeed  { get; set; } = 200f;
-    public float ReturnSpeed { get; set; } = 220f;
+    public const float DisplayScale = 2f; // เปลี่ยนเป็น 2f พอทำ Level จริงเสร็จ
 
     // ── AI Ranges ─────────────────────────────────────────────────────────────
-    public float PatrolRadius   { get; set; } = 150f; // ระยะ patrol ซ้าย/ขวาจาก spawn
-    public float DetectionRange { get; set; } = 250f; // ระยะมองเห็น player
-    public float AttackRange    { get; set; } = 50f;  // ระยะ melee         เปลี่ยนเป็น 60
-    public float LeashRange     { get; set; } = 400f; // ระยะสูงสุดก่อน return to spawn
+    public float DetectionRange { get; set; } = 400f; // ระยะมองเห็น player และระยะโยนค้อน
 
     // ── Combat ────────────────────────────────────────────────────────────────
-    public float AttackCooldown { get; set; } = 2f;
+    public float AttackCooldown { get; set; } = 1.2f;
     private float _attackTimer;
 
     // ── Attack Animation Duration ─────────────────────────────────────────────
     // 6 frames × 0.083 s — ปรับตามจำนวน frame จริงใน spritesheet
-    private const float AttackAnimDuration = 7 * 0.083f;
+    private const float AttackAnimDuration = 4 * 0.10f + 1.0f;
     private float _attackAnimTimer;
 
     // ── Velocity ──────────────────────────────────────────────────────────────
@@ -70,11 +55,14 @@ public class Enemy : GameObject
     public int  FacingDirection { get; set; } = 1; // +1 = ขวา, -1 = ซ้าย
 
     // ── State Machine ─────────────────────────────────────────────────────────
-    public EnemyState State { get; private set; } = EnemyState.Idle;
+    public ThrowLephantState State { get; private set; } = ThrowLephantState.Idle;
 
-    // ── Spawn / Patrol ────────────────────────────────────────────────────────
+    // ── Spawn ────────────────────────────────────────────────────────
     private Vector2 _spawnPosition;
-    private int     _patrolDirection = 1;
+
+    // ── Scene Reference (สำหรับ spawn ThrowingHammer) ────────────────────────
+    private Scene _scene;
+    private int _hammerCount;
 
     // ── Player Reference ──────────────────────────────────────────────────────
     private Player _player;
@@ -82,38 +70,19 @@ public class Enemy : GameObject
     // ── Components ────────────────────────────────────────────────────────────
     private SpriteRenderer   _spriteRenderer;
     private Animator         _animator;
-    private EnemyBoxCollider _collider;
+    private ThrowLephantBoxCollider _collider;
     private List<Rectangle>  _solidRects = [];
-
-    // ── Patrol Wait ───────────────────────────────────────────────────────────
-    private const float PatrolWaitDuration = 3.5f;  // วินาทีหยุดที่ขอบ patrol ก่อนเดินต่อ
-    private float _patrolWaitTimer;
-
-    // ── Taunt ─────────────────────────────────────────────────────────────────
-    // 7 frames × 0.083 s — ตรงกับ emote animation ที่ลงทะเบียนใน Initialize
-    private const float TauntAnimDuration = 7 * 0.083f + 0.10f;
-    private float _tauntTimer;
-
-    // ── Getting Up ────────────────────────────────────────────────────────────
-    // 4 frames × 0.10 s — ตรงกับ gettingup animation ที่ลงทะเบียนใน Initialize
-    private const float GettingUpAnimDuration = 4 * 0.10f + 0.31f;
-    private float _gettingUpTimer;
 
     // ── Death ─────────────────────────────────────────────────────────────────
     // 7 frames × 0.13 s — ตรงกับ dead animation ที่ลงทะเบียนใน Initialize
     private const float DeadAnimDuration = 7 * 0.13f;
     private float _deadTimer;
 
-    // Stunned
-    private const float StunnedAnimDuration = 5 * 0.10f * 10;
-    private float _stunnedTimer;
-
     // ═════════════════════════════════════════════════════════════════════════
 
     public override void Initialize()
     {
         _spawnPosition   = Position;
-        _patrolDirection = 1;
 
         Scale       = new Vector2(DisplayScale, DisplayScale);
         _animator   = AddComponent<Animator>();
@@ -123,23 +92,17 @@ public class Enemy : GameObject
         // TODO: แทนที่ "Enemy/Enemy-SpriteSheet" ด้วย path spritesheet จริง
         //       และปรับ rows/columns/totalFrames ให้ตรงกับไฟล์
         var f = new AnimationFactory(
-            ResourceManager.Instance.GetTexture("elephant-animation"),
-            rows: 8, columns: 8
+            ResourceManager.Instance.GetTexture("Enemy3-SpriteSheet"),
+            rows: 3, columns: 6
         );
 
         _animator.AddAnimation("standing",   f.CreateFromRow(row: 0, totalFrames: 1, frameDuration: 0.083f));
-        _animator.AddAnimation("emote",      f.CreateFromRow(row: 1, totalFrames: 7, frameDuration: 0.083f, isLooping: false));
-        _animator.AddAnimation("walk",       f.CreateFromRow(row: 2, totalFrames: 8, frameDuration: 0.089f));
-        _animator.AddAnimation("run",        f.CreateFromRow(row: 2, totalFrames: 8, frameDuration: 0.060f));
-        _animator.AddAnimation("attack",     f.CreateFromRow(row: 3, totalFrames: 7, frameDuration: 0.083f, isLooping: false));
-        _animator.AddAnimation("dead",       f.CreateFromRow(row: 4, totalFrames: 7, frameDuration: 0.13f, isLooping: false));
-        _animator.AddAnimation("freefall",   f.CreateFromRow(row: 5, totalFrames: 4, frameDuration: 0.083f));
-        _animator.AddAnimation("stunned",    f.CreateFromRow(row: 6, totalFrames: 5, frameDuration: 0.10f));
-        _animator.AddAnimation("gettingup",  f.CreateFromRow(row: 7, totalFrames: 4, frameDuration: 0.10f, isLooping: false));
+        _animator.AddAnimation("attack",     f.CreateFromRow(row: 1, totalFrames: 4, frameDuration: 0.10f, isLooping: false));
+        _animator.AddAnimation("dead",       f.CreateFromRow(row: 2, totalFrames: 6, frameDuration: 0.13f, isLooping: false));
 
         _animator.Play("standing");
 
-        _collider = AddComponent<EnemyBoxCollider>();
+        _collider = AddComponent<ThrowLephantBoxCollider>();
         UpdateColliderBounds();
     }
 
@@ -149,21 +112,18 @@ public class Enemy : GameObject
         float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
         if (WorldTime.IsFrozen) return;
-        if (State == EnemyState.Dead)
+
+        // Dead: นับ timer รอ animation จบ แล้ว deactivate
+        if (State == ThrowLephantState.Dead)
         {
-            // dead animation จบแล้ว → ลบออกจาก scene
-            if (_animator.IsCurrentAnimationFinished && SceneKey != null)
-                SceneManager.Instance.CurrentScene.RemoveGameObject(SceneKey);
+            if (_deadTimer > 0f) _deadTimer -= dt;
+            else base.Active = false;
             return;
         }
 
         // Cooldown / wait timers
         if (_attackTimer      > 0f) _attackTimer      -= dt;
         if (_attackAnimTimer  > 0f) _attackAnimTimer  -= dt;
-        if (_patrolWaitTimer  > 0f) _patrolWaitTimer  -= dt;
-        if (_tauntTimer       > 0f) _tauntTimer       -= dt;
-        if (_gettingUpTimer   > 0f) _gettingUpTimer   -= dt;
-        if (_stunnedTimer     > 0f) _stunnedTimer     -= dt;
 
         // AI decision → ตั้ง VelocityX
         UpdateAI();
@@ -171,7 +131,6 @@ public class Enemy : GameObject
         // Physics
         ApplyGravity(dt);
         MoveAndCollide(dt);
-        HandleAirborneTransitions();
 
         // Animation + sprite flip
         SyncAnimation();
@@ -188,159 +147,52 @@ public class Enemy : GameObject
     {
         if (_player == null) return;
 
-        float distToSpawn  = System.MathF.Abs(Position.X - _spawnPosition.X);
         float distToPlayer  = Vector2.Distance(Position, _player.Position);
         bool  playerInSight = CanSeePlayer(distToPlayer);
 
-        // Leash: ออกไกลเกิน LeashRange → กลับ spawn (ไม่ interrupt ขณะกลางอากาศหรือลุกขึ้น)
-        if (distToSpawn > LeashRange
-            && State != EnemyState.ReturningToSpawn
-            && State != EnemyState.FallingDown
-            && State != EnemyState.GettingUp)
-        {
-            ChangeState(EnemyState.ReturningToSpawn);
-        }
-
         switch (State)
         {
-            // ── Idle: เริ่ม patrol ทันที ──────────────────────────────────────
-            case EnemyState.Idle:
-                ChangeState(EnemyState.Patrolling);
-                break;
-
-            // ── Patrol: เดินไปมาในรัศมี PatrolRadius ─────────────────────────
-            case EnemyState.Patrolling:
+            // ── Idle ─────────────────────────
+            case ThrowLephantState.Idle:
                 if (playerInSight)
                 {
-                    ChangeState(EnemyState.Taunting);
-                    break;
+                    ChangeState(ThrowLephantState.Attacking);
                 }
-                HandlePatrol();
                 break;
 
-            // ── Taunting: หยุด หันหา player เล่น emote แล้วค่อย chase ─────────
-            case EnemyState.Taunting:
-                VelocityX = 0f;
-                FacingDirection = _player.Position.X > Position.X ? 1 : -1;
-                if (_tauntTimer <= 0f)
-                    ChangeState(EnemyState.Chasing);
-                break;
-
-            // ── Chase: วิ่งตาม player ─────────────────────────────────────────
-            case EnemyState.Chasing:
-                if (!playerInSight)
+            // ── Attack ─────────────────────────────────────────
+            case ThrowLephantState.Attacking:
+                if (playerInSight && (distToPlayer <= DetectionRange))
                 {
-                    // ยังอยู่ในเขต patrol → กลับ patrol; ออกนอกเขต → คืน spawn
-                    ChangeState(distToSpawn <= PatrolRadius
-                        ? EnemyState.Patrolling
-                        : EnemyState.ReturningToSpawn);
-                    break;
+                    ThrowHammerAttack();
                 }
-                if (distToPlayer <= AttackRange)
-                {
-                    TryMeleeAttack();
-                    break;
-                }
-                ChasePlayer();
-                break;
-
-            // ── Attacking: หยุดนิ่ง รอ animation จบ ─────────────────────────
-            case EnemyState.Attacking:
-                VelocityX = 0f;
-                if (_attackAnimTimer <= 0f)
-                    ChangeState(playerInSight ? EnemyState.Chasing : EnemyState.Patrolling);
-                break;
-
-            // ── Falling: physics จัดการ ไม่ควบคุม horizontal ──────────────────
-            case EnemyState.FallingDown:
-                VelocityX = 0f;
-                break;
-
-            // ── Getting Up: หยุดนิ่ง รอ animation จบ → กลับ patrol ───────────
-            case EnemyState.GettingUp:
-                VelocityX = 0f;
-                if (_gettingUpTimer <= 0f)
-                    ChangeState(EnemyState.Patrolling);
-                break;
-
-            // ── Return to Spawn ───────────────────────────────────────────────
-            case EnemyState.ReturningToSpawn:
-                HandleReturnToSpawn();
-                if (distToSpawn < 10f)
-                {
-                    VelocityX = 0f;
-                    ChangeState(EnemyState.Patrolling);
-                }
-                break;
-
-            // Stunned
-            case EnemyState.Stunned:
-                VelocityX = 0f;
-                if (_stunnedTimer <= 0f)
-                    ChangeState(EnemyState.Patrolling);
                 break;
         }
     }
 
-    private void HandlePatrol()
-    {
-        // กำลังรอที่ขอบ patrol — หยุดนิ่ง รอ timer หมด
-        if (_patrolWaitTimer > 0f)
-        {
-            VelocityX = 0f;
-            return;
-        }
-
-        float patrolLeft  = _spawnPosition.X - PatrolRadius;
-        float patrolRight = _spawnPosition.X + PatrolRadius;
-
-        // ถึงขอบ → สลับทิศและตั้ง wait timer
-        if (Position.X <= patrolLeft && _patrolDirection == -1)
-        {
-            _patrolDirection = 1;
-            _patrolWaitTimer = PatrolWaitDuration;
-            VelocityX = 0f;
-            return;
-        }
-        if (Position.X >= patrolRight && _patrolDirection == 1)
-        {
-            _patrolDirection = -1;
-            _patrolWaitTimer = PatrolWaitDuration;
-            VelocityX = 0f;
-            return;
-        }
-
-        FacingDirection = _patrolDirection;
-        VelocityX       = _patrolDirection * PatrolSpeed;
-    }
-
-    private void ChasePlayer()
-    {
-        float dir = _player.Position.X > Position.X ? 1f : -1f;
-        FacingDirection = (int)dir;
-        VelocityX       = dir * ChaseSpeed;
-    }
-
-    private void TryMeleeAttack()
+    private void ThrowHammerAttack()
     {
         if (_attackTimer > 0f) return; // ยังอยู่ใน cooldown
-        if (_player.State == PlayerState.Sliding) return; // player กำลังสไลด์ → ไม่โจมตี
 
         _attackTimer     = AttackCooldown;
         _attackAnimTimer = AttackAnimDuration;
-        ChangeState(EnemyState.Attacking);
 
         // เผชิญหน้ากับ player ก่อน attack
         FacingDirection = _player.Position.X > Position.X ? 1 : -1;
 
-        _player.Die();
+        SpawnHammer();
     }
 
-    private void HandleReturnToSpawn()
+    private void SpawnHammer()
     {
-        float dir = _spawnPosition.X > Position.X ? 1f : -1f;
-        FacingDirection = (int)dir;
-        VelocityX       = dir * ReturnSpeed;
+        if (_scene == null || _player == null) return;
+
+        Vector2 dir = Vector2.Normalize(_player.Position - Position);
+
+        var hammer = _scene.AddGameObject<ThrowingHammer>($"hammer_{_hammerCount++}");
+        hammer.Position = Position;
+        hammer.Setup(dir, _player, _solidRects);
+        hammer.Initialize();
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -412,57 +264,14 @@ public class Enemy : GameObject
     {
         switch (State)
         {
-            case EnemyState.Patrolling:
-                _animator.Play(_patrolWaitTimer > 0f ? "standing" : "walk");
+            case ThrowLephantState.Attacking:
+                _animator.Play(_attackAnimTimer > 0f ? "attack" : "standing");
                 break;
-            case EnemyState.Taunting:
-                _animator.Play("emote");
-                break;
-            case EnemyState.ReturningToSpawn:
-            case EnemyState.Chasing:
-                _animator.Play("run");
-                break;
-            case EnemyState.Attacking:
-                _animator.Play("attack");
-                break;
-            case EnemyState.FallingDown:
-                _animator.Play("freefall");
-                break;
-            case EnemyState.GettingUp:
-                _animator.Play("gettingup");
-                break;
-            case EnemyState.Dead:
+            case ThrowLephantState.Dead:
                 _animator.Play("dead");
-                break;
-            case EnemyState.Stunned:
-                _animator.Play("stunned");
                 break;
             default:
                 _animator.Play("standing");
-                break;
-        }
-    }
-
-    // ══════════════════════════════════════════════════════════════════════════
-    // Airborne Transitions (เรียกหลัง MoveAndCollide ทุก frame)
-    // ══════════════════════════════════════════════════════════════════════════
-
-    private void HandleAirborneTransitions()
-    {
-        switch (State)
-        {
-            // เดินตกขอบ → เข้า FallingDown
-            case EnemyState.Patrolling:
-            case EnemyState.Chasing:
-            case EnemyState.ReturningToSpawn:
-                if (!IsGrounded)
-                    ChangeState(EnemyState.FallingDown);
-                break;
-
-            // แตะพื้นหลังตก → เข้า GettingUp
-            case EnemyState.FallingDown:
-                if (IsGrounded)
-                    ChangeState(EnemyState.GettingUp);
                 break;
         }
     }
@@ -492,13 +301,10 @@ public class Enemy : GameObject
             if (VelocityX > 0f)
             {
                 Position = new Vector2(solid.Left - EnemyWidth / 2f, Position.Y);
-                // ชนผนังขณะ patrol → สลับทิศ
-                if (State == EnemyState.Patrolling) _patrolDirection = -1;
             }
             else if (VelocityX < 0f)
             {
                 Position = new Vector2(solid.Right + EnemyWidth / 2f, Position.Y);
-                if (State == EnemyState.Patrolling) _patrolDirection = 1;
             }
             VelocityX = 0f;
             UpdateColliderBounds();
@@ -557,26 +363,14 @@ public class Enemy : GameObject
     // State Machine
     // ══════════════════════════════════════════════════════════════════════════
 
-    private void ChangeState(EnemyState newState)
+    private void ChangeState(ThrowLephantState newState)
     {
         if (State == newState) return;
 
         switch (newState)
         {
-            case EnemyState.Patrolling:
-                _patrolWaitTimer = 0f;
-                break;
-            case EnemyState.Taunting:
-                _tauntTimer = TauntAnimDuration;
-                break;
-            case EnemyState.GettingUp:
-                _gettingUpTimer = GettingUpAnimDuration;
-                break;
-            case EnemyState.Dead:
+            case ThrowLephantState.Dead:
                 _deadTimer = DeadAnimDuration;
-                break;
-            case EnemyState.Stunned:
-                _stunnedTimer = StunnedAnimDuration;
                 break;
         }
 
@@ -587,46 +381,26 @@ public class Enemy : GameObject
     // Public API
     // ══════════════════════════════════════════════════════════════════════════
 
+    /// <summary>ส่ง Scene reference เพื่อให้ Enemy spawn ThrowingHammer ได้</summary>
+    public void SetScene(Scene scene) => _scene = scene;
+
     /// <summary>ส่ง Player reference จาก Level เพื่อให้ Enemy ติดตาม</summary>
-    public void SetPlayer(Player player) => _player = player;
+    public override void SetPlayer(Player player) => _player = player;
 
     /// <summary>ส่ง solid rectangles จาก Level (เหมือน Player.SetSolids)</summary>
-    public void SetSolids(List<Rectangle> solids) => _solidRects = solids;
+    public override void SetSolids(List<Rectangle> solids) => _solidRects = solids;
 
-    /// <summary>key ที่ใช้ตอน AddGameObject — ตั้งจาก Level เพื่อให้ลบตัวเองออกจาก scene ได้</summary>
-    public string SceneKey { get; set; }
-
-    public Rectangle ColliderBounds => _collider?.Bounds ?? Rectangle.Empty;
-
-    /// <summary>รีเซ็ต enemy กลับไปยังตำแหน่ง spawn และเริ่ม patrol ใหม่</summary>
-    public void ResetToSpawn()
-    {
-        Position     = _spawnPosition;
-        VelocityX    = 0f;
-        VelocityY    = 0f;
-        IsGrounded   = false;
-        _patrolDirection = 1;
-        State = EnemyState.Idle; // bypass ChangeState guard so Patrolling transition fires
-        ChangeState(EnemyState.Patrolling);
-        _animator.Play("walk");
-    }
+    public override Rectangle ColliderBounds => _collider?.Bounds ?? Rectangle.Empty;
 
     /// <summary>เรียกจาก hazard/trap หรือ Player เมื่อต้องการกำจัด enemy</summary>
-    public void Die()
+    public override void Die()
     {
-        if (State == EnemyState.Dead) return;
+        if (State == ThrowLephantState.Dead) return;
         VelocityX = 0f;
         VelocityY = 0f;
-        ChangeState(EnemyState.Dead);
-        _animator.Play("dead"); // force ทันที — Update() จะ return early ก่อนถึง SyncAnimation
-    }
-
-    public void Stun()
-    {
-        if (State == EnemyState.Stunned) return;
-        ChangeState(EnemyState.Stunned);
+        ChangeState(ThrowLephantState.Dead);
     }
 }
 
 // ── Concrete BoxCollider สำหรับ Enemy ────────────────────────────────────────
-internal sealed class EnemyBoxCollider : BoxCollider { }
+internal sealed class ThrowLephantBoxCollider : BoxCollider { }

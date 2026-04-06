@@ -61,6 +61,78 @@
 /processorParam:TextureFormat=Color
 /build:../Assets/Aseprite/Collectibles/SpeedUp.png;Collectibles/SpeedBoost
 
+#begin ../Assets/Aseprite/Parallax/Level1/level1-background.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../Assets/Aseprite/Parallax/Level1/level1-background.png;Parallax/Level1/level1-background.png
+
+#begin ../Assets/Aseprite/Parallax/Level1/level1-below-overflow.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../Assets/Aseprite/Parallax/Level1/level1-below-overflow.png;Parallax/Level1/level1-below-overflow.png
+
+#begin ../Assets/Aseprite/Parallax/Level1/level1-farground.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../Assets/Aseprite/Parallax/Level1/level1-farground.png;Parallax/Level1/level1-farground.png
+
+#begin ../Assets/Aseprite/Parallax/Level1/level1-midground.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../Assets/Aseprite/Parallax/Level1/level1-midground.png;Parallax/Level1/level1-midground.png
+
+#begin ../Assets/Aseprite/Parallax/Level1/level1-nearground.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../Assets/Aseprite/Parallax/Level1/level1-nearground.png;Parallax/Level1/level1-nearground.png
+
+#begin ../Assets/Aseprite/Parallax/Level1/level1-sky-overflow.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../Assets/Aseprite/Parallax/Level1/level1-sky-overflow.png;Parallax/Level1/level1-sky-overflow.png
+
 #begin ../Assets/Aseprite/Player/Pickaxe.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -265,78 +337,6 @@
 /processorParam:TextureFormat=Color
 /build:../Assets/Aseprite/UI/TabletScene.png;UI/TabletScene.png
 
-#begin ../Assets/Aseprite/Parallax/Level1/level1-sky-overflow.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:../Assets/Aseprite/Parallax/Level1/level1-sky-overflow.png;Parallax/Level1/level1-sky-overflow.png
-
-#begin ../Assets/Aseprite/Parallax/Level1/level1-background.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:../Assets/Aseprite/Parallax/Level1/level1-background.png;Parallax/Level1/level1-background.png
-
-#begin ../Assets/Aseprite/Parallax/Level1/level1-farground.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:../Assets/Aseprite/Parallax/Level1/level1-farground.png;Parallax/Level1/level1-farground.png
-
-#begin ../Assets/Aseprite/Parallax/Level1/level1-midground.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:../Assets/Aseprite/Parallax/Level1/level1-midground.png;Parallax/Level1/level1-midground.png
-
-#begin ../Assets/Aseprite/Parallax/Level1/level1-nearground.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:../Assets/Aseprite/Parallax/Level1/level1-nearground.png;Parallax/Level1/level1-nearground.png
-
-#begin ../Assets/Aseprite/Parallax/Level1/level1-below-overflow.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:../Assets/Aseprite/Parallax/Level1/level1-below-overflow.png;Parallax/Level1/level1-below-overflow.png
-
 #begin ../Assets/background.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -395,7 +395,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:elephant-animation.png
+/build:elephant-animation.png;Enemy1-SpriteSheet.png
 
 #begin Enemy/Enemy1-SpriteSheet.png
 /importer:TextureImporter
@@ -468,6 +468,54 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Enemy/ThrowProjectile-SpriteSheet.png
+
+#begin Enemy2-SpriteSheet.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Enemy2-SpriteSheet.png
+
+#begin Enemy3-SpriteSheet.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Enemy3-SpriteSheet.png
+
+#begin Enemy4-SpriteSheet.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Enemy4-SpriteSheet.png
+
+#begin Explosion-SpriteSheet.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Explosion-SpriteSheet.png
 
 #begin Fonts/36Font.spritefont
 /importer:FontDescriptionImporter
@@ -572,6 +620,18 @@
 /processor:SongProcessor
 /processorParam:Quality=Best
 /build:Song/MainMenu.mp3
+
+#begin ThrowProjectile-SpriteSheet.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:ThrowProjectile-SpriteSheet.png
 
 #begin Tiles/block.jpg
 /importer:TextureImporter

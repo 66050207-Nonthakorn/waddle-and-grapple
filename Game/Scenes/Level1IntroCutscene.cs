@@ -12,14 +12,14 @@ public class Level1IntroCutscene : BaseCutscene
     {
         return
         [
-            "Do you copy, AgenT? This is \"Big Boss\". \n Do you read me?",
+            "Do you copy, Agen-T? This is \"Big Boss\". \n Do you read me?",
             "We have received reports about the whereabouts of the missing \"Dr.Lunix\".",
             "Intelligence suggests that he is being held captive by the \"P'an P'an Syndicate\". \n They operate inside a construction site on the outskirts of town.",
             "The exact location of the site is unknown, but we have reason \nto believe that it is near the old factory district. ",
             "Your mission is to infiltrate the construction site,\n locate Dr.Lunix, and extract him safely.",
             "Use your newly installed \"Grappling Pickaxe\" modeule on  your backpack \n to navigate the environment and take down your foes.",
             "He should have left traces of holographic fish \n that only your augmented vision can see. \n Follow the trail to find him.",
-            "Do you understand the mission, AgenT? \n This is a high-priority operation, and we are counting on you to succeed. \n Good luck, AgenT."
+            "Do you understand the mission, Agen-T? \n This is a high-priority operation, and we are counting on you to succeed. \n Good luck, Agen-T."
         ];
     }
 
