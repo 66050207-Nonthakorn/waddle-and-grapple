@@ -1,5 +1,6 @@
 using System;
 using WaddleAndGrapple.Engine;
+using WaddleAndGrapple.Game;
 using WaddleAndGrapple.Engine.Components.Physics;
 using WaddleAndGrapple.Engine.Managers;
 using WaddleAndGrapple.Engine.UI;
@@ -25,6 +26,7 @@ public abstract class BaseLevel : Scene
     public override void Setup()
     {
         GumService.Default.Root.Children.Clear(); // Clear any existing Gum UI elements
+        WorldTime.Reset();
 
         _pausedPanel = new PausedPanel(TogglePause, ResetLevel, ReturnToLevelSelect);
         _pausedPanel.AddToRoot();
@@ -76,6 +78,23 @@ public abstract class BaseLevel : Scene
         }
 
         base.Update(gameTime);
+
+        // Apply section-based camera clamp (Celeste-style: camera stops at section boundary)
+        if (Camera != null)
+        {
+            var section = CheckpointManager.Instance.ActiveSection;
+            if (section != null)
+            {
+                float half = Camera.Origin.X / Camera.Zoom;
+                Camera.ClampMinX = section.LeftBound + half;
+                Camera.ClampMaxX = section.RightBound - half;
+            }
+            else
+            {
+                Camera.ClampMinX = null;
+                Camera.ClampMaxX = null;
+            }
+        }
 
         // Update timer position after camera movement has been processed for this frame
         if (Camera != null)

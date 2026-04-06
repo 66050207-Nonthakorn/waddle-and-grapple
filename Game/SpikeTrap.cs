@@ -1,51 +1,49 @@
 using System;
-using WaddleAndGrapple.Engine.Managers;
 using Microsoft.Xna.Framework;
 
 namespace WaddleAndGrapple.Game;
 
-public enum SpikeOrigin { Floor, Ceiling, LeftWall, RightWall }
-
 /// <summary>
-/// หนามที่ผุดจากพื้น/เพดาน/กำแพง แล้วหุบกลับ
-/// Visual: block สีเขียว ขยาย-หดตาม progress
-/// Collision: active ทุก state ยกเว้น Paused
+/// A spike trap that extends and retracts from a surface.
+/// Rendering is tile-based (see SpikeRenderer).
+///
+/// RotationAngle controls the extension direction:
+///   0        = pointing UP   (floor spike)
+///   PI/2     = pointing RIGHT (left-wall spike)
+///   PI       = pointing DOWN  (ceiling spike)
+///   -PI/2    = pointing LEFT  (right-wall spike)
+///   any other value = custom angle
 /// </summary>
 public class SpikeTrap : Trap
 {
-    public SpikeOrigin Origin          { get; set; } = SpikeOrigin.Floor;
-    public float       SpikeLength     { get; set; } = 45f;
-    public float       ExtendDuration  { get; set; } = 0.2f;
-    public float       HoldDuration    { get; set; } = 1.0f;
-    public float       RetractDuration { get; set; } = 0.2f;
-    public float       PauseDuration   { get; set; } = 1.5f;
-    // ชดเชย phase ให้หนามหลายตัวไม่ผุดพร้อมกัน
-    public float       PhaseOffset     { get; set; } = 0f;
+    /// <summary>Extension direction in radians. 0 = up, PI/2 = right, PI = down, -PI/2 = left.</summary>
+    public float RotationAngle  { get; set; } = 0f;
 
-    private const int SpikeThickness = 20;
-    private static readonly Color SpikeColor = new Color(50, 220, 80); // lime green
+    /// <summary>Total number of tiles when fully extended (minimum 1).</summary>
+    public int   SpikeTiles     { get; set; } = 3;
+
+    public float ExtendDuration  { get; set; } = 0.2f;
+    public float HoldDuration    { get; set; } = 1.0f;
+    public float RetractDuration { get; set; } = 0.2f;
+    public float PauseDuration   { get; set; } = 1.5f;
+
+    /// <summary>Phase shift so multiple spikes don't activate simultaneously.</summary>
+    public float PhaseOffset { get; set; } = 0f;
+
+    /// <summary>Current extension fraction (0.0 to 1.0). Read by SpikeRenderer.</summary>
+    public float ExtensionRatio => _extensionRatio;
 
     private enum SpikeState { Paused, Extending, Extended, Retracting }
     private SpikeState _spikeState = SpikeState.Paused;
     private float      _stateTimer;
-    private Vector2    _basePosition;
-    private bool       _usingPixelTexture = true;
+    private float      _extensionRatio;
 
     protected override void OnInitialize()
     {
-        Damage        = 1;
-        _basePosition = Position;
-        _stateTimer   = PhaseOffset;
-
+        Damage            = 1;
+        _stateTimer       = PhaseOffset;
         SpriteTextureName = SpriteTextureName ?? "pixel";
-        var texture = ResourceManager.Instance.GetTexture(SpriteTextureName);
-        _usingPixelTexture = texture == ResourceManager.Instance.GetTexture("pixel");
-        if (_usingPixelTexture)
-            SpriteTint = SpikeColor;
-
-        ApplySpriteTexture();
-
-        UpdateVisual(0f);
+        AddComponent<SpikeRenderer>();
     }
 
     protected override void OnUpdate(GameTime gameTime)
@@ -56,119 +54,48 @@ public class SpikeTrap : Trap
         switch (_spikeState)
         {
             case SpikeState.Paused:
-                UpdateVisual(0f);
-                if (_stateTimer >= PauseDuration) { _spikeState = SpikeState.Extending; _stateTimer = 0f; }
+                _extensionRatio = 0f;
+                if (_stateTimer >= PauseDuration)
+                { _spikeState = SpikeState.Extending; _stateTimer = 0f; }
                 break;
 
             case SpikeState.Extending:
-                UpdateVisual(Math.Min(_stateTimer / ExtendDuration, 1f));
-                if (_stateTimer >= ExtendDuration) { _spikeState = SpikeState.Extended; _stateTimer = 0f; }
+                _extensionRatio = Math.Min(_stateTimer / ExtendDuration, 1f);
+                if (_stateTimer >= ExtendDuration)
+                { _spikeState = SpikeState.Extended; _stateTimer = 0f; }
                 break;
 
             case SpikeState.Extended:
-                UpdateVisual(1f);
-                if (_stateTimer >= HoldDuration) { _spikeState = SpikeState.Retracting; _stateTimer = 0f; }
+                _extensionRatio = 1f;
+                if (_stateTimer >= HoldDuration)
+                { _spikeState = SpikeState.Retracting; _stateTimer = 0f; }
                 break;
 
             case SpikeState.Retracting:
-                UpdateVisual(Math.Max(1f - _stateTimer / RetractDuration, 0f));
-                if (_stateTimer >= RetractDuration) { _spikeState = SpikeState.Paused; _stateTimer = 0f; }
+                _extensionRatio = Math.Max(1f - _stateTimer / RetractDuration, 0f);
+                if (_stateTimer >= RetractDuration)
+                { _spikeState = SpikeState.Paused; _stateTimer = 0f; }
                 break;
         }
     }
 
-    // SpikeLength  = ความกว้างของ block ขนานกับพื้นผิว (คงที่)
-    // SpikeThickness = ระยะที่ block โผล่ออกจากพื้นผิว (max extension)
-    private void UpdateVisual(float progress)
-    {
-        float ext = SpikeThickness * progress; // ระยะที่โผล่ออกมาตาม progress
-        Vector2 drawPos;
-        Vector2 drawSize;
-
-        switch (Origin)
-        {
-            case SpikeOrigin.Floor:
-                drawPos = new Vector2(_basePosition.X, _basePosition.Y - ext);
-                drawSize = new Vector2(SpikeLength, ext);
-                break;
-            case SpikeOrigin.Ceiling:
-                drawPos = new Vector2(_basePosition.X, _basePosition.Y);
-                drawSize = new Vector2(SpikeLength, ext);
-                break;
-            case SpikeOrigin.LeftWall:
-                drawPos = new Vector2(_basePosition.X, _basePosition.Y);
-                drawSize = new Vector2(ext, SpikeLength);
-                break;
-            case SpikeOrigin.RightWall:
-                drawPos = new Vector2(_basePosition.X - ext, _basePosition.Y);
-                drawSize = new Vector2(ext, SpikeLength);
-                break;
-            default:
-                drawPos = _basePosition;
-                drawSize = Vector2.Zero;
-                break;
-        }
-
-        if (_usingPixelTexture)
-        {
-            Rotation = Vector3.Zero;
-            Position = drawPos;
-            SetSpikeScale(drawSize);
-            return;
-        }
-
-        // Keep unrotated size as horizontal strip, then rotate for wall-mounted spikes.
-        SetSpikeScale(new Vector2(SpikeLength, ext));
-
-        // For sprite textures, draw from center and rotate so the same sprite works on all surfaces.
-        _spriteRenderer.Origin = new Vector2(_spriteRenderer.Texture.Bounds.Width * 0.5f,
-                                             _spriteRenderer.Texture.Bounds.Height * 0.5f);
-        Position = drawPos + (drawSize * 0.5f);
-
-        Rotation = Origin switch
-        {
-            SpikeOrigin.Floor     => new Vector3(0f, 0f, 0f),
-            SpikeOrigin.Ceiling   => new Vector3(0f, 0f, MathF.PI),
-            SpikeOrigin.LeftWall  => new Vector3(0f, 0f, MathF.PI / 2f),
-            SpikeOrigin.RightWall => new Vector3(0f, 0f, -MathF.PI / 2f),
-            _                     => Vector3.Zero
-        };
-    }
-
-    private void SetSpikeScale(Vector2 targetSize)
-    {
-        if (_spriteRenderer?.Texture == null)
-        {
-            Scale = targetSize;
-            return;
-        }
-
-        var pixelTexture = ResourceManager.Instance.GetTexture("pixel");
-        if (_spriteRenderer.Texture == pixelTexture)
-        {
-            Scale = targetSize;
-            return;
-        }
-
-        Scale = new Vector2(targetSize.X / _spriteRenderer.Texture.Bounds.Width,
-                            targetSize.Y / _spriteRenderer.Texture.Bounds.Height);
-    }
-
-    // Fixed hitbox matching the fully-extended block dimensions
     protected override Rectangle GetCollisionBounds()
     {
-        int cx   = (int)_basePosition.X;
-        int cy   = (int)_basePosition.Y;
-        int ext  = SpikeThickness;
-        int span = (int)SpikeLength;
-        return Origin switch
-        {
-            SpikeOrigin.Floor     => new Rectangle(cx,       cy - ext, span, ext),
-            SpikeOrigin.Ceiling   => new Rectangle(cx,       cy,       span, ext),
-            SpikeOrigin.LeftWall  => new Rectangle(cx,       cy,       ext,  span),
-            SpikeOrigin.RightWall => new Rectangle(cx - ext, cy,       ext,  span),
-            _                     => base.GetCollisionBounds(),
-        };
+        int ts  = SpikeRenderer.TileSize;
+        var dir = new Vector2(MathF.Sin(RotationAngle), -MathF.Cos(RotationAngle));
+        var right = new Vector2(MathF.Cos(RotationAngle), MathF.Sin(RotationAngle));
+
+        // คำนวณขอบเขตแนวนอน (ซ้ายสุดไปขวาสุดของความกว้างหนามทั้งหมด)
+        var p1 = Position - right * (ts * 0.5f);
+        var p2 = Position + right * ((SpikeTiles - 0.5f) * ts);
+        var p3 = p1 + dir * ts;
+        var p4 = p2 + dir * ts;
+
+        int minX = (int)Math.Min(Math.Min(p1.X, p2.X), Math.Min(p3.X, p4.X));
+        int minY = (int)Math.Min(Math.Min(p1.Y, p2.Y), Math.Min(p3.Y, p4.Y));
+        int maxX = (int)Math.Max(Math.Max(p1.X, p2.X), Math.Max(p3.X, p4.X));
+        int maxY = (int)Math.Max(Math.Max(p1.Y, p2.Y), Math.Max(p3.Y, p4.Y));
+        return new Rectangle(minX, minY, maxX - minX, maxY - minY);
     }
 
     protected override void OnPlayerEnter(Player player)

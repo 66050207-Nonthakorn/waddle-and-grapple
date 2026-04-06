@@ -139,7 +139,13 @@ public class Enemy : GameObject
         float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
         if (WorldTime.IsFrozen) return;
-        if (State == EnemyState.Dead) return;
+        if (State == EnemyState.Dead)
+        {
+            // dead animation จบแล้ว → ลบออกจาก scene
+            if (_animator.IsCurrentAnimationFinished && SceneKey != null)
+                SceneManager.Instance.CurrentScene.RemoveGameObject(SceneKey);
+            return;
+        }
 
         // Cooldown / wait timers
         if (_attackTimer      > 0f) _attackTimer      -= dt;
@@ -300,6 +306,7 @@ public class Enemy : GameObject
     private void TryMeleeAttack()
     {
         if (_attackTimer > 0f) return; // ยังอยู่ใน cooldown
+        if (_player.State == PlayerState.Sliding) return; // player กำลังสไลด์ → ไม่โจมตี
 
         _attackTimer     = AttackCooldown;
         _attackAnimTimer = AttackAnimDuration;
@@ -308,7 +315,7 @@ public class Enemy : GameObject
         // เผชิญหน้ากับ player ก่อน attack
         FacingDirection = _player.Position.X > Position.X ? 1 : -1;
 
-        Die();
+        _player.Die();
     }
 
     private void HandleReturnToSpawn()
@@ -559,6 +566,9 @@ public class Enemy : GameObject
     /// <summary>ส่ง solid rectangles จาก Level (เหมือน Player.SetSolids)</summary>
     public void SetSolids(List<Rectangle> solids) => _solidRects = solids;
 
+    /// <summary>key ที่ใช้ตอน AddGameObject — ตั้งจาก Level เพื่อให้ลบตัวเองออกจาก scene ได้</summary>
+    public string SceneKey { get; set; }
+
     public Rectangle ColliderBounds => _collider?.Bounds ?? Rectangle.Empty;
 
     /// <summary>เรียกจาก hazard/trap หรือ Player เมื่อต้องการกำจัด enemy</summary>
@@ -568,6 +578,7 @@ public class Enemy : GameObject
         VelocityX = 0f;
         VelocityY = 0f;
         ChangeState(EnemyState.Dead);
+        _animator.Play("dead"); // force ทันที — Update() จะ return early ก่อนถึง SyncAnimation
     }
 }
 

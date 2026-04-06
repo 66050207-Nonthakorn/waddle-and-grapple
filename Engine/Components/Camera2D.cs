@@ -70,6 +70,10 @@ public class Camera2D : Component
     // Bounds (optional - for limiting camera movement)
     public Rectangle? Bounds { get; set; }
 
+    // Section clamp — camera X cannot go outside this range (set by CheckpointManager section)
+    public float? ClampMinX { get; set; }
+    public float? ClampMaxX { get; set; }
+
     public Camera2D()
     {
         _zoom = 1f;
@@ -114,6 +118,14 @@ public class Camera2D : Component
 
             _isViewTransformationDirty = true;
         }
+
+        // Section clamp (Celeste-style: camera can't move past section boundary)
+        if (ClampMinX.HasValue)
+            _position.X = Math.Max(_position.X, ClampMinX.Value);
+        if (ClampMaxX.HasValue)
+            _position.X = Math.Min(_position.X, ClampMaxX.Value);
+        if (ClampMinX.HasValue || ClampMaxX.HasValue)
+            _isViewTransformationDirty = true;
 
         // Apply bounds constraints
         if (Bounds.HasValue)

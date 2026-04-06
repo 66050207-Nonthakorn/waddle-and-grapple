@@ -339,6 +339,30 @@
 /processorParam:TextureFormat=Color
 /build:../Assets/Aseprite/Player/Player-SpriteSheet.png;Player/Player-SpriteSheet.png
 
+#begin ../Assets/SpriteSheet/Player/SpeedBoostPlayer-SpriteSheet.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../Assets/SpriteSheet/Player/SpeedBoostPlayer-SpriteSheet.png;Player/SpeedBoostPlayer-SpriteSheet
+
+#begin ../Assets/SpriteSheet/Player/SlowDownPlayer-SpriteSheet.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../Assets/SpriteSheet/Player/SlowDownPlayer-SpriteSheet.png;Player/SlowDownPlayer-SpriteSheet
+
 #begin ../Assets/Aseprite/Player/Pickaxe.png
 /importer:TextureImporter
 /processor:TextureProcessor

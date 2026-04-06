@@ -72,7 +72,7 @@ public abstract class PowerUp : Collectible
         OnActivate(player);
     }
 
-    public void UpdateEffect(Player player, float dt)
+    public virtual void UpdateEffect(Player player, float dt)
     {
         if (!IsActive) return;
         if (Duration <= 0f) return;
@@ -81,6 +81,11 @@ public abstract class PowerUp : Collectible
         if (RemainingTime <= 0f)
             Deactivate(player);
     }
+
+    /// <summary>อัตราส่วนเกจที่แสดงบนหัว (0–1). ค่าปกติคำนวณจาก RemainingTime/TotalDuration</summary>
+    public virtual float GaugeRatio => Duration > 0f
+        ? System.Math.Clamp(RemainingTime / Duration, 0f, 1f)
+        : (IsActive ? 1f : 0f);
 
     public void Deactivate(Player player)
     {

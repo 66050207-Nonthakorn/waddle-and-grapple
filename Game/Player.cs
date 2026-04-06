@@ -37,7 +37,8 @@ public class Player : GameObject
     public const float JumpForce        = -550f;  // px/s (ลบ = ขึ้น)
     public const float SprintMultiplier = 1.6f;
     public const float SlideSpeed       = 420f;   // px/s
-    public const float SlideDuration    = 0.45f;  // วินาที
+    public const int   SlideLoopCount  = 2;       // ← เปลี่ยนตรงนี้เพื่อยืด/สั้นระยะสไลด์ (จำนวนรอบของ row 13)
+    public const float SlideDuration   = 0.083f * 4f * (1 + SlideLoopCount); // slidestart 1× + row13 N×
     public const float WallSlideSpeed    = 60f;    // px/s
     public const float RopeLaunchSpeed  = 900f;   // ความเร็วดึงตัวเองไปตามเชือก (px/s)
 
@@ -51,7 +52,7 @@ public class Player : GameObject
     // ── Phase 7: Death ────────────────────────────────────────────────────────
     private const float FallDeathY      = 480f;   // ขอบล่างหน้าจอ → ตาย
     private const float ScreenLeft      = 0f;     // ขอบซ้าย
-    private const float ScreenRight     = 2400f;  // ขอบขวาของ demo scene
+    private const float ScreenRight     = 4800f;  // ขอบขวาของ demo scene
     private const float RespawnDelaySec = 1.5f;   // วินาทีก่อน respawn
 
     // ── Velocity ──────────────────────────────────────────────────────────────
@@ -85,12 +86,12 @@ public class Player : GameObject
     // ── Dynamic Collider Height (ลดครึ่งหนึ่งตอน Crouching/Sliding) ──────────
     private int _currentHeight = PlayerHeight;
 
-    // ── Coin Count ────────────────────────────────────────────────────────────
-    public int CoinCount { get; private set; }
+    // ── Fish Count ────────────────────────────────────────────────────────────
+    public int FishCount { get; private set; }
 
-    // ── Goal Animation ────────────────────────────────────────────────────────
-    // ปรับ GoalAnimTotalFrames ให้ตรงกับจำนวน frame จริงในแถว 14 ของ spritesheet
-    private const int   GoalAnimTotalFrames = 6;
+    // ── Goal / Death Animation (row 14) ──────────────────────────────────────
+    private const int   DeadAnimTotalFrames   = 6;    // ทุก frame ในแถว (ตายครบแถว)
+    private const int   GoalAnimTotalFrames   = 4;    // แค่ 4 frame แรกตอน goal
     private const float GoalAnimFrameDuration = 0.1f;
     private const int   GoalAnimLoopsRequired = 3;
     public  bool IsGoalAnimationComplete { get; private set; }
@@ -115,6 +116,11 @@ public class Player : GameObject
     private float           _respawnTimer;
     private List<Rectangle> _hazardRects = [];
 
+    // ── Active Spritesheet ────────────────────────────────────────────────────
+    private bool _speedSheetActive = false;
+    private bool _slowSheetActive  = false;
+    private string _lastSheet = "normal"; // "normal" | "speed" | "slow"
+
     // ── Phase 8: Checkpoints ──────────────────────────────────────────────────
     private List<CheckpointData> _checkpoints = [];
 
@@ -126,6 +132,13 @@ public class Player : GameObject
     private const float IdleBreathDelay   = 3f;    // วินาทีก่อนเล่น Breathe
     private float _jumpAnimTimer;                  // > 0 → เล่น jumpstart / walljumpstart
     private float _slideAnimTimer;                 // > 0 → เล่น slidestart
+    private float _slideEndAnimTimer;              // > 0 → เล่น slideend (row 12 reversed)
+
+    // ── Sprint (Double-tap) ───────────────────────────────────────────────────
+    private const float DoubleTapWindow = 0.25f; // วินาทีที่รอ tap ที่สอง
+    private float _doubleTapTimerD = 0f;         // countdown หลัง tap D ครั้งแรก
+    private float _doubleTapTimerA = 0f;         // countdown หลัง tap A ครั้งแรก
+    private int   _sprintDir       = 0;          // 0=ไม่ sprint, 1=ขวา, -1=ซ้าย
 
     // ── Rope Dash ─────────────────────────────────────────────────────────────
     private bool _isRopeDashing = false;
@@ -150,26 +163,7 @@ public class Player : GameObject
         //     5=Running,  6=GroundJumpStartup, 7=Jumping, 8=Freefall,
         //     9=LedgeGrab, 10=WallSlide, 11=WallJumpStartup,
         //    12=SlideStartEnd, 13=SlideLoop
-        var f = new AnimationFactory(
-            ResourceManager.Instance.GetTexture("Player/Player-SpriteSheet"),
-            rows: 15, columns: 9
-        );
-
-        _animator.AddAnimation("standing",       f.CreateFromRow(row:  0, totalFrames: 1, frameDuration: 0.083f));
-        _animator.AddAnimation("breathe",        f.CreateFromRow(row:  1, totalFrames: 7, frameDuration: 0.10f));
-        _animator.AddAnimation("walk",           f.CreateFromRow(row:  2, totalFrames: 9, frameDuration: 0.083f));
-        _animator.AddAnimation("crouch",         f.CreateFromRow(row:  3, totalFrames: 4, frameDuration: 0.083f, isLooping: false));
-        _animator.AddAnimation("crouchwalk",     f.CreateFromRow(row:  4, totalFrames: 6, frameDuration: 0.10f));
-        _animator.AddAnimation("run",            f.CreateFromRow(row:  5, totalFrames: 8, frameDuration: 0.083f));
-        _animator.AddAnimation("jumpstart",      f.CreateFromRow(row:  6, totalFrames: 1, frameDuration: 0.083f, isLooping: false));
-        _animator.AddAnimation("jump",           f.CreateFromRow(row:  7, totalFrames: 4, frameDuration: 0.083f, isLooping: false));
-        _animator.AddAnimation("freefall",       f.CreateFromRow(row:  8, totalFrames: 1, frameDuration: 0.083f));
-        _animator.AddAnimation("ledgegrab",      f.CreateFromRow(row:  9, totalFrames: 1, frameDuration: 0.083f));
-        _animator.AddAnimation("wallslide",      f.CreateFromRow(row: 10, totalFrames: 4, frameDuration: 0.083f));
-        _animator.AddAnimation("walljumpstart",  f.CreateFromRow(row: 11, totalFrames: 3, frameDuration: 0.083f, isLooping: false));
-        _animator.AddAnimation("slidestart",     f.CreateFromRow(row: 12, totalFrames: 4, frameDuration: 0.083f, isLooping: false));
-        _animator.AddAnimation("slide",          f.CreateFromRow(row: 13, totalFrames: 4, frameDuration: 0.083f));
-        _animator.AddAnimation("goal",           f.CreateFromRow(row: 14, totalFrames: GoalAnimTotalFrames, frameDuration: GoalAnimFrameDuration));
+        RegisterAnimations("Player/Player-SpriteSheet");
         _animator.Play("standing");
 
         _collider = AddComponent<PlayerBoxCollider>();
@@ -177,12 +171,81 @@ public class Player : GameObject
 
         Pickaxe = new IcePickaxe(this);
         Pickaxe.Initialize();
+        Pickaxe.SetEnemies(_enemies); // forward enemies ที่อาจถูกตั้งไว้ก่อน Initialize
 
         var pickaxeRenderer = AddComponent<PickaxeRenderer>();
         pickaxeRenderer.Setup(this, Pickaxe);
 
         AddComponent<PowerUpBarRenderer>();
-        AddComponent<CoinHUD>();
+        AddComponent<FishHUD>();
+    }
+
+    // ── Spritesheet Helpers ───────────────────────────────────────────────────
+
+    private void RegisterAnimations(string sheetName)
+    {
+        var f = new AnimationFactory(
+            ResourceManager.Instance.GetTexture(sheetName),
+            rows: 15, columns: 9
+        );
+
+        _animator.AddAnimation("standing",      f.CreateFromRow(row:  0, totalFrames: 1, frameDuration: 0.083f));
+        _animator.AddAnimation("breathe",       f.CreateFromRow(row:  1, totalFrames: 7, frameDuration: 0.10f));
+        _animator.AddAnimation("walk",          f.CreateFromRow(row:  2, totalFrames: 9, frameDuration: 0.083f));
+        _animator.AddAnimation("crouch",        f.CreateFromRow(row:  3, totalFrames: 4, frameDuration: 0.083f, isLooping: false));
+        _animator.AddAnimation("crouchwalk",    f.CreateFromRow(row:  4, totalFrames: 6, frameDuration: 0.10f));
+        _animator.AddAnimation("run",           f.CreateFromRow(row:  5, totalFrames: 8, frameDuration: 0.083f));
+        _animator.AddAnimation("jumpstart",     f.CreateFromRow(row:  6, totalFrames: 1, frameDuration: 0.083f, isLooping: false));
+        _animator.AddAnimation("jump",          f.CreateFromRow(row:  7, totalFrames: 4, frameDuration: 0.083f, isLooping: false));
+        _animator.AddAnimation("freefall",      f.CreateFromRow(row:  8, totalFrames: 1, frameDuration: 0.083f));
+        _animator.AddAnimation("ledgegrab",     f.CreateFromRow(row:  9, totalFrames: 1, frameDuration: 0.083f));
+        _animator.AddAnimation("wallslide",     f.CreateFromRow(row: 10, totalFrames: 4, frameDuration: 0.083f));
+        _animator.AddAnimation("walljumpstart", f.CreateFromRow(row: 11, totalFrames: 3, frameDuration: 0.083f, isLooping: false));
+        _animator.AddAnimation("slidestart",    f.CreateFromRow(row: 12, totalFrames: 4, frameDuration: 0.083f, isLooping: false));
+        _animator.AddAnimation("slide",         f.CreateFromRow(row: 13, totalFrames: 4, frameDuration: 0.083f));
+        _animator.AddAnimation("slideend",      f.CreateFromRowReversed(row: 12, totalFrames: 4, frameDuration: 0.083f, isLooping: false));
+        _animator.AddAnimation("dead",          f.CreateFromRow(row: 14, totalFrames: DeadAnimTotalFrames, frameDuration: GoalAnimFrameDuration, isLooping: false));
+        _animator.AddAnimation("goal",          f.CreateFromRow(row: 14, totalFrames: GoalAnimTotalFrames, frameDuration: GoalAnimFrameDuration));
+    }
+
+    /// <summary>เรียกจาก PowerUp.OnActivate — เปิดใช้ sheet ของไอเท็มนั้น</summary>
+    public void SetActiveSheet(string sheetName)
+    {
+        if (sheetName == "speed") _speedSheetActive = true;
+        if (sheetName == "slow")  _slowSheetActive  = true;
+        _lastSheet = sheetName; // บันทึกไอเท็มล่าสุดที่เก็บได้
+        ApplySheet();
+    }
+
+    /// <summary>เรียกจาก PowerUp.OnDeactivate — ปิด sheet ของไอเท็มนั้น และ fallback</summary>
+    public void ClearSheet(string sheetName)
+    {
+        if (sheetName == "speed") _speedSheetActive = false;
+        if (sheetName == "slow")  _slowSheetActive  = false;
+
+        // fallback: ใช้ sheet ของ effect ที่ยังเหลืออยู่ ถ้าไม่มีแล้วก็ normal
+        if (_slowSheetActive && sheetName == "speed")
+            _lastSheet = "slow";
+        else if (_speedSheetActive && sheetName == "slow")
+            _lastSheet = "speed";
+        else if (!_speedSheetActive && !_slowSheetActive)
+            _lastSheet = "normal";
+
+        ApplySheet();
+    }
+
+    private void ApplySheet()
+    {
+        string textureName = _lastSheet switch
+        {
+            "speed" => "Player/SpeedBoostPlayer-SpriteSheet",
+            "slow"  => "Player/SlowDownPlayer-SpriteSheet",
+            _       => "Player/Player-SpriteSheet",
+        };
+
+        string playingNow = _animator.CurrentAnimationName;
+        RegisterAnimations(textureName);
+        if (playingNow != null) _animator.Play(playingNow);
     }
 
     // ── Update Loop ───────────────────────────────────────────────────────────
@@ -210,16 +273,25 @@ public class Player : GameObject
         // Phase 7 — Respawn timer (ทำงานแม้ตาย)
         if (State == PlayerState.Dead)
         {
+            SyncAnimation(dt);
             _respawnTimer -= dt;
             if (_respawnTimer <= 0f) Respawn();
             return;
         }
 
-        // Phase 7 — Screen boundary death (ชนขอบจอ → ตาย)
-        if (Position.Y > FallDeathY || Position.X < ScreenLeft || Position.X > ScreenRight)
+        // Phase 7 — Screen boundary
+        if (Position.Y > FallDeathY) { Die(); return; } // ตกหล่น → ตาย
+
+        // ชนขอบซ้าย/ขวา → หยุดแค่นั้น ไม่ตาย
+        if (Position.X < ScreenLeft)
         {
-            Die();
-            return;
+            Position  = new Vector2(ScreenLeft, Position.Y);
+            VelocityX = 0f;
+        }
+        else if (Position.X > ScreenRight)
+        {
+            Position  = new Vector2(ScreenRight, Position.Y);
+            VelocityX = 0f;
         }
 
         // Coyote time — reset เมื่ออยู่บนพื้น, นับถอยหลังเมื่ออยู่ในอากาศ
@@ -267,8 +339,9 @@ public class Player : GameObject
         HandleSlide(dt);
         HandleCrouch();
         HandleMove();
+        HandleSprint(dt);
         if (Pickaxe.IsHooked) HandleRopeLaunch();
-        else                { _isRopeDashing = false; HandleSprint(); }
+        else                  _isRopeDashing = false;
         HandleWallCling();
         HandleLedgeGrab();
         HandleJump();
@@ -314,20 +387,24 @@ public class Player : GameObject
     private const float JumpStartDuration     = 0.083f; // ความยาว 1 frame
     private const float WallJumpStartDuration = 0.083f * 3f;
     private const float SlideStartDuration    = 0.083f * 4f;
+    private const float SlideEndAnimDuration  = 0.083f * 4f; // row 12 reversed
 
     // ขยับ sprite ขึ้น (ไม่กระทบ collider) เพื่อชดเชย sprite art ที่วาดต่ำกว่า frame กลาง
-    private const float CrouchSpriteOffsetY = -15f;
+    private const float CrouchSpriteOffsetY   = -15f;
+    private const float DeadGoalSpriteOffsetY = -20f; // ← ปรับตรงนี้ถ้าต้องการขึ้น/ลงมากกว่านี้
 
     private void SyncAnimation(float dt)
     {
         // ── countdown timers ──────────────────────────────────────────────────
-        if (_jumpAnimTimer  > 0f) _jumpAnimTimer  -= dt;
-        if (_slideAnimTimer > 0f) _slideAnimTimer -= dt;
+        if (_jumpAnimTimer     > 0f) _jumpAnimTimer     -= dt;
+        if (_slideAnimTimer    > 0f) _slideAnimTimer    -= dt;
+        if (_slideEndAnimTimer > 0f) _slideEndAnimTimer -= dt;
 
-        bool isCrouched = State == PlayerState.Crouching || State == PlayerState.Sliding;
-        _spriteRenderer.DrawOffset = isCrouched
-            ? new Vector2(0f, CrouchSpriteOffsetY)
-            : Vector2.Zero;
+        bool isCrouched  = State == PlayerState.Crouching || State == PlayerState.Sliding;
+        bool isDeadGoal  = State == PlayerState.Dead       || State == PlayerState.GoalReached;
+        _spriteRenderer.DrawOffset = isCrouched ? new Vector2(0f, CrouchSpriteOffsetY)
+                                   : isDeadGoal ? new Vector2(0f, DeadGoalSpriteOffsetY)
+                                   : Vector2.Zero;
 
         switch (State)
         {
@@ -386,13 +463,20 @@ public class Player : GameObject
                     _animator.Play("crouch");
                 break;
 
-            // ── Slide: slidestart → slide ──────────────────────────────────────
+            // ── Slide: slidestart → slide → slideend ──────────────────────────
             case PlayerState.Sliding:
                 _idleTimer = 0f;
                 if (_slideAnimTimer > 0f)
                     _animator.Play("slidestart");
+                else if (_slideEndAnimTimer > 0f)
+                    _animator.Play("slideend");
                 else
                     _animator.Play("slide");
+                break;
+
+            case PlayerState.Dead:
+                _idleTimer = 0f;
+                _animator.Play("dead");
                 break;
 
             case PlayerState.GoalReached:
@@ -459,23 +543,53 @@ public class Player : GameObject
     }
 
     /// <summary>
-    /// Shift + A/D: วิ่งเร็ว — คูณ VelocityX ด้วย SprintMultiplier
-    /// เรียกหลัง HandleMove เสมอ เพื่อให้ VelocityX ตั้งค่าแล้ว
+    /// Double-tap A/D: sprint ไปทิศที่ double-tap
+    /// sprint ต่อเนื่องตราบที่ยัง hold ปุ่มนั้นอยู่, หยุดเมื่อปล่อย
     /// </summary>
-    private void HandleSprint()
+    private void HandleSprint(float dt)
     {
         if (State == PlayerState.Sliding
          || State == PlayerState.LedgeGrabbing
-         || State == PlayerState.Crouching) return;
+         || State == PlayerState.Crouching)
+        {
+            _sprintDir = 0;
+            return;
+        }
 
-        bool shiftHeld = InputManager.Instance.IsKeyDown(Keys.LeftShift)
-                      || InputManager.Instance.IsKeyDown(Keys.RightShift);
-        bool moving    = VelocityX != 0f;
+        // tick double-tap timers
+        if (_doubleTapTimerD > 0f) _doubleTapTimerD -= dt;
+        if (_doubleTapTimerA > 0f) _doubleTapTimerA -= dt;
 
-        if (shiftHeld && moving)
+        bool dPressed = InputManager.Instance.IsKeyPressed(Keys.D) || InputManager.Instance.IsKeyPressed(Keys.Right);
+        bool aPressed = InputManager.Instance.IsKeyPressed(Keys.A) || InputManager.Instance.IsKeyPressed(Keys.Left);
+        bool dHeld    = InputManager.Instance.IsKeyDown(Keys.D)    || InputManager.Instance.IsKeyDown(Keys.Right);
+        bool aHeld    = InputManager.Instance.IsKeyDown(Keys.A)    || InputManager.Instance.IsKeyDown(Keys.Left);
+
+        // double-tap detection
+        if (dPressed)
+        {
+            if (_doubleTapTimerD > 0f) _sprintDir = 1;   // double-tap → sprint ขวา
+            else                       _doubleTapTimerD = DoubleTapWindow; // tap แรก
+        }
+        if (aPressed)
+        {
+            if (_doubleTapTimerA > 0f) _sprintDir = -1;  // double-tap → sprint ซ้าย
+            else                       _doubleTapTimerA = DoubleTapWindow;
+        }
+
+        // cancel sprint เมื่อปล่อยปุ่ม
+        if (_sprintDir == 1  && !dHeld) _sprintDir = 0;
+        if (_sprintDir == -1 && !aHeld) _sprintDir = 0;
+
+        // apply sprint
+        if (_sprintDir != 0 && VelocityX != 0f && IsGrounded)
         {
             VelocityX *= SprintMultiplier;
-            if (IsGrounded) ChangeState(PlayerState.Sprinting);
+            ChangeState(PlayerState.Sprinting);
+        }
+        else if (State == PlayerState.Sprinting)
+        {
+            ChangeState(VelocityX == 0f ? PlayerState.Idle : PlayerState.Running);
         }
     }
 
@@ -551,7 +665,12 @@ public class Player : GameObject
     /// </summary>
     private void HandleJump()
     {
-        if (!InputManager.Instance.IsKeyPressed(Keys.Space)) return;
+        bool jumpPressed = InputManager.Instance.IsKeyPressed(Keys.Space)
+                        || InputManager.Instance.IsKeyPressed(Keys.W);
+        if (!jumpPressed) return;
+
+        // อยู่ในพื้นที่แคบ (ย่ออยู่ + มีเพดานบัง) → กระโดดไม่ได้
+        if (_currentHeight != PlayerHeight && !CanStandUp()) return;
 
         if (IsGrounded || _coyoteTimer > 0f)
         {
@@ -626,12 +745,17 @@ public class Player : GameObject
         bool crouchHeld = InputManager.Instance.IsKeyDown(Keys.S)
                        || InputManager.Instance.IsKeyDown(Keys.Down);
 
-        // ถ้าไม่กด S แต่ height ยังเป็น crouch → restore เสมอ (source of truth คือ _currentHeight)
+        // ถ้าไม่กด S แต่ height ยังเป็น crouch → ลองลุก แต่ต้องเช็ค headroom ก่อน
         if (!crouchHeld && _currentHeight != PlayerHeight && State != PlayerState.Sliding)
         {
-            SetCrouchHeight(false);
-            if (State == PlayerState.Crouching)
-                ChangeState(VelocityX == 0f ? PlayerState.Idle : PlayerState.Running);
+            if (CanStandUp())
+            {
+                SetCrouchHeight(false);
+                if (State == PlayerState.Crouching)
+                    ChangeState(VelocityX == 0f ? PlayerState.Idle : PlayerState.Running);
+            }
+            // else: มีเพดานอยู่บน → ค้าง Crouching อัตโนมัติโดยไม่ต้องกด S
+            // พอเดินออกจากพื้นที่แคบ CanStandUp() จะ return true และลุกเองทันที
             return;
         }
 
@@ -653,7 +777,7 @@ public class Player : GameObject
     }
 
     /// <summary>
-    /// Shift+S หรือ Sprint+S: สไลด์ไปข้างหน้าด้วยความเร็วสูง
+    /// Shift+A/D: สไลด์ไปซ้าย/ขวาด้วยความเร็วสูง
     ///   ระหว่าง Slide: VelocityX = SlideSpeed (ทิศตาม FacingDirection), นับ timer
     ///   หมดเวลา: กลับ Crouching (ถ้ายัง hold S) หรือ Idle
     ///   Interaction กับ TankElephant: stub — รอ Member 3
@@ -661,15 +785,18 @@ public class Player : GameObject
     private void HandleSlide(float dt)
     {
         // ── Trigger ──────────────────────────────────────────────────────────
-        bool crouchPressed = InputManager.Instance.IsKeyPressed(Keys.S)
-                          || InputManager.Instance.IsKeyPressed(Keys.Down);
-        bool shiftHeld     = InputManager.Instance.IsKeyDown(Keys.LeftShift)
-                          || InputManager.Instance.IsKeyDown(Keys.RightShift);
-        bool canSlide      = IsGrounded && crouchPressed
-                          && (shiftHeld || State == PlayerState.Sprinting);
+        bool shiftHeld    = InputManager.Instance.IsKeyDown(Keys.LeftShift)
+                         || InputManager.Instance.IsKeyDown(Keys.RightShift);
+        bool rightPressed = InputManager.Instance.IsKeyPressed(Keys.D)
+                         || InputManager.Instance.IsKeyPressed(Keys.Right);
+        bool leftPressed  = InputManager.Instance.IsKeyPressed(Keys.A)
+                         || InputManager.Instance.IsKeyPressed(Keys.Left);
+        bool canSlide     = IsGrounded && shiftHeld && (rightPressed || leftPressed)
+                         && (_currentHeight == PlayerHeight || CanStandUp()); // อยู่ใต้เพดาน → slide ไม่ได้
 
         if (canSlide && State != PlayerState.Sliding)
         {
+            FacingDirection = rightPressed ? 1 : -1;
             SetCrouchHeight(true);
             _slideTimer = SlideDuration;
             ChangeState(PlayerState.Sliding);
@@ -678,8 +805,34 @@ public class Player : GameObject
         if (State != PlayerState.Sliding) return;
 
         // ── During Slide ──────────────────────────────────────────────────────
+        // ช่วง slideend animation: หยุดเคลื่อนที่ รอ animation จบก่อน transition
+        if (_slideEndAnimTimer > 0f)
+        {
+            VelocityX = 0f;
+            if (_slideEndAnimTimer > dt) return; // ยังไม่จบ
+
+            // slideend จบแล้ว → transition ออกจาก Sliding
+            bool stillCrouching = InputManager.Instance.IsKeyDown(Keys.S)
+                               || InputManager.Instance.IsKeyDown(Keys.Down);
+            if (stillCrouching || !CanStandUp())
+            {
+                ChangeState(PlayerState.Crouching);
+            }
+            else
+            {
+                SetCrouchHeight(false);
+                ChangeState(PlayerState.Idle);
+            }
+            return;
+        }
+
         VelocityX    = FacingDirection * SlideSpeed;
         _slideTimer -= dt;
+
+        // ตรวจชน enemy ขณะสไลด์ → enemy ตาย
+        foreach (var enemy in _enemies)
+            if (_collider.Bounds.Intersects(enemy.ColliderBounds))
+                enemy.Die();
 
         // TODO (Phase 3 → Member 3): TankElephant interaction
         //   ตรวจ _collider.Bounds ชน TankElephant.Collider.Bounds
@@ -688,17 +841,8 @@ public class Player : GameObject
         // ── Slide End ─────────────────────────────────────────────────────────
         if (_slideTimer > 0f && IsGrounded) return;
 
-        bool stillCrouching = InputManager.Instance.IsKeyDown(Keys.S)
-                           || InputManager.Instance.IsKeyDown(Keys.Down);
-        if (stillCrouching)
-        {
-            ChangeState(PlayerState.Crouching); // ยังนิ้วอยู่ → นั่งยอง
-        }
-        else
-        {
-            SetCrouchHeight(false);
-            ChangeState(PlayerState.Idle);
-        }
+        // เริ่ม slideend animation (หยุดนิ่ง รอ reverse animation จบ)
+        _slideEndAnimTimer = SlideEndAnimDuration;
     }
 
     /// <summary>
@@ -717,6 +861,31 @@ public class Player : GameObject
     }
 
     // ── Helper: Crouch Height ─────────────────────────────────────────────────
+
+    /// <summary>
+    /// ตรวจว่าพื้นที่เหนือหัวว่างพอที่จะลุกขึ้นยืนได้หรือไม่
+    /// เปรียบเทียบ solid rects กับ headroom rectangle ที่จะเพิ่มขึ้นเมื่อลุก
+    /// </summary>
+    private bool CanStandUp()
+    {
+        if (_currentHeight == PlayerHeight) return true; // ยืนอยู่แล้ว
+
+        float bottomY    = Position.Y + _currentHeight / 2f;  // ขอบล่าง (เท้า) — คงที่
+        float standTopY  = bottomY - PlayerHeight;             // ขอบบนขณะยืน
+        float crouchTopY = Position.Y - _currentHeight / 2f;  // ขอบบนขณะย่อ
+
+        // พื้นที่เพิ่มเติมที่ต้องการ = ระหว่าง standTopY กับ crouchTopY
+        var headroom = new Rectangle(
+            (int)(Position.X - PlayerWidth / 2f),
+            (int)standTopY,
+            PlayerWidth,
+            (int)(crouchTopY - standTopY));
+
+        foreach (var solid in _solidRects)
+            if (headroom.Intersects(solid)) return false;
+
+        return true;
+    }
 
     /// <summary>
     /// เปลี่ยนความสูง collider ระหว่างยืน ↔ นั่งยอง
@@ -839,6 +1008,13 @@ public class Player : GameObject
     public void SetSolids(List<Rectangle> solids) => _solidRects = solids;
     public IReadOnlyList<Rectangle> Solids => _solidRects;
 
+    private List<Enemy> _enemies = [];
+    public void SetEnemies(List<Enemy> enemies)
+    {
+        _enemies = enemies;
+        Pickaxe?.SetEnemies(enemies); // Pickaxe อาจยังเป็น null ถ้าเรียกก่อน Initialize
+    }
+
     // ══════════════════════════════════════════════════════════════════════════
     // Phase 1: API (PowerUp / Coin / Death / State)
     // ══════════════════════════════════════════════════════════════════════════
@@ -859,7 +1035,7 @@ public class Player : GameObject
         }
     }
 
-    public void AddCoin(int value) => CoinCount += value;
+    public void AddFish(int value) => FishCount += value;
 
     /// <summary>เรียกจาก GoalFlag เมื่อ player แตะธง — เล่น animation 3 รอบก่อนขึ้น overlay</summary>
     public void TriggerGoalReached()
@@ -950,7 +1126,8 @@ public class Player : GameObject
                 _jumpAnimTimer = JumpStartDuration;     // jumpstart 1 frame
                 break;
             case PlayerState.Sliding:
-                _slideAnimTimer = SlideStartDuration;   // slidestart 4 frames
+                _slideAnimTimer    = SlideStartDuration;   // slidestart 4 frames
+                _slideEndAnimTimer = 0f;                   // reset slideend
                 break;
             case PlayerState.Idle:
                 _idleTimer = 0f;                        // reset breathe timer

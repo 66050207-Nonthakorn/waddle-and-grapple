@@ -1,21 +1,20 @@
 using System.Collections.Generic;
 using WaddleAndGrapple.Engine.Components;
 using WaddleAndGrapple.Engine.Managers;
-using WaddleAndGrapple.Game.Example;
 using Microsoft.Xna.Framework;
 
 namespace WaddleAndGrapple.Game;
 
 /// <summary>
-/// เหรียญทอง — เก็บได้เพื่อเพิ่ม CoinCount ของ Player
+/// ปลา — เก็บได้เพื่อเพิ่ม FishCount ของ Player
 ///
 /// วิธีใส่ใน Scene:
-///   var coin = scene.AddGameObject&lt;Coin&gt;("coin_1");
-///   coin.Position = new Vector2(300, 480);
-///   coin.Value = 1;
-///   coin.SetPlayer(player);
+///   var fish = scene.AddGameObject&lt;Fish&gt;("fish_1");
+///   fish.Position = new Vector2(300, 480);
+///   fish.Value = 1;
+///   fish.SetPlayer(player);
 /// </summary>
-public class Coin : Collectible
+public class Fish : Collectible
 {
     public int Value { get; set; } = 1;
 
@@ -47,7 +46,7 @@ public class Coin : Collectible
 
     public override void OnCollect(Player player)
     {
-        player.AddCoin(Value);
+        player.AddFish(Value);
         // TODO (Phase 9): เล่น sound effect (AudioManager)
         // TODO (Phase 9): spawn particle
     }

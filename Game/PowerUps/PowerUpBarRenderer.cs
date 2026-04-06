@@ -36,9 +36,9 @@ public class PowerUpBarRenderer : Component
 
         foreach (var fx in effects)
         {
-            if (!fx.IsActive || fx.TotalDuration <= 0f) continue;
+            if (!fx.IsActive) continue;
 
-            float ratio  = Math.Clamp(fx.RemainingTime / fx.TotalDuration, 0f, 1f);
+            float ratio  = fx.GaugeRatio;
             float barY   = _player.Position.Y - OffsetY - drawn * BarGap;
             float barX   = _player.Position.X - BarW / 2f;
 

@@ -42,14 +42,11 @@ public class LaserTrap : Trap
         Damage = 1;
 
         // Collision bounding box = full beam rectangle.
-        float endpointSize = LaserRenderer.EndpointSize * EndpointScale;
-        float T = Style == LaserStyle.Floating
-            ? LaserRenderer.BeamThickness
-            : endpointSize;
+        float tilePixels = LaserRenderer.TileSize * EndpointScale;
 
         Scale = IsHorizontal
-            ? new Vector2(BeamLength, T)
-            : new Vector2(T, BeamLength);
+            ? new Vector2(BeamLength, tilePixels)
+            : new Vector2(tilePixels, BeamLength);
 
         AddComponent<LaserRenderer>();
     }

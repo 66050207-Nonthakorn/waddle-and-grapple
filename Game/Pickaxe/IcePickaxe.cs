@@ -89,7 +89,8 @@ public class IcePickaxe
     /// <summary>ตั้งเป็น true เมื่อ Player ใช้คลิกขวาเพื่อ launch → ป้องกันชาร์จซ้ำในเฟรมถัดไป</summary>
     public bool SuppressCharge { get; set; }
 
-    // TODO (Member 3): private IEnemy _hookedEnemy;
+    private List<Enemy> _enemies = [];
+    public void SetEnemies(List<Enemy> enemies) => _enemies = enemies;
 
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -545,8 +546,24 @@ public class IcePickaxe
             CheckFlightWrap();
         } while (_bendPoints.Count > prevBends && ++safetyLimit < 10);
 
-        // ตรวจชน solid → hook บน surface (snap ไปที่ขอบ solid ที่ใกล้ที่สุด)
         const float PickaxeRadius = 6f;
+
+        // ตรวจชน enemy ก่อน solid — กัน enemy feet ทับพื้น solid แล้ว solid โดนก่อน
+        foreach (var enemy in _enemies)
+        {
+            var b = enemy.ColliderBounds;
+            if (_position.X + PickaxeRadius > b.Left
+             && _position.X - PickaxeRadius < b.Right
+             && _position.Y + PickaxeRadius > b.Top
+             && _position.Y - PickaxeRadius < b.Bottom)
+            {
+                enemy.Die();
+                StartRecall();
+                return;
+            }
+        }
+
+        // ตรวจชน solid → hook บน surface (snap ไปที่ขอบ solid ที่ใกล้ที่สุด)
         foreach (var solid in _owner.Solids)
         {
             if (_position.X + PickaxeRadius > solid.Left

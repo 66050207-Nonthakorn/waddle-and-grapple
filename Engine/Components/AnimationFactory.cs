@@ -29,6 +29,25 @@ public class AnimationFactory(Texture2D sheet, int rows, int columns)
         return new Animation(sheet, frames, frameDuration, isLooping);
     }
 
+    public Animation CreateFromRowReversed(int row, int totalFrames, float frameDuration, int spaceX = 0, int spaceY = 0, bool isLooping = true)
+    {
+        var frames = new List<Rectangle>();
+        for (int x = totalFrames - 1; x >= 0; x--)
+        {
+            int c = x % columns;
+            int r = row + x / columns;
+
+            frames.Add(new Rectangle(
+                c * (frameWidth + spaceX),
+                r * (frameHeight + spaceY),
+                frameWidth,
+                frameHeight
+            ));
+        }
+
+        return new Animation(sheet, frames, frameDuration, isLooping);
+    }
+
     public Animation CreateFromCell(int row, int col, int totalFrames, float frameDuration, int spaceX = 0, int spaceY = 0, bool isLooping = true)
     {
         var frames = new List<Rectangle>();

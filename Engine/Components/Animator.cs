@@ -11,6 +11,7 @@ public class Animator : Component
 
     public string CurrentAnimationName => _currentName;
     public int CurrentLoopCount => _currentAnimation?.LoopCount ?? 0;
+    public bool IsCurrentAnimationFinished => _currentAnimation?.IsFinished ?? false;
 
     public void AddAnimation(string name, Animation animation)
     {

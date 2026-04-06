@@ -1,61 +1,67 @@
-using System;
-using WaddleAndGrapple.Engine.Components;
-using WaddleAndGrapple.Engine.Managers;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace WaddleAndGrapple.Game;
 
-public enum SawPlacement { Floating, FloorMounted }
+/// <summary>
+/// Saw placement — controls which quadrant(s) of the sprite are rendered
+/// and where the attachment point (Position) sits relative to the visible blade.
+/// </summary>
+/// <summary>Discrete size tiers matching the sprite sheets (1 tile = 75 px).</summary>
+public enum SawSize
+{
+    Small  =  16,   // 1×1 tile,  spritesheet 48×32,  3 cols
+    Medium = 32,   // 2×2 tiles, spritesheet 128×64, 4 cols
+    Large  = 64,   // 4×4 tiles, spritesheet 256×128,4 cols
+}
+
+public enum SawPlacement
+{
+    Full,              // Full blade, Position = centre
+    FloorMounted,      // Top half visible, Position = bottom-centre (floor contact)
+    CeilingMounted,    // Bottom half visible, Position = top-centre (ceiling contact)
+    LeftWallMounted,   // Left half visible, Position = right-centre (wall contact)
+    RightWallMounted,  // Right half visible, Position = left-centre (wall contact)
+}
 
 /// <summary>
-/// A saw blade trap that moves back and forth along a path and damages the player on contact.
+/// A saw blade trap that moves back and forth and damages the player on contact.
+/// Rendering is handled by SawRenderer.
 /// </summary>
 public class SawTrap : Trap
 {
-    // Movement range from starting position (in pixels)
-    public float MoveRange { get; set; } = 150f;
+    // Movement
+    public float MoveRange      { get; set; } = 150f;
+    public float MoveSpeed      { get; set; } = 80f;
+    public bool  MoveHorizontal { get; set; } = true;
 
-    // Movement speed in pixels per second
-    public float MoveSpeed { get; set; } = 80f;
+    // Appearance
+    /// <summary>Discrete size tiers: Small=1 tile (75px), Medium=2 tiles (150px), Large=4 tiles (300px).</summary>
+    public SawSize Size { get; set; } = SawSize.Medium;
 
-    // Blade size in pixels (width and height)
-    public float BladeSize { get; set; } = 30f;
+    /// <summary>Rendered size of the full blade in pixels (derived from Size).</summary>
+    public float BladeSize => (float)Size;
 
-    // Axis of movement: true = horizontal (X), false = vertical (Y)
-    public bool MoveHorizontal { get; set; } = true;
+    /// <summary>
+    /// Which portion of the blade is visible (for wall/floor/ceiling mounting).
+    /// Small saws (AnimationColumns == 3) always use Full regardless of this value.
+    /// </summary>
+    public SawPlacement Placement { get; set; } = SawPlacement.Full;
 
-    // Floating saw uses row 0, floor-mounted saw uses row 1
-    public SawPlacement Placement { get; set; } = SawPlacement.Floating;
-
-    // Frames per row in the saw spritesheet (Large/Medium = 4, Small = 3)
-    public int AnimationColumns { get; set; } = 4;
-
-    // Animation speed for sprite-sheet saws
+    /// <summary>Number of animation frames (columns) in the spritesheet row.</summary>
+    public int   AnimationColumns       { get; set; } = 4;
     public float AnimationFrameDuration { get; set; } = 0.06f;
 
     private Vector2 _startPosition;
-    private float _moveDirection = 1f;
-    private Animator _animator;
+    private float   _moveDirection = 1f;
 
     protected override void OnInitialize()
     {
         Damage = 1;
-        _startPosition = Position;
-
+        _startPosition    = Position;
         SpriteTextureName = SpriteTextureName ?? "pixel";
-        var texture = ResourceManager.Instance.GetTexture(SpriteTextureName);
-        bool usingPixel = texture == ResourceManager.Instance.GetTexture("pixel");
-        if (usingPixel)
-            SpriteTint = Color.Red;
-
-        ApplySpriteTexture(new Vector2(BladeSize, BladeSize));
-
-        if (!usingPixel)
-            TrySetupSawAnimation(texture);
-
-        if (usingPixel)
-            Scale = new Vector2(BladeSize, BladeSize);
+        if (Size == SawSize.Small) // Small saws always use the Full blade spritesheet row, even if Placement is set to something else.
+            AnimationColumns = 3;
+        AddComponent<SawRenderer>();
     }
 
     protected override void OnUpdate(GameTime gameTime)
@@ -65,54 +71,49 @@ public class SawTrap : Trap
         if (MoveHorizontal)
         {
             Position = new Vector2(Position.X + MoveSpeed * _moveDirection * dt, Position.Y);
-
-            float distanceMoved = Position.X - _startPosition.X;
-            if (distanceMoved >= MoveRange) _moveDirection = -1f;
-            else if (distanceMoved <= 0f)   _moveDirection =  1f;
+            float d = Position.X - _startPosition.X;
+            if (d >= MoveRange) _moveDirection = -1f;
+            else if (d <= 0f)   _moveDirection =  1f;
         }
         else
         {
             Position = new Vector2(Position.X, Position.Y + MoveSpeed * _moveDirection * dt);
-
-            float distanceMoved = Position.Y - _startPosition.Y;
-            if (distanceMoved >= MoveRange) _moveDirection = -1f;
-            else if (distanceMoved <= 0f)   _moveDirection =  1f;
+            float d = Position.Y - _startPosition.Y;
+            if (d >= MoveRange) _moveDirection = -1f;
+            else if (d <= 0f)   _moveDirection =  1f;
         }
     }
 
-    protected override void OnPlayerEnter(Player player)
+    protected override void OnPlayerEnter(Player player) => player.Die();
+
+    protected override Rectangle GetCollisionBounds()
     {
-        player.Die();
-    }
+        int x    = (int)Position.X;
+        int y    = (int)Position.Y;
+        int half = (int)(BladeSize * 0.5f);
+        int full = (int)BladeSize;
 
-    private void TrySetupSawAnimation(Texture2D texture)
-    {
-        if (texture == null) return;
+        // Small saw (3 cols) is always a full circle.
+        var p = AnimationColumns == 3 ? SawPlacement.Full : Placement;
 
-        const int rows = 2;
-        int columns = Math.Max(1, AnimationColumns);
+        return p switch
+        {
+            SawPlacement.Full =>
+                new Rectangle(x - half, y - half, full, full),
 
-        if (texture.Width < columns || texture.Height < rows) return;
+            SawPlacement.FloorMounted =>
+                new Rectangle(x - half, y - half, full, half),
 
-        int row = Placement == SawPlacement.FloorMounted ? 1 : 0;
+            SawPlacement.CeilingMounted =>
+                new Rectangle(x - half, y,        full, half),
 
-        var factory = new AnimationFactory(texture, rows: rows, columns: columns);
-        var spin = factory.CreateFromRow(
-            row: row,
-            totalFrames: columns,
-            frameDuration: AnimationFrameDuration,
-            isLooping: true
-        );
+            SawPlacement.LeftWallMounted =>
+                new Rectangle(x,        y - half, half, full),
 
-        _animator = AddComponent<Animator>();
-        _animator.AddAnimation("spin", spin);
-        _animator.Play("spin");
+            SawPlacement.RightWallMounted =>
+                new Rectangle(x - half, y - half, half, full),
 
-        // Animator draws a frame (not full sheet), so scale from frame size.
-        // Use uniform scale to avoid stretching when frame width/height are not equal.
-        float frameWidth = texture.Width / (float)columns;
-        float frameHeight = texture.Height / (float)rows;
-        float uniformScale = BladeSize / MathF.Max(frameWidth, frameHeight);
-        Scale = new Vector2(uniformScale, uniformScale);
+            _ => base.GetCollisionBounds()
+        };
     }
 }

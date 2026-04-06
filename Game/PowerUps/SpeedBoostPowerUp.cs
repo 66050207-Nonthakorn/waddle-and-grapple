@@ -1,5 +1,4 @@
 using Microsoft.Xna.Framework;
-using WaddleAndGrapple.Game.Example;
 
 namespace WaddleAndGrapple.Game;
 
@@ -22,10 +21,12 @@ public class SpeedBoostPowerUp : PowerUp
     protected override void OnActivate(Player player)
     {
         player.MoveSpeed *= Multiplier;
+        player.SetActiveSheet("speed");
     }
 
     protected override void OnDeactivate(Player player)
     {
         player.MoveSpeed /= Multiplier;
+        player.ClearSheet("speed");
     }
 }
