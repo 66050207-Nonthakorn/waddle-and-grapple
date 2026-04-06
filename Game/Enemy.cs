@@ -598,6 +598,19 @@ public class Enemy : GameObject
 
     public Rectangle ColliderBounds => _collider?.Bounds ?? Rectangle.Empty;
 
+    /// <summary>รีเซ็ต enemy กลับไปยังตำแหน่ง spawn และเริ่ม patrol ใหม่</summary>
+    public void ResetToSpawn()
+    {
+        Position     = _spawnPosition;
+        VelocityX    = 0f;
+        VelocityY    = 0f;
+        IsGrounded   = false;
+        _patrolDirection = 1;
+        State = EnemyState.Idle; // bypass ChangeState guard so Patrolling transition fires
+        ChangeState(EnemyState.Patrolling);
+        _animator.Play("walk");
+    }
+
     /// <summary>เรียกจาก hazard/trap หรือ Player เมื่อต้องการกำจัด enemy</summary>
     public void Die()
     {
