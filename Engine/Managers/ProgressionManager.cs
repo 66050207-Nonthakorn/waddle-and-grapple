@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
 using Microsoft.Xna.Framework;
+using WaddleAndGrapple.Engine.Utils;
 
 namespace WaddleAndGrapple.Engine.Managers;
 
@@ -16,6 +19,12 @@ public sealed class ProgressionManager
     public TimeSpan LastCompletionTime { get; private set; }
     public int LastCompletionCollectedFishCount { get; private set; }
     public int LastCompletionTotalFishCount { get; private set; }
+
+    public string SaveFilePath { get; set; } = Path.Combine(
+        Directory.GetCurrentDirectory(),
+        "Save",
+        "Progression.json"
+    );
 
     private ProgressionManager() { }
 
@@ -143,6 +152,8 @@ public sealed class ProgressionManager
         {
             progression.TotalFishCount = totalFishCount;
         }
+
+        SaveToFile(SaveFilePath);
     }
 
     public void UpdateFishProgress(int levelIndex, int collectedFishCount, int totalFishCount)
@@ -238,6 +249,87 @@ public sealed class ProgressionManager
             CurrentLevelIndex = 0;
         }
     }
+
+    public void SaveToFile(string filePath)
+    {
+        var saveData = new ProgressionSaveData
+        {
+            Levels = [.._levels.Values],
+            PlayedCutscenes = [.._playedCutscenes],
+            CurrentLevelIndex = CurrentLevelIndex,
+            LastCompletedLevelIndex = LastCompletedLevelIndex,
+            LastCompletionTime = LastCompletionTime,
+            LastCompletionCollectedFishCount = LastCompletionCollectedFishCount,
+            LastCompletionTotalFishCount = LastCompletionTotalFishCount
+        };
+
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            Converters = { new Vector2JsonConverter() }
+        };
+
+        string directory = Path.GetDirectoryName(filePath);
+        if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        string json = JsonSerializer.Serialize(saveData, options);
+        File.WriteAllText(filePath, json);
+    }
+
+    public void LoadFromFile(string filePath)
+    {
+        if (!File.Exists(filePath))
+        {
+            SaveToFile(filePath);
+            return;
+        }
+
+        var options = new JsonSerializerOptions
+        {
+            Converters = { new Vector2JsonConverter() }
+        };
+
+        string json = File.ReadAllText(filePath);
+        var saveData = JsonSerializer.Deserialize<ProgressionSaveData>(json, options);
+
+        if (saveData == null)
+        {
+            return;
+        }
+
+        _levels.Clear();
+        _playedCutscenes.Clear();
+
+        foreach (var level in saveData.Levels)
+        {
+            _levels[level.LevelIndex] = level;
+        }
+
+        foreach (var cutscene in saveData.PlayedCutscenes)
+        {
+            _playedCutscenes.Add(cutscene);
+        }
+
+        CurrentLevelIndex = saveData.CurrentLevelIndex;
+        LastCompletedLevelIndex = saveData.LastCompletedLevelIndex;
+        LastCompletionTime = saveData.LastCompletionTime;
+        LastCompletionCollectedFishCount = saveData.LastCompletionCollectedFishCount;
+        LastCompletionTotalFishCount = saveData.LastCompletionTotalFishCount;
+    }
+}
+
+public sealed class ProgressionSaveData
+{
+    public List<LevelProgression> Levels { get; set; } = [];
+    public List<string> PlayedCutscenes { get; set; } = [];
+    public int CurrentLevelIndex { get; set; }
+    public int LastCompletedLevelIndex { get; set; }
+    public TimeSpan LastCompletionTime { get; set; }
+    public int LastCompletionCollectedFishCount { get; set; }
+    public int LastCompletionTotalFishCount { get; set; }
 }
 
 public sealed class LevelProgression

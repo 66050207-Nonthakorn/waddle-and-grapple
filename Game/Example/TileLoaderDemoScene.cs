@@ -3,38 +3,28 @@ using Microsoft.Xna.Framework.Input;
 using WaddleAndGrapple.Engine;
 using WaddleAndGrapple.Engine.Components;
 using WaddleAndGrapple.Engine.Components.Physics;
-using WaddleAndGrapple.Engine.Components.Tile;
 using WaddleAndGrapple.Engine.Managers;
 
 namespace WaddleAndGrapple.Game.Example;
 
-public class TileLoaderDemoScene : Scene
+public class GameMapLoaderDemo : Scene
 {
-    GameObject player;
+    Game.Player player;
 
     public override void Setup()
     {
-        // Load and parse the JSON map file
-        var map = TiledMapLoader.Load("Content/gametiles.tmj");
-
-        // Create tilemap GameObjects with collision
         var tileset = ResourceManager.Instance.GetTexture("Tiles/tileset");
-        
-        TiledMapLoader.CreateTilemapObjects(
-            scene: this,
-            map: map,
-            tileset: tileset,
-            baseLayer: 0.5f,
-            solidTileIndices: [0, 2, 3, 4, 5]
-        );
+
+        // Load map, build tile layers, and spawn all registered objects in one call
+        var loader = new GameMapLoader(this, "Content/testtest.tmj", player);
+        loader.Load(tileset, baseLayer: 0.5f);
 
         // Create player GameObject
-        player = base.AddGameObject<GameObject>("player");
+        player = base.AddGameObject<Game.Player>("player");
         player.Position = new Vector2(100, 100);
-        player.AddComponent<SpriteRenderer>().Texture = ResourceManager.Instance.GetTexture("bird");
 
         var rb = player.AddComponent<Rigidbody2D>();
-        rb.GravityScale = 1f;
+        rb.GravityScale = 0f;
         rb.Drag = 0.5f;
 
         var collider = player.AddComponent<BoxCollider>();
