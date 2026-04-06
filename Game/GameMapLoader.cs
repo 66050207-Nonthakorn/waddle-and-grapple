@@ -105,14 +105,14 @@ public class GameMapLoader
     {
         _loader.Register<SawTrap>("SawTrap", (trap, obj) =>
         {
-            trap.MoveRange             = obj.FloatProp("moveRange",     trap.MoveRange);
-            trap.MoveSpeed             = obj.FloatProp("moveSpeed",     trap.MoveSpeed);
-            trap.MoveHorizontal        = obj.BoolProp ("moveHorizontal",trap.MoveHorizontal);
-            trap.Placement             = obj.EnumProp ("placement",     trap.Placement);
-            trap.AnimationColumns      = obj.IntProp  ("animationColumns", trap.AnimationColumns);
-            trap.AnimationFrameDuration= obj.FloatProp("animationFrameDuration", trap.AnimationFrameDuration);
-            if (obj.Properties.ContainsKey("spriteName"))
-                trap.SpriteTextureName = obj.StringProp("spriteName");
+            trap.MoveRange             = obj.FloatProp("MoveRange",     trap.MoveRange);
+            trap.MoveSpeed             = obj.FloatProp("MoveSpeed",     trap.MoveSpeed);
+            trap.MoveHorizontal        = obj.BoolProp ("MoveHorizontal",trap.MoveHorizontal);
+            trap.Placement             = obj.EnumProp ("Placement",     trap.Placement);
+            trap.AnimationColumns      = obj.IntProp  ("AnimationColumns", trap.AnimationColumns);
+            trap.AnimationFrameDuration= obj.FloatProp("AnimationFrameDuration", trap.AnimationFrameDuration);
+            if (obj.Properties.ContainsKey("SpriteName"))
+                trap.SpriteTextureName = obj.StringProp("SpriteName");
             trap.Player = _player;
         });
     }
@@ -121,14 +121,14 @@ public class GameMapLoader
     {
         _loader.Register<LaserTrap>("LaserTrap", (laser, obj) =>
         {
-            laser.BeamLength          = obj.FloatProp("beamLength",          laser.BeamLength);
-            laser.IsHorizontal        = obj.BoolProp ("isHorizontal",        laser.IsHorizontal);
-            laser.AlwaysOn            = obj.BoolProp ("alwaysOn",            laser.AlwaysOn);
-            laser.OnDuration          = obj.FloatProp("onDuration",          laser.OnDuration);
-            laser.OffDuration         = obj.FloatProp("offDuration",         laser.OffDuration);
-            laser.Style               = obj.EnumProp ("style",               laser.Style);
-            laser.EndpointScale       = obj.FloatProp("endpointScale",       laser.EndpointScale);
-            laser.BeamThicknessScale  = obj.FloatProp("beamThicknessScale",  laser.BeamThicknessScale);
+            laser.BeamLength          = obj.FloatProp("BeamLength",          laser.BeamLength);
+            laser.IsHorizontal        = obj.BoolProp ("IsHorizontal",        laser.IsHorizontal);
+            laser.AlwaysOn            = obj.BoolProp ("AlwaysOn",            laser.AlwaysOn);
+            laser.OnDuration          = obj.FloatProp("OnDuration",          laser.OnDuration);
+            laser.OffDuration         = obj.FloatProp("OffDuration",         laser.OffDuration);
+            laser.Style               = obj.EnumProp ("Style",               laser.Style);
+            laser.EndpointScale       = obj.FloatProp("EndpointScale",       laser.EndpointScale);
+            laser.BeamThicknessScale  = obj.FloatProp("BeamThicknessScale",  laser.BeamThicknessScale);
             laser.Player = _player;
         });
     }
@@ -137,13 +137,13 @@ public class GameMapLoader
     {
         _loader.Register<SpikeTrap>("SpikeTrap", (spike, obj) =>
         {
-            spike.PhaseOffset     = obj.FloatProp("phaseOffset",     spike.PhaseOffset);
-            spike.ExtendDuration  = obj.FloatProp("extendDuration",  spike.ExtendDuration);
-            spike.HoldDuration    = obj.FloatProp("holdDuration",    spike.HoldDuration);
-            spike.RetractDuration = obj.FloatProp("retractDuration", spike.RetractDuration);
-            spike.PauseDuration   = obj.FloatProp("pauseDuration",   spike.PauseDuration);
-            if (obj.Properties.ContainsKey("spriteName"))
-                spike.SpriteTextureName = obj.StringProp("spriteName");
+            spike.PhaseOffset     = obj.FloatProp("PhaseOffset",     spike.PhaseOffset);
+            spike.ExtendDuration  = obj.FloatProp("ExtendDuration",  spike.ExtendDuration);
+            spike.HoldDuration    = obj.FloatProp("HoldDuration",    spike.HoldDuration);
+            spike.RetractDuration = obj.FloatProp("RetractDuration", spike.RetractDuration);
+            spike.PauseDuration   = obj.FloatProp("PauseDuration",   spike.PauseDuration);
+            if (obj.Properties.ContainsKey("SpriteName"))
+                spike.SpriteTextureName = obj.StringProp("SpriteName");
             spike.Player = _player;
         });
     }
@@ -152,13 +152,13 @@ public class GameMapLoader
     {
         _loader.Register<Enemy>("Enemy", (enemy, obj) =>
         {
-            enemy.PatrolRadius   = obj.FloatProp("patrolRadius",   enemy.PatrolRadius);
-            enemy.DetectionRange = obj.FloatProp("detectionRange", enemy.DetectionRange);
-            enemy.AttackRange    = obj.FloatProp("attackRange",    enemy.AttackRange);
-            enemy.LeashRange     = obj.FloatProp("leashRange",     enemy.LeashRange);
-            enemy.PatrolSpeed    = obj.FloatProp("patrolSpeed",    enemy.PatrolSpeed);
-            enemy.ChaseSpeed     = obj.FloatProp("chaseSpeed",     enemy.ChaseSpeed);
-            enemy.ReturnSpeed    = obj.FloatProp("returnSpeed",    enemy.ReturnSpeed);
+            enemy.PatrolRadius   = obj.FloatProp("PatrolRadius",   enemy.PatrolRadius);
+            enemy.DetectionRange = obj.FloatProp("DetectionRange", enemy.DetectionRange);
+            enemy.AttackRange    = obj.FloatProp("AttackRange",    enemy.AttackRange);
+            enemy.LeashRange     = obj.FloatProp("LeashRange",     enemy.LeashRange);
+            enemy.PatrolSpeed    = obj.FloatProp("PatrolSpeed",    enemy.PatrolSpeed);
+            enemy.ChaseSpeed     = obj.FloatProp("ChaseSpeed",     enemy.ChaseSpeed);
+            enemy.ReturnSpeed    = obj.FloatProp("ReturnSpeed",    enemy.ReturnSpeed);
             enemy.SetPlayer(_player);
         });
     }
@@ -167,7 +167,7 @@ public class GameMapLoader
     {
         _loader.Register<Fish>("Fish", (coin, obj) =>
         {
-            coin.Value = obj.IntProp("value", coin.Value);
+            coin.Value = obj.IntProp("Value", coin.Value);
             coin.SetPlayer(_player);
         });
     }
