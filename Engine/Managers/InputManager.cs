@@ -38,8 +38,18 @@ public class InputManager
         return _currentKeyState.IsKeyUp(key) && _previousKeyState.IsKeyDown(key);
     }
     
+    /// <summary>true ถ้าเคอร์เซอร์อยู่ภายใน RenderDestination (viewport จริงของเกม)</summary>
+    public bool IsMouseInViewport()
+    {
+        var vp = ScreenManager.Instance.RenderDestination;
+        if (vp == Microsoft.Xna.Framework.Rectangle.Empty) return true; // fallback
+        return _currentMouseState.X >= vp.Left && _currentMouseState.X <= vp.Right
+            && _currentMouseState.Y >= vp.Top  && _currentMouseState.Y <= vp.Bottom;
+    }
+
     public bool IsMouseButtonDown(int button)
     {
+        if (!IsMouseInViewport()) return false;
         return button switch
         {
             0 => _currentMouseState.LeftButton == ButtonState.Pressed,
@@ -51,6 +61,7 @@ public class InputManager
 
     public bool IsMouseButtonReleased(int button)
     {
+        if (!IsMouseInViewport()) return false;
         return button switch
         {
             0 => _currentMouseState.LeftButton == ButtonState.Released && _previousMouseState.LeftButton == ButtonState.Pressed,
@@ -62,6 +73,7 @@ public class InputManager
 
     public bool IsMouseButtonPressed(int button)
     {
+        if (!IsMouseInViewport()) return false;
         return button switch
         {
             0 => _currentMouseState.LeftButton == ButtonState.Pressed && _previousMouseState.LeftButton == ButtonState.Released,

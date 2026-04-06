@@ -25,6 +25,7 @@ public class IcePickaxe
     private const float FlySpeed       = 900f;  // ความเร็ว projectile (px/s)
     private const float ClimbSpeed     = 150f;  // ความเร็วไต่เชือก (px/s)
     private const float MinRopeLength  = 20f;   // ความยาวเชือกขั้นต่ำ (px)
+    public  const float MaxRopeLength  = 700f;  // ความยาวเชือกสูงสุด (px) — เกินนี้ auto-recall
     private const float FlyGravity     = 1200f; // แรงโน้มถ่วงขณะ pickaxe บิน (px/s²)
     private const float RecallSpeed    = 900f;  // ความเร็วดึงเชือกกลับ (px/s)
 
@@ -212,6 +213,11 @@ public class IcePickaxe
         // ใช้ bend ที่ CheckFlightWrap สะสมไว้ตอนบิน — ไม่คำนวณซ้ำเพราะจะทับ bend ที่ถูกต้อง
         Vector2 firstAnchor = _bendPoints.Count > 0 ? _bendPoints[0].Position : point;
         _ropeLength = Vector2.Distance(firstAnchor, _owner.Position);
+
+        // เชือกยาวเกิน MaxRopeLength → ไม่ hook, ดึงกลับทันที
+        if (_ropeLength > MaxRopeLength) { Console.WriteLine($"[ROPE] Hook rejected — ropeLen={_ropeLength:F0} > max={MaxRopeLength}"); StartRecall(); return; }
+
+        Console.WriteLine($"[ROPE] Hooked  at=({point.X:F0},{point.Y:F0})  ropeLen={_ropeLength:F0}  bends={_bendPoints.Count}");
         IsHooked    = true;
         _state      = PickaxeState.Hooked;
     }
@@ -523,6 +529,7 @@ public class IcePickaxe
         _flyVelocity    = dir * FlySpeed;
         _flownDistance  = 0f;
         _maxFlyDistance = Math.Max(ChargeLevel * MaxRange, MinThrowRange);
+        Console.WriteLine($"[ROPE] Throw  charge={ChargeLevel:F2}  maxDist={_maxFlyDistance:F0}  dir=({dir.X:F2},{dir.Y:F2})");
         ChargeLevel     = 0f;
         IsDeployed      = true;
         _state          = PickaxeState.Flying;
@@ -590,9 +597,9 @@ public class IcePickaxe
         if (_flownDistance >= _maxFlyDistance)
             _flyVelocity = new Vector2(0f, _flyVelocity.Y);
 
-        // เชือกตึงเต็มที่: ระยะตรงจาก player → pickaxe เกิน _maxFlyDistance → ดึงกลับ
+        // ระยะตรง player → pickaxe เกิน MaxRopeLength → ดึงกลับทันที
         float ropeDist = Vector2.Distance(_position, _owner.Position);
-        if (ropeDist > _maxFlyDistance + 100f)
+        if (ropeDist > MaxRopeLength)
             StartRecall();
     }
 
@@ -651,6 +658,7 @@ public class IcePickaxe
     /// <summary>เริ่ม reel-in: ถ้า hooked ให้เลื่อน _position มาที่ hook ก่อน</summary>
     private void StartRecall()
     {
+        Console.WriteLine($"[ROPE] Recall  from={_state}  ropeLen={_ropeLength:F0}");
         if (_state == PickaxeState.Hooked)
             _position = _hookPosition;
 

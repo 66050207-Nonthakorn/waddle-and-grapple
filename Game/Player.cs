@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using WaddleAndGrapple.Engine;
 using WaddleAndGrapple.Engine.Components;
@@ -14,7 +15,7 @@ public enum PlayerState
 {
     Idle,
     Running,
-    Sprinting,
+    Sprinting, 
     Jumping,
     Falling,
     WallClinging,
@@ -153,6 +154,10 @@ public class Player : GameObject
     private int   _sprintDir       = 0;          // 0=ไม่ sprint, 1=ขวา, -1=ซ้าย
     private bool  _ropeHitWall     = false;      // true = เพิ่ง jump จากกำแพงตอน rope pull → auto-cling
     private float _ledgeReleaseCooldown = 0f;   // ห้าม re-grab หลังปล่อย/กระโดดจาก ledge
+    private float _wallClingLockTimer  = 0f;    // หลัง kick เข้ากำแพงตรงข้าม: ห้าม pressingAway exit ชั่วคราว
+    private float _jumpBufferTimer     = 0f;    // Space ถูกกดเมื่อกี้ — buffer ไว้ใช้ตอน wall cling
+    private const float JumpBufferWindow = 0.2f; // window ที่ buffer jump input (วินาที)
+    private bool  _wasGroundedPrev = false;      // debug: ป้องกัน [LAND] spam ทุก frame
 
     // ── Rope Dash ─────────────────────────────────────────────────────────────
     private bool _isRopeDashing = false;
@@ -315,6 +320,8 @@ public class Player : GameObject
         // Wall jump cooldown
         if (_wallJumpCooldownTimer > 0f) _wallJumpCooldownTimer -= dt;
         if (_ledgeReleaseCooldown > 0f)  _ledgeReleaseCooldown  -= dt;
+        if (_wallClingLockTimer    > 0f) _wallClingLockTimer    -= dt;
+        if (_jumpBufferTimer       > 0f) _jumpBufferTimer       -= dt;
 
         // ── Left-click ขณะ Hooked → เริ่มดึงตัวเองไปตามเชือก ──────────────────
         if (Pickaxe.IsHooked && InputManager.Instance.IsMouseButtonPressed(0))
@@ -710,48 +717,59 @@ public class Player : GameObject
     /// </summary>
     private void HandleJump()
     {
-        bool jumpPressed = InputManager.Instance.IsKeyPressed(Keys.Space)
-                        ;
-        if (!jumpPressed) return;
+        bool jumpPressed = InputManager.Instance.IsKeyPressed(Keys.Space);
+        if (jumpPressed) _jumpBufferTimer = JumpBufferWindow;
+
+        bool hasJumpIntent = jumpPressed || _jumpBufferTimer > 0f;
+        if (!hasJumpIntent) return;
 
         // อยู่ในพื้นที่แคบ (ย่ออยู่ + มีเพดานบัง) → กระโดดไม่ได้
         if (_currentHeight != PlayerHeight && !CanStandUp()) return;
 
         if (IsGrounded || _coyoteTimer > 0f)
         {
-            if (State == PlayerState.Crouching) SetCrouchHeight(false); // reset ก่อน jump
-            VelocityY    = JumpForce;
-            _coyoteTimer = 0f;
+            bool coyote = !IsGrounded && _coyoteTimer > 0f;
+            Console.WriteLine($"[JUMP] GroundJump{(coyote ? "(coyote)" : "")}  pos={Position.X:F0},{Position.Y:F0}");
+            if (State == PlayerState.Crouching) SetCrouchHeight(false);
+            VelocityY         = JumpForce;
+            _coyoteTimer      = 0f;
+            _jumpBufferTimer  = 0f;
             ChangeState(PlayerState.Jumping);
         }
         else if (State == PlayerState.WallClinging)
         {
-            // Kick ออกจากผนัง — ใช้ wall side โดยตรง ไม่ใช้ FacingDirection (อาจ stale)
             int wallSide           = IsTouchingWallRight ? 1 : -1;
             _wallJumpedFromSide    = wallSide;
             _wallJumpCooldownTimer = WallJumpCooldown;
             VelocityY              = JumpForce * WallJumpYMultiplier;
             VelocityX              = -wallSide * MoveSpeed * WallJumpXMultiplier * SpeedScale;
             FacingDirection        = -wallSide;
+            _jumpBufferTimer       = 0f;
+            Console.WriteLine($"[JUMP] WallJump  side={wallSide}  kickVX={VelocityX:F0}  kickVY={VelocityY:F0}  (buffered={!jumpPressed})");
             ChangeState(PlayerState.Jumping);
         }
         else if (State == PlayerState.LedgeGrabbing)
         {
+            Console.WriteLine($"[JUMP] LedgeJump  pos={Position.X:F0},{Position.Y:F0}");
             _ledgeReleaseCooldown = 0.25f;
-            VelocityY = JumpForce;
+            VelocityY        = JumpForce;
+            _jumpBufferTimer = 0f;
             ChangeState(PlayerState.Jumping);
         }
         else if (Pickaxe.IsHooked)
         {
-            // กระโดดออกจาก rope พร้อม jump force
+            Console.WriteLine($"[JUMP] RopeJump");
             Pickaxe.Recall();
-            VelocityY = JumpForce;
+            VelocityY        = JumpForce;
+            _jumpBufferTimer = 0f;
             ChangeState(PlayerState.Jumping);
         }
         else if (HasDoubleJump && !HasUsedDoubleJump)
         {
+            Console.WriteLine($"[JUMP] DoubleJump");
             VelocityY         = JumpForce;
             HasUsedDoubleJump = true;
+            _jumpBufferTimer  = 0f;
             ChangeState(PlayerState.Jumping);
         }
     }
@@ -792,16 +810,34 @@ public class Player : GameObject
         bool autoClingSuffix = _ropeHitWall && touchingWall && VelocityY >= 0f;
         if (IsGrounded || !touchingWall) _ropeHitWall = false;
 
-        if (!IsGrounded && touchingWall && (pressingTowardWall || kickedIntoOppositeWall || autoClingSuffix)
+        if (!IsGrounded && touchingWall && ((pressingTowardWall && VelocityY >= 0f) || kickedIntoOppositeWall || autoClingSuffix)
             && State != PlayerState.LedgeGrabbing
             && !blockedByCooldown)
         {
+            if (kickedIntoOppositeWall)
+            {
+                _wallJumpedFromSide = 0;
+                _wallClingLockTimer = 0.15f; // ล็อก 0.15s ไม่ให้ pressingAway exit ทันที
+                // buffer ยังคงอยู่ → HandleJump จะ fire wall jump จากกำแพงฝั่งนี้ทันที
+            }
+            else
+            {
+                _jumpBufferTimer = 0f; // press/rope cling: ต้องกด Space ใหม่ ไม่ใช้ buffer เก่า
+            }
+
+            string reason = pressingTowardWall ? "press" : kickedIntoOppositeWall ? "kick" : "rope";
+            if (State != PlayerState.WallClinging)
+                Console.WriteLine($"[WALL] Cling  side={(IsTouchingWallRight?"R":"L")}  reason={reason}  VX={VelocityX:F0} VY={VelocityY:F0}");
             ChangeState(PlayerState.WallClinging);
         }
         else if (State == PlayerState.WallClinging)
         {
-            if      (IsGrounded)                            ChangeState(PlayerState.Idle);
-            else if (!touchingWall || pressingAwayFromWall) ChangeState(PlayerState.Falling);
+            // ถ้ากด Space อยู่ → ให้ HandleJump fire wall jump ก่อน อย่าเพิ่ง exit
+            bool jumpHeld = InputManager.Instance.IsKeyDown(Keys.Space) || _jumpBufferTimer > 0f;
+            bool canExitByPress = pressingAwayFromWall && _wallClingLockTimer <= 0f && !jumpHeld;
+            Console.WriteLine($"[WALL_EXIT?] touch={touchingWall} away={pressingAwayFromWall} lock={_wallClingLockTimer:F3} canExit={canExitByPress}");
+            if      (IsGrounded)                        ChangeState(PlayerState.Idle);
+            else if (!touchingWall || canExitByPress)   ChangeState(PlayerState.Falling);
         }
     }
 
@@ -993,6 +1029,7 @@ public class Player : GameObject
 
     private void MoveAndCollide(float dt)
     {
+        _wasGroundedPrev    = IsGrounded;
         IsGrounded          = false;
         IsTouchingWallLeft  = false;
         IsTouchingWallRight = false;
@@ -1035,6 +1072,8 @@ public class Player : GameObject
 
             if (VelocityY > 0f)      // ตกลง → ลงจอดบน solid
             {
+                if (!_wasGroundedPrev)
+                    Console.WriteLine($"[LAND]  pos={Position.X:F0},{Position.Y:F0}  impactVY={VelocityY:F0}  state={State}");
                 Position   = new Vector2(Position.X, solid.Top - _currentHeight / 2f);
                 IsGrounded = true;
             }
@@ -1129,6 +1168,7 @@ public class Player : GameObject
             VelocityY       = 0f;
             FacingDirection = facingDir;
             UpdateColliderBounds();
+            Console.WriteLine($"[LEDGE] Grab  side={(facingDir>0?"R":"L")}  snapY={solid.Top}  pos={Position.X:F0},{Position.Y:F0}");
             ChangeState(PlayerState.LedgeGrabbing);
             return;
         }
@@ -1262,6 +1302,8 @@ public class Player : GameObject
     public void ChangeState(PlayerState newState)
     {
         if (State == newState) return;
+
+        Console.WriteLine($"[STATE] {State} → {newState}  |  VX={VelocityX:F0} VY={VelocityY:F0}  grounded={IsGrounded}  L={IsTouchingWallLeft} R={IsTouchingWallRight}");
 
         // Set animation startup timers เมื่อเข้า state ใหม่
         switch (newState)
