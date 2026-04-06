@@ -11,6 +11,8 @@ namespace WaddleAndGrapple.Engine;
 
 public abstract class Scene
 {
+    public virtual bool IsPlayScene => false;
+
     protected Dictionary<string, GameObject> GameObjects { get; } = [];
     private readonly List<string> _deadObjects = [];
 

@@ -44,6 +44,8 @@ class Level1 : BaseLevel
         LevelIndex = 1;
         SetTotalFish(0);
 
+        AudioManager.Instance.PlaySong("Song/Level1");
+
         // ── Camera ────────────────────────────────────────────────────────────
         cameraObject = base.AddGameObject<GameObject>("camera");
         var camera   = cameraObject.AddComponent<Camera2D>();

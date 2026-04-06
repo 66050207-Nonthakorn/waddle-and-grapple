@@ -241,6 +241,9 @@ public class IcePickaxe
         if (_ropeLength > MaxRopeLength) { Console.WriteLine($"[ROPE] Hook rejected — ropeLen={_ropeLength:F0} > max={MaxRopeLength}"); StartRecall(); return; }
 
         Console.WriteLine($"[ROPE] Hooked  at=({point.X:F0},{point.Y:F0})  ropeLen={_ropeLength:F0}  bends={_bendPoints.Count}");
+
+        AudioManager.Instance.PlaySound("SFX/PickaxeHit");
+        
         IsHooked    = true;
         _state      = PickaxeState.Hooked;
     }
@@ -269,6 +272,7 @@ public class IcePickaxe
         IsLaunchComplete = false;
         IsHooked         = false;
         _state           = PickaxeState.Launching;
+        AudioManager.Instance.PlaySound("SFX/PickaxeRope");
     }
 
     // ── Draw ─────────────────────────────────────────────────────────────────
@@ -548,6 +552,8 @@ public class IcePickaxe
 
         dir.Normalize();
 
+        AudioManager.Instance.PlaySound("SFX/PickaxeThrow");
+
         _position       = _owner.Position;
         _flyVelocity    = dir * FlySpeed;
         _flownDistance  = 0f;
@@ -695,6 +701,8 @@ public class IcePickaxe
         Console.WriteLine($"[ROPE] Recall  from={_state}  ropeLen={_ropeLength:F0}");
         if (_state == PickaxeState.Hooked)
             _position = _hookPosition;
+
+        AudioManager.Instance.PlaySound("SFX/PickaxeRope");
 
         IsHooked  = false;
         _state    = PickaxeState.Recalling;

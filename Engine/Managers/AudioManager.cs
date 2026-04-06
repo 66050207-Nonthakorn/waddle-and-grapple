@@ -9,6 +9,8 @@ public class AudioManager
 {
     public static AudioManager Instance { get; private set; } = new AudioManager();
     
+    public string CurrentSongName { get; private set; }
+
     public static float SongVolume 
     {
         get => MediaPlayer.Volume;
@@ -35,12 +37,18 @@ public class AudioManager
         _soundsEffects[name] = sound;
     }
     
-    public void PlaySound(string name)
+    public void PlaySound(string name, float volume = 1f, float pitch = 0f, float pan = 0f)
     {
-        if (_soundsEffects.TryGetValue(name, out var sound))
+        if (!_soundsEffects.TryGetValue(name, out var sound))
+            sound = ResourceManager.Instance.GetSound(name);
+
+        if (sound == null) 
         {
-            sound.Play();
+            Console.WriteLine($"[AudioManager] Sound '{name}' not found.");
+            return;
         }
+
+        sound?.Play(SFXVolume * volume, pitch, pan);
     }
 
     public void LoadSong(string name, Song song)
@@ -50,11 +58,20 @@ public class AudioManager
 
     public void PlaySong(string name, bool isRepeating = true)
     {
-        if (_songs.TryGetValue(name, out var song))
-        {
-            MediaPlayer.Stop();
-            MediaPlayer.IsRepeating = isRepeating;
-            MediaPlayer.Play(song);
-        }
+        if (!_songs.TryGetValue(name, out var song))
+            song = ResourceManager.Instance.GetSong(name);
+
+        if (song == null) return;
+        MediaPlayer.Stop();
+        MediaPlayer.IsRepeating = isRepeating;
+        MediaPlayer.Play(song);
+
+        CurrentSongName = name;
+    }
+
+    public void StopSong()
+    {
+        MediaPlayer.Stop();
+        CurrentSongName = null;
     }
 }

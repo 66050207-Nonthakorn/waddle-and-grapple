@@ -39,6 +39,8 @@ public abstract class BaseCutscene : Scene
     {
         GumService.Default.Root.Children.Clear();
 
+        AudioManager.Instance.StopSong();
+
         CreateBackground();
         CreateBossPortrait();
         CreateDialogueTextLines();

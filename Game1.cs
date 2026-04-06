@@ -62,6 +62,8 @@ public class Game1 : Microsoft.Xna.Framework.Game
         
         // SceneManager.Instance.AddScene<GameMapLoaderDemo>("tileloaderdemo");
 
+        ScreenManager.Instance.ApplyCurrentMode();
+
         base.Initialize();
     }
 
@@ -140,7 +142,7 @@ public class Game1 : Microsoft.Xna.Framework.Game
         _renderDestination.Y = (size.Y - _renderDestination.Height) / 2;
         ScreenManager.Instance.SetRenderDestination(_renderDestination);
 
-        if (!ScreenManager.Instance.isFullScreen)
+        if (!ScreenManager.Instance.IsFullScreen)
         {
             ScreenManager.Instance.previousWidth = size.X;
             ScreenManager.Instance.previousHeight = size.Y;
@@ -152,6 +154,16 @@ public class Game1 : Microsoft.Xna.Framework.Game
     protected override void Update(GameTime gameTime)
     {
         InputManager.Instance.Update();
+
+        var currentScene = SceneManager.Instance.CurrentScene;
+        bool isNonPlayScene = !(currentScene?.IsPlayScene ?? false);
+        bool isPaused = currentScene is BaseLevel bl && bl.IsPaused;
+
+        if ((isNonPlayScene || isPaused) && InputManager.Instance.IsMouseButtonPressed(0))
+        {
+            WaddleAndGrapple.Engine.Managers.AudioManager.Instance.PlaySound("SFX/UI/Click");
+        }
+
         GumUI.Update(gameTime);
         foreach (var item in GumUI.Root.Children)
         {

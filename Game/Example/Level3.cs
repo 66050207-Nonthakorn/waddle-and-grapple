@@ -23,6 +23,8 @@ class Level3 : BaseLevel
         LevelIndex = 3;
         SetTotalFish(16);
 
+        AudioManager.Instance.PlaySong("Song/Level3");
+
         // Create tilemap first
         tilemapObject = base.AddGameObject<GameObject>("tilemap");
         var tilemap = tilemapObject.AddComponent<Tilemap>();
