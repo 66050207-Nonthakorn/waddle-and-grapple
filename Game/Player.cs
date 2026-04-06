@@ -33,14 +33,14 @@ public class Player : GameObject
 {
     // ── Physics Constants ─────────────────────────────────────────────────────
     public const float Gravity          = 1200f;  // px/s²
-    public const float MaxFallSpeed     = 700f;   // px/s
-    public const float JumpForce        = -550f;  // px/s (ลบ = ขึ้น)
+    public const float MaxFallSpeed     = 350f;   // px/s
+    public const float JumpForce        = -500f;  // px/s (ลบ = ขึ้น)
     public const float SprintMultiplier = 1.6f;
-    public const float SlideSpeed       = 420f;   // px/s
+    public const float SlideSpeed       = 550f;   // px/s
     public const int   SlideLoopCount  = 2;       // ← เปลี่ยนตรงนี้เพื่อยืด/สั้นระยะสไลด์ (จำนวนรอบของ row 13)
     public const float SlideDuration   = 0.083f * 4f * (1 + SlideLoopCount); // slidestart 1× + row13 N×
     public const float WallSlideSpeed    = 60f;    // px/s
-    public const float RopeLaunchSpeed  = 900f;   // ความเร็วดึงตัวเองไปตามเชือก (px/s)
+    public const float RopeLaunchSpeed  = 450f;   // ความเร็วดึงตัวเองไปตามเชือก (px/s)
 
     // ── Collider Size (placeholder — ปรับเมื่อได้ sprite จริง) ────────────────
     private const int PlayerWidth  = 16;
