@@ -147,10 +147,7 @@ public class Player : GameObject
     private float _wallJumpCooldownTimer = 0f;    // countdown
     private int   _wallJumpedFromSide    = 0;     // 1=เพิ่ง jump จากกำแพงขวา, -1=ซ้าย
 
-    // ── Sprint (Double-tap) ───────────────────────────────────────────────────
-    private const float DoubleTapWindow = 0.25f; // วินาทีที่รอ tap ที่สอง
-    private float _doubleTapTimerD = 0f;         // countdown หลัง tap D ครั้งแรก
-    private float _doubleTapTimerA = 0f;         // countdown หลัง tap A ครั้งแรก
+    // ── Sprint (Shift+A/D) ────────────────────────────────────────────────────
     private int   _sprintDir       = 0;          // 0=ไม่ sprint, 1=ขวา, -1=ซ้าย
     private bool  _ropeHitWall     = false;      // true = เพิ่ง jump จากกำแพงตอน rope pull → auto-cling
     private float _ledgeReleaseCooldown = 0f;   // ห้าม re-grab หลังปล่อย/กระโดดจาก ledge
@@ -365,7 +362,7 @@ public class Player : GameObject
         HandleSlide(dt);
         HandleCrouch();
         HandleMove();
-        HandleSprint(dt);
+        HandleSprint();
         if (Pickaxe.IsHooked) HandleRopeLaunch();
         else                  _isRopeDashing = false;
         HandleWallCling();
@@ -598,7 +595,7 @@ public class Player : GameObject
     /// Double-tap A/D: sprint ไปทิศที่ double-tap
     /// sprint ต่อเนื่องตราบที่ยัง hold ปุ่มนั้นอยู่, หยุดเมื่อปล่อย
     /// </summary>
-    private void HandleSprint(float dt)
+    private void HandleSprint()
     {
         if (State == PlayerState.Sliding
          || State == PlayerState.LedgeGrabbing
@@ -608,30 +605,15 @@ public class Player : GameObject
             return;
         }
 
-        // tick double-tap timers
-        if (_doubleTapTimerD > 0f) _doubleTapTimerD -= dt;
-        if (_doubleTapTimerA > 0f) _doubleTapTimerA -= dt;
+        bool shiftHeld = InputManager.Instance.IsKeyDown(Keys.LeftShift)
+                      || InputManager.Instance.IsKeyDown(Keys.RightShift);
+        bool dHeld = InputManager.Instance.IsKeyDown(Keys.D);
+        bool aHeld = InputManager.Instance.IsKeyDown(Keys.A);
 
-        bool dPressed = InputManager.Instance.IsKeyPressed(Keys.D);
-        bool aPressed = InputManager.Instance.IsKeyPressed(Keys.A);
-        bool dHeld    = InputManager.Instance.IsKeyDown(Keys.D);
-        bool aHeld    = InputManager.Instance.IsKeyDown(Keys.A);
-
-        // double-tap detection
-        if (dPressed)
-        {
-            if (_doubleTapTimerD > 0f) _sprintDir = 1;   // double-tap → sprint ขวา
-            else                       _doubleTapTimerD = DoubleTapWindow; // tap แรก
-        }
-        if (aPressed)
-        {
-            if (_doubleTapTimerA > 0f) _sprintDir = -1;  // double-tap → sprint ซ้าย
-            else                       _doubleTapTimerA = DoubleTapWindow;
-        }
-
-        // cancel sprint เมื่อปล่อยปุ่ม
-        if (_sprintDir == 1  && !dHeld) _sprintDir = 0;
-        if (_sprintDir == -1 && !aHeld) _sprintDir = 0;
+        // Shift+D = sprint ขวา, Shift+A = sprint ซ้าย
+        if      (shiftHeld && dHeld)  _sprintDir = 1;
+        else if (shiftHeld && aHeld)  _sprintDir = -1;
+        else                          _sprintDir = 0;
 
         // apply sprint
         if (_sprintDir != 0 && VelocityX != 0f && IsGrounded)
@@ -890,16 +872,15 @@ public class Player : GameObject
     private void HandleSlide(float dt)
     {
         // ── Trigger ──────────────────────────────────────────────────────────
-        bool shiftHeld    = InputManager.Instance.IsKeyDown(Keys.LeftShift)
-                         || InputManager.Instance.IsKeyDown(Keys.RightShift);
-        bool rightPressed = InputManager.Instance.IsKeyPressed(Keys.D);
-        bool leftPressed  = InputManager.Instance.IsKeyPressed(Keys.A);
-        bool canSlide     = IsGrounded && shiftHeld && (rightPressed || leftPressed)
-                         && (_currentHeight == PlayerHeight || CanStandUp()); // อยู่ใต้เพดาน → slide ไม่ได้
+        bool shiftHeld  = InputManager.Instance.IsKeyDown(Keys.LeftShift)
+                       || InputManager.Instance.IsKeyDown(Keys.RightShift);
+        bool sPressed   = InputManager.Instance.IsKeyPressed(Keys.S);
+        bool canSlide   = IsGrounded && shiftHeld && sPressed
+                       && (_currentHeight == PlayerHeight || CanStandUp()); // อยู่ใต้เพดาน → slide ไม่ได้
 
         if (canSlide && State != PlayerState.Sliding)
         {
-            FacingDirection = rightPressed ? 1 : -1;
+            // หันหน้าไปทางไหนอยู่ก็ slide ไปทางนั้น (FacingDirection คงเดิม)
             SetCrouchHeight(true);
             _slideTimer = SlideDuration;
             ChangeState(PlayerState.Sliding);
