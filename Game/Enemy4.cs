@@ -35,7 +35,9 @@ public class Enemy4 : GameObject
     public float DetectionRange { get; set; } = 60f; // ระยะมองเห็น player และระยะโยนค้อน
 
     // ── Kill Zone ─────────────────────────────────────────────────────────────
-    public float KillZoneRange { get; set; } = 80f; // ระยะที่ระเบิดฆ่า player
+    // KillZoneScaleReference = ระยะที่ทำให้ explode2 มีขนาดพอดีกับ DisplayScale (ค่าคงที่ ห้ามเปลี่ยน)
+    private const float KillZoneScaleReference = 80f; // DO NOT TOUCH!!!!!!!!!!
+    public float KillZoneRange { get; set; } = 80f; // ปรับค่านี้เพื่อเปลี่ยนทั้งระยะฆ่าและขนาด explosion
 
     // ── Explode Animation Durations ───────────────────────────────────────────
     private const float Explode1AnimDuration = 2 * 0.13f; // ตรงกับ explode1 (2 frames)
@@ -53,9 +55,6 @@ public class Enemy4 : GameObject
 
     // ── State Machine ─────────────────────────────────────────────────────────
     public Enemy4State State { get; private set; } = Enemy4State.Idle;
-
-    // ── Spawn ────────────────────────────────────────────────────────
-    private Vector2 _spawnPosition;
 
     // ── Player Reference ──────────────────────────────────────────────────────
     private Player _player;
@@ -75,8 +74,6 @@ public class Enemy4 : GameObject
 
     public override void Initialize()
     {
-        _spawnPosition   = Position;
-
         Scale       = new Vector2(DisplayScale, DisplayScale);
         _animator   = AddComponent<Animator>();
         _spriteRenderer            = GetComponent<SpriteRenderer>();
@@ -373,6 +370,8 @@ public class Enemy4 : GameObject
                 break;
             case Enemy4State.Explode:
                 _explode2Timer = Explode2AnimDuration;
+                float explodeScale = DisplayScale * (KillZoneRange / KillZoneScaleReference);
+                Scale = new Vector2(explodeScale, explodeScale);
                 if (_player != null && Vector2.Distance(Position, _player.Position) <= KillZoneRange)
                     _player.Die();
                 break;
