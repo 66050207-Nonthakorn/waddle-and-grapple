@@ -81,10 +81,18 @@ public abstract class BaseLevel : Scene
 
         base.Update(gameTime);
 
-        // Stop camera following when player falls off the map
-        if (_trackedPlayer != null && _trackedPlayer.Position.Y > MapHeight)
+        // Stop camera following when player falls off the map,
+        // and restore follow when the player is back in playable bounds.
+        if (_trackedPlayer != null && MapHeight > 0)
         {
-            Camera.FollowTarget = null;
+            if (_trackedPlayer.Position.Y > MapHeight)
+            {
+                Camera.FollowTarget = null;
+            }
+            else if (Camera != null && Camera.FollowTarget == null)
+            {
+                Camera.FollowTarget = _trackedPlayer;
+            }
         }
 
         // Apply section-based camera clamp (Celeste-style: camera stops at section boundary)

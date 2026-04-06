@@ -45,6 +45,11 @@ public class CheckpointManager
     /// </summary>
     public void UpdateSection(float playerX)
     {
+        UpdateSection(playerX, float.NaN);
+    }
+
+    public void UpdateSection(float playerX, float playerY)
+    {
         var newSection = FindSection(playerX);
         if (newSection == null) return;
 
@@ -53,6 +58,11 @@ public class CheckpointManager
         {
             ActiveSection = newSection;
             LastEntryDirection = EntryDirection.Left;
+
+            if (!float.IsNaN(playerY))
+            {
+                ActiveSection.LeftSpawnPoint = new Vector2(ActiveSection.LeftSpawnPoint.X, playerY);
+            }
             return;
         }
 
@@ -63,6 +73,14 @@ public class CheckpointManager
         LastEntryDirection = newSection.Id > ActiveSection.Id
             ? EntryDirection.Left
             : EntryDirection.Right;
+
+        if (!float.IsNaN(playerY))
+        {
+            if (LastEntryDirection == EntryDirection.Left)
+                newSection.LeftSpawnPoint = new Vector2(newSection.LeftSpawnPoint.X, playerY);
+            else
+                newSection.RightSpawnPoint = new Vector2(newSection.RightSpawnPoint.X, playerY);
+        }
 
         ActiveSection = newSection;
     }

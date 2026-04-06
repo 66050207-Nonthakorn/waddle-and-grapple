@@ -329,7 +329,7 @@ public class Player : GameObject
             // ไม่ ApplyConstraint — เราเป็นคนดึงเอง
             CheckHazardCollision();
             CheckCheckpoint();
-            CheckpointManager.Instance.UpdateSection(Position.X);
+            CheckpointManager.Instance.UpdateSection(Position.X, Position.Y);
             SyncAnimation(dt);
             Rotation = FacingDirection == -1
                 ? QuaternionUtils.Euler(0, 180, 0)
@@ -371,7 +371,7 @@ public class Player : GameObject
 
         // Phase 8 — Checkpoint detection
         CheckCheckpoint();
-        CheckpointManager.Instance.UpdateSection(Position.X);
+        CheckpointManager.Instance.UpdateSection(Position.X, Position.Y);
         // Sync animation to state
         SyncAnimation(dt);
 
@@ -1010,12 +1010,12 @@ public class Player : GameObject
     // ── API สำหรับ Level (Member 4) ───────────────────────────────────────────
     public void SetSolids(List<Rectangle> solids) => _solidRects = solids;
     public IReadOnlyList<Rectangle> Solids => _solidRects;
-    // public void SetWorldBounds(float left, float right, float fallDeathY)
-    // {
-    //     _screenLeft = left;
-    //     _screenRight = right;
-    //     _fallDeathY = fallDeathY;
-    // }
+    public void SetWorldBounds(float left, float right, float fallDeathY)
+    {
+        _screenLeft = left;
+        _screenRight = right;
+        _fallDeathY = fallDeathY;
+    }
 
     private List<Enemy> _enemies = [];
     public void SetEnemies(List<Enemy> enemies)

@@ -16,11 +16,11 @@ public enum SawSize
 
 public enum SawPlacement
 {
-    Full,              // Full blade, Position = centre
-    FloorMounted,      // Top half visible, Position = bottom-centre (floor contact)
-    CeilingMounted,    // Bottom half visible, Position = top-centre (ceiling contact)
-    LeftWallMounted,   // Left half visible, Position = right-centre (wall contact)
-    RightWallMounted,  // Right half visible, Position = left-centre (wall contact)
+    Full,              // Full blade, Position = left-bottom anchor
+    FloorMounted,      // Top half visible, Position = left-bottom anchor
+    CeilingMounted,    // Bottom half visible, Position = left-bottom anchor
+    LeftWallMounted,   // Left half visible, Position = left-bottom anchor
+    RightWallMounted,  // Right half visible, Position = left-bottom anchor
 }
 
 /// <summary>
@@ -30,8 +30,8 @@ public enum SawPlacement
 public class SawTrap : Trap
 {
     // Movement
-    public float MoveRange      { get; set; } = 150f;
-    public float MoveSpeed      { get; set; } = 80f;
+    public float MoveRange      { get; set; } = 0f;
+    public float MoveSpeed      { get; set; } = 0f;
     public bool  MoveHorizontal { get; set; } = true;
 
     // Appearance
@@ -111,19 +111,19 @@ public class SawTrap : Trap
         return p switch
         {
             SawPlacement.Full =>
-                new Rectangle(x - half, y - half, full, full),
+                new Rectangle(x, y - full, full, full),
 
             SawPlacement.FloorMounted =>
-                new Rectangle(x - half, y - half, full, half),
+                new Rectangle(x, y - half, full, half),
 
             SawPlacement.CeilingMounted =>
-                new Rectangle(x - half, y,        full, half),
+                new Rectangle(x, y - half, full, half),
 
             SawPlacement.LeftWallMounted =>
-                new Rectangle(x,        y - half, half, full),
+                new Rectangle(x, y - full, half, full),
 
             SawPlacement.RightWallMounted =>
-                new Rectangle(x - half, y - half, half, full),
+                new Rectangle(x, y - full, half, full),
 
             _ => base.GetCollisionBounds()
         };

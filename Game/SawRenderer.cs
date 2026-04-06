@@ -102,8 +102,45 @@ public class SawRenderer : Component
             };
         }
 
-        spriteBatch.Draw(_sheet, _saw.Position, src, _saw.SpriteTint,
+        Vector2 drawPos = GetBottomLeftAnchoredDrawPosition(
+            _saw.Position,
+            new Vector2(src.Width, src.Height),
+            origin,
+            rotation,
+            scale);
+
+        spriteBatch.Draw(_sheet, drawPos, src, _saw.SpriteTint,
                          rotation, origin, scale, SpriteEffects.None, LayerDepth);
+    }
+
+    // Keeps _saw.Position as a stable "left-bottom" anchor regardless of rotation.
+    private static Vector2 GetBottomLeftAnchoredDrawPosition(
+        Vector2 anchorBottomLeft,
+        Vector2 srcSize,
+        Vector2 origin,
+        float rotation,
+        float scale)
+    {
+        Vector2[] corners =
+        [
+            new Vector2(0f, 0f),
+            new Vector2(srcSize.X, 0f),
+            new Vector2(0f, srcSize.Y),
+            new Vector2(srcSize.X, srcSize.Y),
+        ];
+
+        float minX = float.PositiveInfinity;
+        float maxY = float.NegativeInfinity;
+
+        for (int i = 0; i < corners.Length; i++)
+        {
+            Vector2 local = (corners[i] - origin) * scale;
+            Vector2 rotated = Vector2.Transform(local, Matrix.CreateRotationZ(rotation));
+            if (rotated.X < minX) minX = rotated.X;
+            if (rotated.Y > maxY) maxY = rotated.Y;
+        }
+
+        return anchorBottomLeft + new Vector2(-minX, -maxY);
     }
 
     private void DrawFallback(SpriteBatch spriteBatch)

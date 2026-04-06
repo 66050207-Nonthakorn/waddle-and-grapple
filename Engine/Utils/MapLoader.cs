@@ -208,18 +208,70 @@ public class MapLoader(Scene scene, string mapPath)
             MapData = new int[height, width],
         };
 
-        int i = 0;
-        foreach (var gid in layer.GetProperty("data").EnumerateArray())
+        // Default all cells to empty.
+        for (int y = 0; y < height; y++)
         {
-            // Use uint: flipped/rotated tiles have bits 29-31 set, exceeding int.MaxValue.
-            uint rawGid = gid.GetUInt32();
-            int tileId  = (int)(rawGid & 0x0FFFFFFFu); // strip flip flags
+            for (int x = 0; x < width; x++)
+            {
+                tileLayer.MapData[y, x] = -1;
+            }
+        }
 
-            tileLayer.MapData[i / width, i % width] = tileId == 0 ? -1 : tileId - 1;
-            i++;
+        // Non-infinite map layers: flat data array.
+        if (layer.TryGetProperty("data", out var dataArray))
+        {
+            int i = 0;
+            foreach (var gid in dataArray.EnumerateArray())
+            {
+                int x = i % width;
+                int y = i / width;
+                if (y >= height) break;
+
+                tileLayer.MapData[y, x] = DecodeTileId(gid);
+                i++;
+            }
+            return tileLayer;
+        }
+
+        // Infinite map layers: chunked data array.
+        if (layer.TryGetProperty("chunks", out var chunks))
+        {
+            int startX = layer.TryGetProperty("startx", out var sx) ? sx.GetInt32() : 0;
+            int startY = layer.TryGetProperty("starty", out var sy) ? sy.GetInt32() : 0;
+
+            foreach (var chunk in chunks.EnumerateArray())
+            {
+                int chunkX = chunk.GetProperty("x").GetInt32();
+                int chunkY = chunk.GetProperty("y").GetInt32();
+                int chunkW = chunk.GetProperty("width").GetInt32();
+                int chunkH = chunk.GetProperty("height").GetInt32();
+
+                int i = 0;
+                foreach (var gid in chunk.GetProperty("data").EnumerateArray())
+                {
+                    int localX = (chunkX - startX) + (i % chunkW);
+                    int localY = (chunkY - startY) + (i / chunkW);
+
+                    if (localX >= 0 && localX < width && localY >= 0 && localY < height)
+                    {
+                        tileLayer.MapData[localY, localX] = DecodeTileId(gid);
+                    }
+
+                    i++;
+                    if (i >= chunkW * chunkH) break;
+                }
+            }
         }
 
         return tileLayer;
+    }
+
+    private static int DecodeTileId(JsonElement gidElement)
+    {
+        // Use uint: flipped/rotated tiles have bits 29-31 set, exceeding int.MaxValue.
+        uint rawGid = gidElement.GetUInt32();
+        int tileId = (int)(rawGid & 0x0FFFFFFFu); // strip flip flags
+        return tileId == 0 ? -1 : tileId - 1;
     }
 
     private static TiledObjectLayer ParseObjectLayer(JsonElement layer)

@@ -110,6 +110,7 @@ public class GameMapLoader
             trap.MoveHorizontal        = obj.BoolProp ("MoveHorizontal",trap.MoveHorizontal);
             trap.Placement             = obj.EnumProp ("Placement",     trap.Placement);
             trap.Size                  = obj.EnumProp ("Size",          trap.Size);
+            trap.Placement             = obj.EnumProp ("Placement",     trap.Placement);
             trap.AnimationColumns      = obj.IntProp  ("AnimationColumns", trap.AnimationColumns);
             trap.AnimationFrameDuration= obj.FloatProp("AnimationFrameDuration", trap.AnimationFrameDuration);
             if (obj.Properties.ContainsKey("SpriteName"))
