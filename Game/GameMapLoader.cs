@@ -69,10 +69,12 @@ public class GameMapLoader
 {
     private readonly MapLoader _loader;
     private readonly Player _player;
+    private readonly Scene  _scene;
 
     public GameMapLoader(Scene scene, string mapPath, Player player)
     {
         _player = player;
+        _scene  = scene;
         _loader = new MapLoader(scene, mapPath);
         RegisterAll();
     }
@@ -202,6 +204,7 @@ public class GameMapLoader
             enemy.DetectionRange = obj.FloatProp("DetectionRange", enemy.DetectionRange);
             enemy.AttackCooldown = obj.FloatProp("AttackCooldown", enemy.AttackCooldown);
             enemy.SetPlayer(_player);
+            enemy.SetScene(_scene);
         });
     }
 

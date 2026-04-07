@@ -5,6 +5,7 @@ using System.Text.Json;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using WaddleAndGrapple.Engine;
+using WaddleAndGrapple.Game;
 
 namespace WaddleAndGrapple.Engine.Components.Tile;
 
@@ -93,6 +94,7 @@ public class MapLoader(Scene scene, string mapPath)
 
             var go = _scene.AddGameObject<T>(goName);
             go.Position = new Vector2(obj.X, obj.Y);
+            if (go is Enemy e) e.SceneKey = goName;
             configure?.Invoke(go, obj);
             return go;
         };

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using WaddleAndGrapple.Engine;
 using WaddleAndGrapple.Engine.Components;
@@ -723,8 +722,6 @@ public class Player : GameObject
 
         if (IsGrounded || _coyoteTimer > 0f)
         {
-            bool coyote = !IsGrounded && _coyoteTimer > 0f;
-            Console.WriteLine($"[JUMP] GroundJump{(coyote ? "(coyote)" : "")}  pos={Position.X:F0},{Position.Y:F0}");
             if (State == PlayerState.Crouching) SetCrouchHeight(false);
             VelocityY         = JumpForce;
             _coyoteTimer      = 0f;
@@ -741,13 +738,11 @@ public class Player : GameObject
             VelocityX              = -wallSide * MoveSpeed * WallJumpXMultiplier * SpeedScale;
             FacingDirection        = -wallSide;
             _jumpBufferTimer       = 0f;
-            Console.WriteLine($"[JUMP] WallJump  side={wallSide}  kickVX={VelocityX:F0}  kickVY={VelocityY:F0}  (buffered={!jumpPressed})");
             AudioManager.Instance.PlaySound("SFX/Jump");
             ChangeState(PlayerState.Jumping);
         }
         else if (State == PlayerState.LedgeGrabbing)
         {
-            Console.WriteLine($"[JUMP] LedgeJump  pos={Position.X:F0},{Position.Y:F0}");
             _ledgeReleaseCooldown = 0.25f;
             VelocityY        = JumpForce;
             _jumpBufferTimer = 0f;
@@ -756,7 +751,6 @@ public class Player : GameObject
         }
         else if (Pickaxe.IsHooked)
         {
-            Console.WriteLine($"[JUMP] RopeJump");
             Pickaxe.Recall();
             VelocityY        = JumpForce;
             _jumpBufferTimer = 0f;
@@ -765,7 +759,6 @@ public class Player : GameObject
         }
         else if (HasDoubleJump && !HasUsedDoubleJump)
         {
-            Console.WriteLine($"[JUMP] DoubleJump");
             VelocityY         = JumpForce;
             HasUsedDoubleJump = true;
             _jumpBufferTimer  = 0f;
@@ -825,9 +818,6 @@ public class Player : GameObject
                 _jumpBufferTimer = 0f; // press/rope cling: ต้องกด Space ใหม่ ไม่ใช้ buffer เก่า
             }
 
-            string reason = pressingTowardWall ? "press" : kickedIntoOppositeWall ? "kick" : "rope";
-            if (State != PlayerState.WallClinging)
-                Console.WriteLine($"[WALL] Cling  side={(IsTouchingWallRight?"R":"L")}  reason={reason}  VX={VelocityX:F0} VY={VelocityY:F0}");
             ChangeState(PlayerState.WallClinging);
         }
         else if (State == PlayerState.WallClinging)
@@ -835,7 +825,6 @@ public class Player : GameObject
             // ถ้ากด Space อยู่ → ให้ HandleJump fire wall jump ก่อน อย่าเพิ่ง exit
             bool jumpHeld = InputManager.Instance.IsKeyDown(Keys.Space) || _jumpBufferTimer > 0f;
             bool canExitByPress = pressingAwayFromWall && _wallClingLockTimer <= 0f && !jumpHeld;
-            Console.WriteLine($"[WALL_EXIT?] touch={touchingWall} away={pressingAwayFromWall} lock={_wallClingLockTimer:F3} canExit={canExitByPress}");
             if      (IsGrounded)                        ChangeState(PlayerState.Idle);
             else if (!touchingWall || canExitByPress)   ChangeState(PlayerState.Falling);
         }
@@ -1073,7 +1062,6 @@ public class Player : GameObject
             {
                 if (!_wasGroundedPrev)
                 {
-                    Console.WriteLine($"[LAND]  pos={Position.X:F0},{Position.Y:F0}  impactVY={VelocityY:F0}  state={State}");
                     AudioManager.Instance.PlaySound("SFX/Landing");
                 }
                 Position   = new Vector2(Position.X, solid.Top - _currentHeight / 2f);
@@ -1170,7 +1158,6 @@ public class Player : GameObject
             VelocityY       = 0f;
             FacingDirection = facingDir;
             UpdateColliderBounds();
-            Console.WriteLine($"[LEDGE] Grab  side={(facingDir>0?"R":"L")}  snapY={solid.Top}  pos={Position.X:F0},{Position.Y:F0}");
             ChangeState(PlayerState.LedgeGrabbing);
             return;
         }
@@ -1306,7 +1293,6 @@ public class Player : GameObject
     {
         if (State == newState) return;
 
-        Console.WriteLine($"[STATE] {State} → {newState}  |  VX={VelocityX:F0} VY={VelocityY:F0}  grounded={IsGrounded}  L={IsTouchingWallLeft} R={IsTouchingWallRight}");
 
         // Set animation startup timers เมื่อเข้า state ใหม่
         switch (newState)

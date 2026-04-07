@@ -16,6 +16,9 @@ public abstract class Enemy : GameObject
     /// <summary>Kill this enemy immediately.</summary>
     public abstract void Die();
 
+    /// <summary>False once Die() has been called.</summary>
+    public virtual bool IsAlive => true;
+
     /// <summary>Provide the player reference so the enemy can track and react to them.</summary>
     public abstract void SetPlayer(Player player);
 

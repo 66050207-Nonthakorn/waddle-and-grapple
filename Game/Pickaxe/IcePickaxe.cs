@@ -187,13 +187,8 @@ public class IcePickaxe
             if (newBounds.Intersects(solid))
             {
                 _ropeLength = dist;
-                float totalStretch = TotalRopeLength;
-                Console.WriteLine($"[ROPE] stretch  total={totalStretch:F0}  maxSwing={MaxSwingRopeLength:F0}");
-                if (totalStretch > MaxSwingRopeLength)
-                {
-                    Console.WriteLine($"[ROPE] swing-exceed total={totalStretch:F0} → recall");
+                if (TotalRopeLength > MaxSwingRopeLength)
                     StartRecall();
-                }
                 return;
             }
         }
@@ -238,9 +233,7 @@ public class IcePickaxe
         _ropeLength = Vector2.Distance(firstAnchor, _owner.Position);
 
         // เชือกยาวเกิน MaxRopeLength → ไม่ hook, ดึงกลับทันที
-        if (_ropeLength > MaxRopeLength) { Console.WriteLine($"[ROPE] Hook rejected — ropeLen={_ropeLength:F0} > max={MaxRopeLength}"); StartRecall(); return; }
-
-        Console.WriteLine($"[ROPE] Hooked  at=({point.X:F0},{point.Y:F0})  ropeLen={_ropeLength:F0}  bends={_bendPoints.Count}");
+        if (_ropeLength > MaxRopeLength) { StartRecall(); return; }
 
         AudioManager.Instance.PlaySound("SFX/PickaxeHit");
         
@@ -326,10 +319,6 @@ public class IcePickaxe
 
         if (bestSolid != default)
         {
-            System.Diagnostics.Debug.WriteLine(
-                $"[BendFlight] from=({ropeFrom.X:F0},{ropeFrom.Y:F0}) pickaxe=({_position.X:F0},{_position.Y:F0}) " +
-                $"solid=({bestSolid.Left},{bestSolid.Top},{bestSolid.Right},{bestSolid.Bottom}) " +
-                $"corner=({bestCorner.X:F0},{bestCorner.Y:F0}) [{CornerLabel(bestCorner, bestSolid)}]");
             _bendPoints.Add(new BendPoint { Position = bestCorner, Solid = bestSolid, SegmentLength = 0f });
         }
     }
@@ -344,6 +333,7 @@ public class IcePickaxe
         // ใช้ SegmentCrossesRectInterior (ตรวจ 4 ขอบ, strict t) เพื่อรองรับ
         // กรณี player อยู่ใต้ platform และ hook อยู่บน top surface
         // (SegmentCrossesRect เดิมไม่ตรวจขอบล่าง → ลบ bend ผิด)
+        bool didUnwrap = false;
         while (_bendPoints.Count > 0)
         {
             var   first      = _bendPoints[0];
@@ -353,9 +343,14 @@ public class IcePickaxe
             {
                 _ropeLength += first.SegmentLength; // คืน rope ที่ถูกใช้ใน segment นี้
                 _bendPoints.RemoveAt(0);
+                didUnwrap = true;
             }
             else break;
         }
+
+        // ถ้าเพิ่ง unwrap ไปในเฟรมนี้แล้ว → ข้าม wrap check
+        // ป้องกัน SegmentCrossesRect กับ SegmentCrossesRectInterior ให้ผลต่างกันแล้ว wrap/unwrap กลับซ้ำในเฟรมเดียว
+        if (didUnwrap) return;
 
         // --- Wrap: ตรวจ player → anchor ปัจจุบัน ผ่าน solid ใหม่ไหม ---
         // เลือก solid ที่ใกล้ player ที่สุด (corner ใกล้สุด) เพื่อให้ wrap ถูก solid
@@ -435,10 +430,6 @@ public class IcePickaxe
             wrapCorner = Vector2.DistanceSquared(a, edgeC) <= Vector2.DistanceSquared(a, edgeD)
                        ? edgeC : edgeD;
 
-        System.Diagnostics.Debug.WriteLine(
-            $"[WrapCorner] rect=({rect.Left},{rect.Top},{rect.Right},{rect.Bottom}) " +
-            $"edgeC={CornerLabel(edgeC,rect)} cOk={cOk} | edgeD={CornerLabel(edgeD,rect)} dOk={dOk} " +
-            $"→ picked={CornerLabel(wrapCorner,rect)}({wrapCorner.X:F0},{wrapCorner.Y:F0})");
         return true;
     }
 
@@ -502,13 +493,6 @@ public class IcePickaxe
         return t > eps && t < 1f - eps && u >= 0f && u <= 1f;
     }
 
-    private static string CornerLabel(Vector2 c, Rectangle r)
-    {
-        string v = MathF.Abs(c.Y - r.Top) < 2f ? "T" : MathF.Abs(c.Y - r.Bottom) < 2f ? "B" : "?";
-        string h = MathF.Abs(c.X - r.Left) < 2f ? "L" : MathF.Abs(c.X - r.Right) < 2f ? "R" : "?";
-        return v + h;
-    }
-
     // ── Charge / Throw ────────────────────────────────────────────────────────
 
     /// <summary>
@@ -558,7 +542,6 @@ public class IcePickaxe
         _flyVelocity    = dir * FlySpeed;
         _flownDistance  = 0f;
         _maxFlyDistance = Math.Max(ChargeLevel * MaxRange, MinThrowRange);
-        Console.WriteLine($"[ROPE] Throw  charge={ChargeLevel:F2}  maxDist={_maxFlyDistance:F0}  dir=({dir.X:F2},{dir.Y:F2})");
         ChargeLevel     = 0f;
         IsDeployed      = true;
         _state          = PickaxeState.Flying;
@@ -573,19 +556,15 @@ public class IcePickaxe
         _flownDistance += Math.Abs(step.X); // นับแค่แนวนอน ให้ขาขึ้น-ลง arc ได้เต็มที่
 
         // ตรวจ corner ที่ pickaxe บินผ่านใกล้ (ต้องก่อน solid hit)
-        // วนซ้ำจนกว่าจะไม่มี bend ใหม่ — รองรับ platform หลายขอบในเฟรมเดียว
-        int safetyLimit = 0;
-        int prevBends;
-        do {
-            prevBends = _bendPoints.Count;
-            CheckFlightWrap();
-        } while (_bendPoints.Count > prevBends && ++safetyLimit < 10);
+        // เรียกครั้งเดียวต่อเฟรม — ให้ pickaxe เคลื่อนที่ก่อนแล้วค่อยตรวจรอบถัดไป
+        CheckFlightWrap();
 
         const float PickaxeRadius = 6f;
 
         // ตรวจชน enemy ก่อน solid — กัน enemy feet ทับพื้น solid แล้ว solid โดนก่อน
         foreach (var enemy in _enemies)
         {
+            if (!enemy.IsAlive) continue;
             var b = enemy.ColliderBounds;
             if (_position.X + PickaxeRadius > b.Left
              && _position.X - PickaxeRadius < b.Right
@@ -650,12 +629,10 @@ public class IcePickaxe
         _ropeLength = Math.Max(_ropeLength, MinRopeLength);
 
         float totalHooked = TotalRopeLength;
-        Console.WriteLine($"[ROPE] hooked total={totalHooked:F0}  maxSwing={MaxSwingRopeLength:F0}");
 
         // เชือกยืดเกิน MaxSwingRopeLength → auto-recall
         if (totalHooked > MaxSwingRopeLength)
         {
-            Console.WriteLine($"[ROPE] swing-exceed ropeLen={_ropeLength:F0} → recall");
             StartRecall();
             return;
         }
@@ -698,7 +675,6 @@ public class IcePickaxe
     /// <summary>เริ่ม reel-in: ถ้า hooked ให้เลื่อน _position มาที่ hook ก่อน</summary>
     private void StartRecall()
     {
-        Console.WriteLine($"[ROPE] Recall  from={_state}  ropeLen={_ropeLength:F0}");
         if (_state == PickaxeState.Hooked)
             _position = _hookPosition;
 

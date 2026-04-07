@@ -211,9 +211,10 @@ public class ThrowLephant : Enemy
     {
         if (distToPlayer > DetectionRange) return false;
 
-        // ตรวจว่า player อยู่ด้านที่ศัตรูหัน
+        // หันหน้าไปทาง player เสมอ
         float dirToPlayer = _player.Position.X - Position.X;
-        if (FacingDirection * dirToPlayer < 0f) return false;
+        if (dirToPlayer != 0f)
+            FacingDirection = dirToPlayer > 0f ? 1 : -1;
 
         // Raycast: solid ตัวไหนบัง line of sight → มองไม่เห็น
         foreach (var solid in _solidRects)
@@ -393,6 +394,7 @@ public class ThrowLephant : Enemy
     public override void SetSolids(List<Rectangle> solids) => _solidRects = solids;
 
     public override Rectangle ColliderBounds => _collider?.Bounds ?? Rectangle.Empty;
+    public override bool IsAlive => State != ThrowLephantState.Dead;
 
     /// <summary>เรียกจาก hazard/trap หรือ Player เมื่อต้องการกำจัด enemy</summary>
     public override void Die()
@@ -401,6 +403,7 @@ public class ThrowLephant : Enemy
         VelocityX = 0f;
         VelocityY = 0f;
         ChangeState(ThrowLephantState.Dead);
+        _animator.Play("dead");
     }
 }
 
