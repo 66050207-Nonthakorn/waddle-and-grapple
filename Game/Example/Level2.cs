@@ -52,7 +52,12 @@ class Level2 : BaseLevel
         // ── Parallax Background ───────────────────────────────────────────────
         var bgObj = base.AddGameObject<GameObject>("background");
         var bg    = bgObj.AddComponent<ParallaxBackground>();
-        bg.AddLayer("background", scrollFactor: 0.3f, layerDepth: 0.00f);
+        bg.AddLayer("Parallax/Level2/Level2-sky-overflow",   scrollFactor: 0.00f, layerDepth: 0.00f);
+        bg.AddLayer("Parallax/Level2/Level2-below-overflow", scrollFactor: 0.00f, layerDepth: 0.01f);
+        bg.AddLayer("Parallax/Level2/Level2-background",     scrollFactor: 0.05f, layerDepth: 0.02f);
+        bg.AddLayer("Parallax/Level2/Level2-farground",      scrollFactor: 0.15f, layerDepth: 0.03f);
+        bg.AddLayer("Parallax/Level2/Level2-midground",      scrollFactor: 0.30f, layerDepth: 0.04f);
+        bg.AddLayer("Parallax/Level2/Level2-nearground",     scrollFactor: 0.50f, layerDepth: 0.06f);
 
         // ── Player ────────────────────────────────────────────────────────────
         player = base.AddGameObject<GamePlayer>("player");

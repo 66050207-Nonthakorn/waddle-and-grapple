@@ -13,13 +13,15 @@ public struct ParallaxLayer
     public Texture2D Texture;
     public float     ScrollFactor; // 0 = ติดจอ, 0.5 = เลื่อนครึ่งความเร็ว, 1 = เคลื่อนตาม world
     public float     LayerDepth;   // 0.0 = หลังสุด, ควรน้อยกว่า SpriteRenderer (0.5)
+    public float     OffsetY;      // pixel offset จาก top ของ screen (ลบ = ขึ้น, บวก = ลง)
     public Color     Tint;
 
-    public ParallaxLayer(Texture2D texture, float scrollFactor, float layerDepth = 0.05f, Color? tint = null)
+    public ParallaxLayer(Texture2D texture, float scrollFactor, float layerDepth = 0.05f, float offsetY = 0f, Color? tint = null)
     {
         Texture      = texture;
         ScrollFactor = scrollFactor;
         LayerDepth   = layerDepth;
+        OffsetY      = offsetY;
         Tint         = tint ?? Color.White;
     }
 }
@@ -38,16 +40,16 @@ public class ParallaxBackground : Component
     private readonly List<ParallaxLayer> _layers = new();
 
     // เพิ่ม layer โดยโหลด texture จากชื่อ asset (ResourceManager)
-    public void AddLayer(string assetName, float scrollFactor, float layerDepth = 0.05f, Color? tint = null)
+    public void AddLayer(string assetName, float scrollFactor, float layerDepth = 0.05f, float offsetY = 0f, Color? tint = null)
     {
         var tex = ResourceManager.Instance.GetTexture(assetName);
-        _layers.Add(new ParallaxLayer(tex, scrollFactor, layerDepth, tint));
+        _layers.Add(new ParallaxLayer(tex, scrollFactor, layerDepth, offsetY, tint));
     }
 
     // เพิ่ม layer โดยส่ง texture โดยตรง
-    public void AddLayer(Texture2D texture, float scrollFactor, float layerDepth = 0.05f, Color? tint = null)
+    public void AddLayer(Texture2D texture, float scrollFactor, float layerDepth = 0.05f, float offsetY = 0f, Color? tint = null)
     {
-        _layers.Add(new ParallaxLayer(texture, scrollFactor, layerDepth, tint));
+        _layers.Add(new ParallaxLayer(texture, scrollFactor, layerDepth, offsetY, tint));
     }
 
     public override void Draw(SpriteBatch spriteBatch)
@@ -66,7 +68,7 @@ public class ParallaxBackground : Component
         foreach (var layer in _layers)
         {
             if (layer.Texture == null) continue;
-            DrawLayer(spriteBatch, layer, visLeft, visTop, screenW, screenH);
+            DrawLayer(spriteBatch, layer, visLeft, visTop + layer.OffsetY, screenW, screenH);
         }
     }
 
