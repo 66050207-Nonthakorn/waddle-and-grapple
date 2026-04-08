@@ -1,7 +1,9 @@
 using WaddleAndGrapple.Engine.Managers;
 using Microsoft.Xna.Framework;
 
-namespace WaddleAndGrapple.Game;
+using WaddleAndGrapple.Game.Systems;
+
+namespace WaddleAndGrapple.Game.Traps;
 
 public enum LaserStyle { WallMounted, Floating }
 

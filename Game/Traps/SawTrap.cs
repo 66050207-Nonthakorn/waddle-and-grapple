@@ -1,7 +1,9 @@
 using System;
 using Microsoft.Xna.Framework;
 
-namespace WaddleAndGrapple.Game;
+using WaddleAndGrapple.Game.Systems;
+
+namespace WaddleAndGrapple.Game.Traps;
 
 /// <summary>
 /// Saw placement — controls which quadrant(s) of the sprite are rendered

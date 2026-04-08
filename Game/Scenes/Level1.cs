@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using WaddleAndGrapple.Game;
+using WaddleAndGrapple.Game.Systems;
+using WaddleAndGrapple.Game.Traps;
 using GamePlayer = WaddleAndGrapple.Game.Player;
 
 namespace WaddleAndGrapple.Game.Scenes;

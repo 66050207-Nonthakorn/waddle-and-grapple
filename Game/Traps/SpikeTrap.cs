@@ -1,7 +1,9 @@
 using System;
 using Microsoft.Xna.Framework;
 
-namespace WaddleAndGrapple.Game;
+using WaddleAndGrapple.Game.Systems;
+
+namespace WaddleAndGrapple.Game.Traps;
 
 /// <summary>
 /// A spike trap that extends and retracts from a surface.

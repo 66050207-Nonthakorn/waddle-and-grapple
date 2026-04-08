@@ -4,7 +4,7 @@ using WaddleAndGrapple.Engine.Managers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace WaddleAndGrapple.Game;
+namespace WaddleAndGrapple.Game.Traps;
 
 /// <summary>
 /// วาด laser ด้วย tile-based rendering:

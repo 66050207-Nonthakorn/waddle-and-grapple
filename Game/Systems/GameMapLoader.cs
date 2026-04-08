@@ -3,7 +3,9 @@ using Microsoft.Xna.Framework.Graphics;
 using WaddleAndGrapple.Engine;
 using WaddleAndGrapple.Engine.Components.Tile;
 
-namespace WaddleAndGrapple.Game;
+using WaddleAndGrapple.Game.Traps;
+
+namespace WaddleAndGrapple.Game.Systems;
 
 /// <summary>
 /// Game-specific map loader that pre-registers every spawnable object type.
