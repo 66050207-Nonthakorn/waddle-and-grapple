@@ -204,6 +204,8 @@ public sealed class ProgressionManager
         {
             CurrentLevelIndex = 0;
         }
+
+        SaveToFile(SaveFilePath);
     }
 
     public void CompleteLevel(
@@ -249,6 +251,8 @@ public sealed class ProgressionManager
         {
             CurrentLevelIndex = 0;
         }
+
+        SaveToFile(SaveFilePath);
     }
 
     public void SaveToFile(string filePath)
