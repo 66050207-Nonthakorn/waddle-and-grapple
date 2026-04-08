@@ -3,7 +3,9 @@ using Microsoft.Xna.Framework.Graphics;
 using WaddleAndGrapple.Engine.Components;
 using WaddleAndGrapple.Engine.Managers;
 
-namespace WaddleAndGrapple.Game;
+using WaddleAndGrapple.Game;
+
+namespace WaddleAndGrapple.Game.Systems;
 
 /// <summary>
 /// แสดงจำนวนปลาที่เก็บได้ มุมบนซ้ายของหน้าจอ

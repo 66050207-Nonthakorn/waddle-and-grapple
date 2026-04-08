@@ -5,6 +5,8 @@ using Microsoft.Xna.Framework;
 using MonoGameGum;
 using MonoGameGum.GueDeriving;
 
+namespace WaddleAndGrapple.Game.Scenes;
+
 public class PausedPanel : Panel
 {
     private Panel optionPanel;

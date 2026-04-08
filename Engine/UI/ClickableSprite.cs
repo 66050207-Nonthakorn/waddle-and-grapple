@@ -2,6 +2,8 @@ using WaddleAndGrapple.Engine.UI;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
+namespace WaddleAndGrapple.Engine.UI;
+
 public class ClickableSprite : Button
 {
     public Texture2D Texture { get; set; }

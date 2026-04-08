@@ -1,4 +1,4 @@
-namespace WaddleAndGrapple.Game;
+namespace WaddleAndGrapple.Game.Systems;
 
 /// <summary>
 /// Time scale ของ world — เมื่อ SlowTimePowerUp active ค่านี้จะน้อยกว่า 1

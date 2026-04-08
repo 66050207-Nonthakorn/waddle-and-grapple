@@ -5,6 +5,8 @@ using WaddleAndGrapple.Engine.UI;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
+namespace WaddleAndGrapple.Engine.UI;
+
 public class LevelPortrait : GameObject
 {
     public Text LevelName { get; private set; }

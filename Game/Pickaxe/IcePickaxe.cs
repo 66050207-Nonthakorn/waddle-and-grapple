@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using WaddleAndGrapple.Engine.Managers;
-using WaddleAndGrapple.Game.Example;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;

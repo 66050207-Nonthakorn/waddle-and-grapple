@@ -5,7 +5,9 @@ using WaddleAndGrapple.Engine;
 using WaddleAndGrapple.Engine.Components;
 using WaddleAndGrapple.Engine.Managers;
 
-namespace WaddleAndGrapple.Game;
+using WaddleAndGrapple.Game;
+
+namespace WaddleAndGrapple.Game.Systems;
 
 /// <summary>
 /// ธงปลายด่าน — เสาสูง + สามเหลี่ยมแดง

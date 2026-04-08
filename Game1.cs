@@ -1,5 +1,4 @@
 ﻿using WaddleAndGrapple.Engine.Managers;
-using WaddleAndGrapple.Game.Example;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ResourceManager = WaddleAndGrapple.Engine.Managers.ResourceManager;

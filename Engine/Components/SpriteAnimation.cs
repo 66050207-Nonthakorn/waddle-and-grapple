@@ -1,7 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace ComputerGameFinal.Engine.Components;
+namespace WaddleAndGrapple.Engine.Components;
 
 /// <summary>
 /// Spritesheet animation — frames laid out horizontally in a single texture.

@@ -1,6 +1,5 @@
 using WaddleAndGrapple.Engine;
 using WaddleAndGrapple.Engine.Components.Physics;
-using WaddleAndGrapple.Game.Example;
 using Microsoft.Xna.Framework;
 
 namespace WaddleAndGrapple.Game;

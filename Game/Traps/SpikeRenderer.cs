@@ -4,7 +4,7 @@ using WaddleAndGrapple.Engine.Managers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace WaddleAndGrapple.Game;
+namespace WaddleAndGrapple.Game.Traps;
 
 /// <summary>
 /// Renders a spike using tile-based drawing.

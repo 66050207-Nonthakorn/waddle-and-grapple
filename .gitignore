@@ -64,6 +64,8 @@ monodroid*.msi
 
 artifacts/
 
+Save/Progression.json
+
 gdd.md
 player_plan.md
 FinalAss.pdf

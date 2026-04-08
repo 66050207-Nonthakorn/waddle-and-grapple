@@ -1,6 +1,6 @@
 using Microsoft.Xna.Framework;
 
-namespace WaddleAndGrapple.Game;
+namespace WaddleAndGrapple.Game.Systems;
 
 /// <summary>
 /// Defines a section (room) within the level.

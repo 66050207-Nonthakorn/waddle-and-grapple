@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using WaddleAndGrapple.Engine.Components;
 using WaddleAndGrapple.Engine.Managers;
 
-namespace WaddleAndGrapple.Game;
+namespace WaddleAndGrapple.Game.Systems;
 
 // ── Data for one parallax layer ───────────────────────────────────────────────
 public struct ParallaxLayer

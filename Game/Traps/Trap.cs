@@ -4,7 +4,9 @@ using WaddleAndGrapple.Engine.Components;
 using WaddleAndGrapple.Engine.Managers;
 using Microsoft.Xna.Framework;
 
-namespace WaddleAndGrapple.Game;
+using WaddleAndGrapple.Game;
+
+namespace WaddleAndGrapple.Game.Traps;
 
 /// <summary>
 /// Abstract base class for all traps in the game.

@@ -1,3 +1,4 @@
+using WaddleAndGrapple.Game.Systems;
 using System.Collections.Generic;
 using WaddleAndGrapple.Engine;
 using WaddleAndGrapple.Engine.Components;
@@ -63,7 +64,7 @@ public class ThrowLephant : Enemy
 
     // ── Scene Reference (สำหรับ spawn ThrowingHammer) ────────────────────────
     private Scene _scene;
-    private int _hammerCount;
+    private static int _hammerCount;
 
     // ── Player Reference ──────────────────────────────────────────────────────
     private Player _player;
