@@ -109,7 +109,7 @@ public class BuffLephant : Enemy
 
         var f = new AnimationFactory(
             ResourceManager.Instance.GetTexture("Enemy/Enemy2-SpriteSheet"),
-            rows: 8, columns: 8
+            rows: 9, columns: 8
         );
 
         _animator.AddAnimation("standing",   f.CreateFromRow(row: 0, totalFrames: 1, frameDuration: 0.083f));
